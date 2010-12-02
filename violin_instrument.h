@@ -120,7 +120,7 @@ private:
     double violin_string_buffer[4][NORMAL_BUFFER_SIZE];
 
     // only does up to NORMAL_BUFFER_SIZE !
-    void handleBuffer(short output[], unsigned int num_samples);
+    void handle_buffer(short output[], unsigned int num_samples);
 
     double bridge_buffer[BRIDGE_BUFFER_SIZE];
     unsigned int bridge_write_index;

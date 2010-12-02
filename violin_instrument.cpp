@@ -110,14 +110,14 @@ void ViolinInstrument::wait_samples(short *buffer, unsigned int num_samples)
     unsigned int remaining = num_samples;
     unsigned int position = 0;
     while (remaining > NORMAL_BUFFER_SIZE) {
-        handleBuffer(buffer+position, NORMAL_BUFFER_SIZE);
+        handle_buffer(buffer+position, NORMAL_BUFFER_SIZE);
         remaining -= NORMAL_BUFFER_SIZE;
         position += NORMAL_BUFFER_SIZE;
     }
-    handleBuffer(buffer+position, remaining);
+    handle_buffer(buffer+position, remaining);
 }
 
-void ViolinInstrument::handleBuffer(short output[], unsigned int num_samples)
+void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
 {
     // calculate string buffers
     for (int id=0; id<4; id++) {
