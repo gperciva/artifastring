@@ -157,7 +157,7 @@ void ViolinString::cache_pc_c()
                                     * n_pi_div_L*n_pi_div_L ));
 
         // text on p. 78
-        const double r_n = B1 + B2*(n-1)*(n-1);
+        const double r_n = pc.B1 + pc.B2*(n-1)*(n-1);
 
         // Other abbreviations
         const double w_n         = sqrt(w0n*w0n - r_n*r_n);
