@@ -23,13 +23,6 @@
 #include "violin_string.h"
 #include "violin_body_impulse.h"
 
-//#define THREADS
-#ifdef THREADS
-#include <boost/thread/thread.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/mutex.hpp>
-#endif
-
 const unsigned int NORMAL_BUFFER_SIZE = 512;
 const unsigned int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
 const unsigned int BRIDGE_BUFFER_SIZE_MINUS_ONE = BRIDGE_BUFFER_SIZE-1;
@@ -132,20 +125,6 @@ private:
     double f_hole[NORMAL_BUFFER_SIZE];
     void body_impulse(unsigned int num_samples);
 
-#ifdef THREADS
-    int threads_status[4];
-    unsigned int thread_calc_samples;
-    boost::thread threads[4];
-    boost::mutex start_mutex[4];
-    boost::condition start_cond[4];
-    boost::mutex ready_mutex[4];
-    boost::condition ready_cond[4];
-    void thread_tick(int id);
-    void sendReady(int id);
-    void sendStart(int id);
-    void waitReady(int id);
-    void waitStartOrEnd(int id);
-#endif
 };
 
 #endif

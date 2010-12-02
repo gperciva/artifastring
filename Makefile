@@ -3,10 +3,8 @@ CPP=g++
 CPPFLAGS = -O3 \
 	-FPIC \
 	-funroll-loops
-#	-lboost_thread-mt
 
 #CPPFLAGS = -g -fbounds-check -Wall
-#	-lboost_thread-mt
 
 
 ### actual user targets
