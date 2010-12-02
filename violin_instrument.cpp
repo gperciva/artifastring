@@ -96,12 +96,12 @@ void ViolinInstrument::body_impulse(unsigned int num_samples)
             f_hole[i] += bridge_buffer[bi] * pc_kernel[ki];
             // update read pointer
             bi++;
-            bi &= BRIDGE_BUFFER_SIZE_MINUS_ONE;
+            bi &= BRIDGE_BUFFER_SIZE - 1;
         }
 #endif
         // update pointers
         bridge_read_index++;
-        bridge_read_index &= BRIDGE_BUFFER_SIZE_MINUS_ONE;
+        bridge_read_index &= BRIDGE_BUFFER_SIZE - 1;
     }
 }
 
@@ -131,7 +131,7 @@ void ViolinInstrument::handleBuffer(short output[], unsigned int num_samples)
             bridge_buffer[bridge_write_index] += violin_string_buffer[id][i];
         }
         bridge_write_index++;
-        bridge_write_index &= BRIDGE_BUFFER_SIZE_MINUS_ONE;
+        bridge_write_index &= BRIDGE_BUFFER_SIZE - 1;
     }
     body_impulse(num_samples); // calculates f_hole
 
