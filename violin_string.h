@@ -155,9 +155,12 @@ protected:
     // calculates m_y0dot_h
     double m_y0dot_h;
     inline void compute_hist_bow();
+    // F0 and F1
+    double m_string_excitation;
+    double m_finger_dampening;
 
     // how should we differ from the "historical" values?
-    inline const double compute_finger(const double F0);
+    inline const double compute_finger();
     inline const double compute_pluck();
     bool m_bow_slipping;
     inline const double compute_bow();
@@ -165,7 +168,7 @@ protected:
     // values for the "next step"
     double m_a[MODES];      // displacement
     double m_adot[MODES];   // velocity
-    inline void apply_forces(const double F0,const double F1);
+    inline void apply_forces();
 
     // actual output of model
     inline const double compute_bridge_force();

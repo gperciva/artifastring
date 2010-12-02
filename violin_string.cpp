@@ -58,8 +58,10 @@ void ViolinString::reset()
 
     m_bow_slipping = false;
     m_active = false;
-    //m_y0dot_h = 0.0;
-    //m_y1_h = 0.0;
+    m_y0dot_h = 0.0;
+    m_y1_h = 0.0;
+    m_string_excitation = 0.0;
+    m_finger_dampening = 0.0;
 
     for (unsigned int n = 1; n <= MODES; ++n) {
         m_a[n-1] = 0.0;
@@ -235,28 +237,28 @@ inline const double ViolinString::tick()
     if (vpa_finger_x1) {
         compute_hist_finger();
     }
-    // Calculate excitation force F0
-    double F0;
+    // Calculate excitation force
     if (vpa_pluck_force != 0) {
         compute_hist_bow();
-        F0 = compute_pluck();
+        m_string_excitation = compute_pluck();
     } else {
         if (vpa_bow_force != 0) {
             compute_hist_bow();
-            F0 = compute_bow();
+            m_string_excitation = compute_bow();
         } else {
-            F0 = 0.0;
+            m_string_excitation = 0.0;
         }
     }
-    const double F1 = compute_finger( F0 );
+    m_finger_dampening = compute_finger();
 
-    apply_forces(F0, F1);
+    apply_forces();
 
     const double bridge_force = compute_bridge_force();
 
 #ifdef DEBUG
     printf("%g\t%i\t%g\t%g\t%g\t%g\t%g\n", time_seconds, !m_bow_slipping,
-           m_y0dot_h, F0, F1, bridge_force, vpa_bow_force);
+           m_y0dot_h, m_string_excitation, m_finger_dampening,
+           bridge_force, vpa_bow_force);
     time_seconds += dt;
 #endif
 
@@ -398,22 +400,21 @@ inline const double ViolinString::compute_bow()
 }
 
 
-inline const double ViolinString::compute_finger(
-    const double F0)
+inline const double ViolinString::compute_finger()
 {
     if (vpa_finger_x1 != 0.0) {
-        return vpa_c_C11 * m_y1_h  +  vpa_c_C12 * F0;
+        return vpa_c_C11 * m_y1_h  +  vpa_c_C12 * m_string_excitation;
     } else {
         return 0.0;
     }
 }
 
-inline void ViolinString::apply_forces(const double F0, const double F1)
+inline void ViolinString::apply_forces()
 {
     for (unsigned int n = 1; n <= MODES; ++n)
     {
-        const double position_forces = vpa_c_bow_eigens[n-1]*F0 +
-                                       vpa_c_finger_eigens[n-1]*F1;
+        const double position_forces = vpa_c_bow_eigens[n-1]*m_string_excitation +
+                                       vpa_c_finger_eigens[n-1]*m_finger_dampening;
         m_a[n-1] = m_a_h[n-1] + X3[n-1] * position_forces;
         m_adot[n-1] = m_adot_h[n-1] + Y3[n-1] * position_forces;
     }
