@@ -33,7 +33,11 @@ ViolinInstrument::ViolinInstrument(int random_seed) {
     }
     // before you doubt this, draw a ring buffer diagram
     bridge_write_index = 0;
+#ifdef NO_CONVOLUTION
+    bridge_read_index = 0;
+#else
     bridge_read_index = BRIDGE_BUFFER_SIZE-PC_KERNEL_SIZE+1;
+#endif
 
 }
 
@@ -83,6 +87,9 @@ void ViolinInstrument::set_physical_constants(int which_string,
 void ViolinInstrument::body_impulse(unsigned int num_samples)
 {
     for (unsigned int i=0; i<num_samples; i++) {
+#ifdef NO_CONVOLUTION
+        f_hole[i] = NO_CONVOLUTION_AMPLIFY*bridge_buffer[bridge_read_index];
+#else
         f_hole[i] = 0.0;
         unsigned int bi=bridge_read_index;
         for (unsigned int ki=0; ki < PC_KERNEL_SIZE; ki++) {
@@ -91,6 +98,7 @@ void ViolinInstrument::body_impulse(unsigned int num_samples)
             bi++;
             bi &= BRIDGE_BUFFER_SIZE_MINUS_ONE;
         }
+#endif
         // update pointers
         bridge_read_index++;
         bridge_read_index &= BRIDGE_BUFFER_SIZE_MINUS_ONE;

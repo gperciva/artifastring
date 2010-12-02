@@ -23,6 +23,11 @@
 #include "violin_string.h"
 #include "violin_body_impulse.h"
 
+#define NO_CONVOLUTION
+#ifdef NO_CONVOLUTION
+const double NO_CONVOLUTION_AMPLIFY = 20.0;
+#endif
+
 const unsigned int NORMAL_BUFFER_SIZE = 512;
 const unsigned int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
 const unsigned int BRIDGE_BUFFER_SIZE_MINUS_ONE = BRIDGE_BUFFER_SIZE-1;
