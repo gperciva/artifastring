@@ -66,7 +66,8 @@ being "not sufficiently accurate" for whatever you want to do.
 In addition, the modal dampening factors used here were determined
 experimentally for the D string (in Demoucron's thesis) -- we have
 not (yet) reproduced those experiments for the other strings.
-This produces unrealistic behaviour, especially from the E string.
+This may produce unrealistic behaviour, especially from the E
+string.
 
 
 \subsection ack 2.3 Acknowledgements
@@ -76,6 +77,10 @@ my supervisor, Dr. Nick Bailey, in understanding and explaining
 the model (in language, diagrams, and code).  Many thanks also to
 Dr.  John Williamson and Dr. Martin Macauley for clarifying some
 more abstract parts of the model.
+
+Many thanks also to Matthias Demoucron for clarifying some
+physical constants (especially the slope of friction charactistics
+v<SUB>0</SUB>) in personal email.
 
 
 \section file_format 3. File format

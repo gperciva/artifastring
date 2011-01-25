@@ -21,6 +21,7 @@
 #include "violin_instrument.h"
 #include "violin_constants.h"
 #include <limits.h>
+#include <cstddef>
 
 ViolinInstrument::ViolinInstrument(int random_seed) {
     violinString[3] = new ViolinString(vl_E, 4*random_seed+0);
@@ -110,7 +111,11 @@ void ViolinInstrument::wait_samples(short *buffer, unsigned int num_samples)
     unsigned int remaining = num_samples;
     unsigned int position = 0;
     while (remaining > NORMAL_BUFFER_SIZE) {
-        handle_buffer(buffer+position, NORMAL_BUFFER_SIZE);
+        if (buffer == NULL) {
+            handle_buffer(NULL, NORMAL_BUFFER_SIZE);
+        } else {
+            handle_buffer(buffer+position, NORMAL_BUFFER_SIZE);
+        }
         remaining -= NORMAL_BUFFER_SIZE;
         position += NORMAL_BUFFER_SIZE;
     }
@@ -130,10 +135,18 @@ void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
         for (int id=0; id<4; id++) {
             bridge_buffer[bridge_write_index] += violin_string_buffer[id][i];
         }
+        // update pointer
         bridge_write_index++;
         bridge_write_index &= BRIDGE_BUFFER_SIZE - 1;
     }
-    body_impulse(num_samples); // calculates f_hole
+
+    // calculates f_hole
+    body_impulse(num_samples);
+
+    // bail if we don't want the output
+    if (output == NULL) {
+        return;
+    }
 
     for (unsigned int i=0; i<num_samples; i++) {
         output[i] = SHRT_MAX*f_hole[i];
