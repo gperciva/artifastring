@@ -53,6 +53,9 @@ void ViolinInstrument::reset() {
     for (unsigned int id = 0; id<4; id++) {
         violinString[id]->reset();
     }
+    for (unsigned int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
+        bridge_buffer[i] = 0.0;
+    }
 }
 
 void ViolinInstrument::finger(int which_string, double ratio_from_nut)
