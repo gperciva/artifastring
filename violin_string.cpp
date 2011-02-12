@@ -225,7 +225,7 @@ void ViolinString::cache_vpa_c()
 }
 
 
-inline const double ViolinString::tick()
+inline double ViolinString::tick()
 {
     if (!m_active) {
         return 0.0;
@@ -316,7 +316,7 @@ inline void ViolinString::compute_hist_bow()
 }
 
 // a pluck is just a bow that disappears once it slips
-inline const double ViolinString::compute_pluck( )
+inline double ViolinString::compute_pluck( )
 {
     const double F0 = vpa_c_C01*(PLUCK_VELOCITY - m_y0dot_h) + vpa_c_C02*m_y1_h;
     if ( fabs(F0) > MU_PLUCK*vpa_pluck_force ) {
@@ -325,7 +325,7 @@ inline const double ViolinString::compute_pluck( )
     return F0;
 }
 
-inline const double ViolinString::compute_bow()
+inline double ViolinString::compute_bow()
 {
     // vpa_bow_force is not 0.0
 
@@ -400,7 +400,7 @@ inline const double ViolinString::compute_bow()
 }
 
 
-inline const double ViolinString::compute_finger()
+inline double ViolinString::compute_finger()
 {
     if (vpa_finger_x1 != 0.0) {
         return vpa_c_C11 * m_y1_h  +  vpa_c_C12 * m_string_excitation;
@@ -420,7 +420,7 @@ inline void ViolinString::apply_forces()
     }
 }
 
-inline const double ViolinString::compute_bridge_force()
+inline double ViolinString::compute_bridge_force()
 {
     // equation (2.35)
     double result = 0.0;

@@ -138,7 +138,7 @@ protected:
 
 
     // calculated (almost) all the time
-    const double tick();
+    double tick();
 
     // do we need to calculate anything?
     bool m_active;
@@ -160,10 +160,10 @@ protected:
     double m_finger_dampening;
 
     // how should we differ from the "historical" values?
-    inline const double compute_finger();
-    inline const double compute_pluck();
+    inline double compute_finger();
+    inline double compute_pluck();
     bool m_bow_slipping;
-    inline const double compute_bow();
+    inline double compute_bow();
 
     // values for the "next step"
     double m_a[MODES];      // displacement
@@ -171,7 +171,7 @@ protected:
     inline void apply_forces();
 
     // actual output of model
-    inline const double compute_bridge_force();
+    inline double compute_bridge_force();
 };
 #endif
 
