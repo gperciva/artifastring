@@ -4,7 +4,7 @@ CPPFLAGS = -O3 \
 	-FPIC \
 	-funroll-loops
 
-#CPPFLAGS = -g -fbounds-check -Wall
+CPPFLAGS = -g -fbounds-check -Wall -Wextra -Werror
 
 
 ### actual user targets
