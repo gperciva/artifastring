@@ -1,0 +1,17 @@
+Recorded by tapping a crappy violin with a dirty teaspoon in the
+anechoic chamber of Glasgow University department of electrical
+engineering.
+
+
+impulse-2048.wav:
+- cut down to 2048 samples
+- last 63 samples were given a Fade-Out in audacity
+
+impulse-512.wav:
+- cut down to 512 samples
+- last 32 samples were given a Fade-Out in audacity
+
+impulse-128.wav:
+- cut down to 128 samples
+- last 8 samples were given a Fade-Out in audacity
+
