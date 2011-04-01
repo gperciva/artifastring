@@ -11,7 +11,7 @@ CPPFLAGS = -O3 \
 all: actions2wav
 
 doc:
-	doxygen
+	(cat Doxyfile ; echo "PROJECT_NUMBER=`cat VERSION`") | doxygen -
 
 swig: _violin_instrument.so _monowav.so
 
