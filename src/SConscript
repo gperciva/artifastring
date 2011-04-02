@@ -1,0 +1,15 @@
+import os
+Import('env')
+
+#env.Library('artifastring', artifastring_lib_files)
+
+src_files = Split("""
+	actions2wav.cpp
+	""")
+actions2wav = env.Program (target='actions2wav',
+	source = [src_files] + env['artifastring_lib_files'],
+	)
+
+env.Install('$PREFIX/bin', actions2wav)
+
+

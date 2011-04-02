@@ -1,0 +1,9 @@
+
+Import('env')
+print "foo"
+
+env.Command(
+  target='html',
+  source='',
+  action=' (cat doc/Doxyfile ; echo "PROJECT_NUMBER=`cat VERSION`") | doxygen - ')
+

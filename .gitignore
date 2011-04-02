@@ -1,10 +1,5 @@
-*.o
-*.pyc
-_violin_instrument.so
-violin_instrument.py
-violin_instrument_wrap.cxx
-_monowav.so
-monowav.py
-monowav_wrap.cxx
+build/
 html/
-actions2wav
+.sconf_temp/
+.sconsign.dblite
+config.log
