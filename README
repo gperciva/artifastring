@@ -4,3 +4,8 @@ physical simulation of a violin for sound synthesis.
 Project webpage, description:
 http://percival-music.ca/artifastring/
 
+
+To build, either use scons:
+    scons -h
+or just use the .cpp .h files directly.
+

@@ -3,9 +3,15 @@ import os
 # TODO: hard-coded python verison!
 Help("""
 Build stuff:
-  scons
-Install stuff to bin/ and lib/python2.6/site-packages/
-  scons PREFIX=$HOME/usr/
+    scons
+
+Docs:  (requires doxygen)
+    scons doc
+
+Install stuff to:  bin/ include/ lib/
+    scons --prefix=DIR install
+# I use:
+    scons --prefix=$HOME/.usr/ install
 """)
 
 dirs = """src swig doc"""

@@ -1,7 +1,8 @@
 import os
 Import('env')
 
-#env.Library('artifastring', artifastring_lib_files)
+env.Library('artifastring', env['artifastring_lib_files'])
+env.Library('monowav', 'monowav.cpp')
 
 src_files = Split("""
 	actions2wav.cpp
@@ -10,6 +11,17 @@ actions2wav = env.Program (target='actions2wav',
 	source = [src_files] + env['artifastring_lib_files'],
 	)
 
+artifastring_h_files = map(lambda(x): x.replace('.cpp', '.h'),
+	env['artifastring_lib_files'])
+extra_h_files = ['violin_constants.h', 'violin_body_impulse.h']
+artifastring_h_files += extra_h_files
+
+
 env.Install('$PREFIX/bin', actions2wav)
+#env.Install('$PREFIX/include/artifastring', [
+env.Install('$PREFIX/include/', artifastring_h_files)
+env.Install('$PREFIX/lib', [
+	'libartifastring.a', 'libmonowav.a'
+])
 
 

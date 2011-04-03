@@ -1,5 +1,4 @@
 build/
-html/
 .sconf_temp/
 .sconsign.dblite
 config.log
