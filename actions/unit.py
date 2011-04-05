@@ -8,6 +8,10 @@ def pluckWait(vln, st, finger, pos, seconds, force = 1.0):
 
 def main():
 	violin = ViolinPhysical.ViolinPhysical('unit')
+	violin.comment("")
+	violin.comment(" This will produce bad sound output")
+	violin.comment("   it's just a simple test; the main Vivi")
+	violin.comment("   output is much better.  :)")
 
 	# pluck position (default)
 	#   - lowest value is pp-0.05

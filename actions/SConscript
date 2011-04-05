@@ -1,0 +1,19 @@
+
+Import('env')
+
+# TODO: this file isn't actually used!  I'm not certain if it should be.
+
+
+### TODO: change this to a proper Builder.
+#bld = Builder(action = 'python ../../actions/unit.py ')
+#env.Append(BUILDERS = {'Unit' : bld} )
+#env.Unit('unit.actions')
+
+env.Command('unit.actions', 'unit.py', [
+	'python actions/unit.py',
+	Move('build/actions', 'unit.actions'),
+	])
+
+
+env.Alias('unit', 'unit.actions')
+

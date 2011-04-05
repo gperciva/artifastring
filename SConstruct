@@ -72,6 +72,8 @@ for dirname in Split(dirs):
 		continue
 	if dirname == "doc" and not 'doc' in COMMAND_LINE_TARGETS:
 		continue
+#	if dirname == "actions" and not 'unit' in COMMAND_LINE_TARGETS:
+#		continue
 	sconscript_filename = dirname + os.sep + "SConscript"
 	build_dirname = 'build' + os.sep + dirname
 	SConscript(sconscript_filename, build_dir=build_dirname, duplicate=0)
