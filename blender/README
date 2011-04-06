@@ -1,0 +1,45 @@
+Video can only be produced with blender 2.49; their python API is
+changing significantly during the 2.5 development series.
+If blender 2.49 is not on your path, edit the Makefile.
+
+
+BASIC TEST
+
+You can produce 3 images in /tmp/vivi-movie/  with:
+  make test
+
+
+ENTIRE VIDEO
+
+To produce the entire video, use
+  make
+or (same thing)
+  make mpeg
+or (h264 output)
+  make avi
+
+
+LOW QUALITY
+
+Output currently defaults to low quality (by using our
+custom -k "flag" when calling blender).  To see a sample
+of high quality, run
+  make quality-test
+for an entire movie, run
+  make quality-avi
+
+
+ACTIONS FILES
+
+The Makefile is pretty much just an example.  It's based around
+unit.actions, which is probably not what you want to view.  In the
+main Vivi code base, this Makefile is never used; instead, we
+construct different command-lines and call them with python.
+
+I'll be thinking about providing a nicer way of handling alternate
+actions files... it kind-of depends if anybody wants to use this
+by itself, without Vivi to generate sensible .actions files.  I'll
+also accept patches that improve the Makefile and/or add it to
+scons and/or other better solutions.  :)
+
+

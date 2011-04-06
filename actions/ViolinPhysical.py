@@ -130,6 +130,11 @@ class ViolinPhysical:
 				  - self.seconds_action)
 				* VIDEO_FPS)
 			for i in range(delta_frames):
+				self.seconds_action += 1.0 / VIDEO_FPS
+				self.bow_pos_along += self.bow_velocity / BOW_LENGTH / VIDEO_FPS
+				if ((self.bow_pos_along > 1.0) or
+				    (self.bow_pos_along < 0.0)):
+					print "ERROR: run out of bow, %g seconds!" % self.seconds_action
 				self.actions.write(
 					'b\t%g\t%i\t%g\t%g\t%g\t%g\n' %(
 					self.seconds_action,
@@ -139,14 +144,20 @@ class ViolinPhysical:
 					self.bow_velocity,
 					self.bow_pos_along
 					) )
-				self.seconds_action += 1.0 / VIDEO_FPS
-				self.bow_pos_along += self.bow_velocity / BOW_LENGTH / VIDEO_FPS
-				if ((self.bow_pos_along > 1.0) or
-				    (self.bow_pos_along < 0.0)):
-					print "ERROR: run out of bow, %g seconds!" % self.seconds_action
 			remaining_time = seconds - float(delta_frames) / VIDEO_FPS
+			self.bow_pos_along += self.bow_velocity / BOW_LENGTH * remaining_time
+
 			self.seconds_action += remaining_time
-			self.actions.write('w\t%g\n' %(
-				self.seconds_action))
+			self.actions.write(
+				'b\t%g\t%i\t%g\t%g\t%g\t%g\n' %(
+				self.seconds_action,
+				self.bow_string,
+				self.bow_bridge_distance,
+				self.bow_force,
+				self.bow_velocity,
+				self.bow_pos_along
+				) )
+#			self.actions.write('w\t%g\n' %(
+#				self.seconds_action))
 
 

@@ -1,7 +1,7 @@
 import Blender
 import math
 
-# TODO: most of this file isn't used any more; clean up.
+import shared
 
 ## general time
 thisFrame = Blender.Get('curframe')
@@ -17,83 +17,19 @@ def get_splitline():
 	splitline = line.split()
 	return splitline
 
-def pos(st, along):
-	" 'along' is the distance away from the bridge."
-	pos = [0,0,0]
-#	print "bridge:     \t", Blender.strings[st][0]
-#	print "fingerboard:\t", Blender.strings[st][1]
-	for i in range(3):
-		# linear interpolation
-		x0 = 0.0
-		y0 = Blender.strings[st][0][i]
-		x1 = 1.0
-		y1 = Blender.strings[st][1][i]
-		x = along
-
-		pos[i] = y0 + (((x-x0)*y1 - (x-x0)*y0) / (x1-x0))
-	return pos
-
-
-############# general geometry
-def centerY(bow_string):
-	return bow_string*1.0
-
-def centerZ(bow_string):
-	if bow_string == 1 or bow_string == 2:
-		return 0.5
-	else:
-		return 0.0
-
 
 def finger(splitline):
 	finger_string_num = int( splitline[2] )
-	if finger_string_num >= 0:
-		finger_string = str( finger_string_num )
-		#print finger_string
-		finger = Blender.Object.Get('Finger'+'-'+finger_string)
-		#finger.LocX = float( splitline[3] ) * 33.0 - 16.5
-		along = 1.0 - float(splitline[3])
-		fp = pos(finger_string_num, along)
-		finger.LocX = fp[0]
-		finger.LocY = fp[1]
-		finger.LocZ = fp[2]
+	finger_string = str( finger_string_num )
+	finger = Blender.Object.Get('Finger'+'-'+finger_string)
+	along = 1.0 - float(splitline[3])
+	finger.setLocation( shared.pos(finger_string_num, along, finger=True) )
 
 def raisePlucks():
-#	for i in range(4):
-#		pluck = Blender.Object.Get('Pluck'+'-'+str(i))
-#		center_z = centerZ( i )
-#		if pluck.LocZ < (center_z + 4.0):
-#			pluck.LocZ += 0.25
-#		center_z = centerZ( i )
 	pluck = Blender.Object.Get('Pluck')
-	steps = thisFrame - Blender.pluckFrame
-	# oh god ick; I can't do simple math any more?!
-	pluck.LocY = Blender.pluckInit
-	for i in range(int(steps)):
-		delta = (Blender.pluckTargetY - pluck.LocY)
-		pluck.LocY += delta*0.1
-	if pluck.LocY > Blender.pluckTargetY:
-		pluck.LocY = Blender.pluckTargetY
-#	print "pluck %f %f %i" % (Blender.pluckInit, Blender.pluckTargetY, Blender.pluckFrame)
-#	print "delta:", delta
-#	print "pluck new:", pluck.LocY
-
-def raiseBow():
-	if not Blender.useBow:
-		#bow = Blender.Object.Get('Bow')
-		bow = Blender.Object.Get('arco')
-		bow.layers = []
-#	else:
-#		bow.layers = range(1,21)
-#		bow.RotX = -0.5*math.pi
-#		bow.RotY = 0.0
-#		bow.RotZ = 0.0
-#		bow.LocX = 20.0
-#		bow.LocZ = 0.5 + 2.0 # off the string to begin with
-#		bow.LocY = -37.5 + 1.5 + 2.0 # origin, and almost at frog
-
-
-
+	steps = int(thisFrame - Blender.pluckFrame)
+	delta_y = 0.1
+	pluck.LocY = (Blender.pluckInit+delta_y) - delta_y*(0.9**steps)
 
 def pluck(splitline):
 	# disable bow
@@ -107,18 +43,10 @@ def pluck(splitline):
 
 	pluck_string = str( pluck_string_num )
 	pluck = Blender.Object.Get('Pluck')
-	contact = pos(pluck_string_num, pluck_pos)
-#	print pluck
-#	print contact
-	#pluck.LocX = 16.5 - 33.0 * pluck_pos
-	#pluck.LocZ = centerZ( pluck_string_num )
-	pluck.LocX = contact[0]
-	pluck.LocY = contact[1]
-	pluck.LocZ = contact[2]
+	pluck.setLocation( shared.pos(pluck_string_num, pluck_pos) )
+
 	Blender.pluckInit = pluck.LocY
-	Blender.pluckTargetY = pluck.LocY + 0.1
 	Blender.pluckFrame = seconds_action * float(fps)
-#	print "pluck target: ", Blender.pluckTargetY
 	# make visible
 	pluck.layers = range(1,21)
 
@@ -147,38 +75,31 @@ def bow(splitline):
 	pluck = Blender.Object.Get('Pluck')
 	pluck.layers = []
 
-
 	bow_string_num = int( splitline[2] )
 	bow_bridge_distance = float( splitline[3] )
 	bow_along = float( splitline[6] )
 
-	#bow = Blender.Object.Get('Bow')
 	bow = Blender.Object.Get('arco')
 	bow.layers = range(1,21)
+
 	angle = string_angle(bow_string_num)
-
-	#bow.RotY = angle
-
-#	h = 75*(0.5 - bow_along)
+	# TODO: bad hack for bow_along; replace with a proper
+	# distances based on vertex locations (maybe by
+	# making a VertexGroup for the bow hair?)
 	h = 0.75*(0.5 - (bow_along + 0.01))
 	# NEW COORDINATE SYSTEM:
 	# X: along bow       (positive is frog)
 	# Y: off string-ish  (positive is off)
 	# Z: away from bridge-ish   (positive is fingerboard)
 	bow.RotX = angle
-	contact = pos(bow_string_num, bow_bridge_distance)
-#	print contact
+	contact = shared.pos(bow_string_num, bow_bridge_distance)
 	bow.LocX = contact[0] + h*math.cos(angle)
-	bow.LocY = contact[1] + h*math.sin(angle) + 0.015
+	bow.LocY = contact[1] + h*math.sin(angle)
 	bow.LocZ = contact[2]
-#	bow.LocX = 16.5 - 33.0 * bow_bridge_distance
-#	bow.LocY = centerY(bow_string) + h*math.sin(angle)
-#	bow.LocZ = centerZ(bow_string) - h*math.cos(angle)
 
-
-#raiseBow()
+# TODO: we need this in both places, but it's icky
 if not Blender.useBow:
-	raisePlucks() # do before any new plucks, though!
+	raisePlucks()
 
 splitline = get_splitline()
 seconds_action = float(splitline[1])
@@ -194,7 +115,6 @@ while (seconds_action < current_time):
 	splitline = get_splitline()
 	seconds_action = float(splitline[1])
 
-	# oh god ick
 	if not Blender.useBow:
-		raisePlucks() # do before any new plucks, though!
+		raisePlucks()
 

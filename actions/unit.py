@@ -18,6 +18,7 @@ def main():
 	pp = 0.25
 	bp = 0.12
 
+	violin.comment(" open strings arco")
 	violin.bow('vl_A', bp, 0.6, 1.0, 0.1)
 	violin.wait(0.5)
 	violin.bow('vl_D', bp, 0.6, -1.0)
@@ -29,6 +30,7 @@ def main():
 	violin.bow('vl_E', bp, 0.0, 0.0)
 	violin.wait(0.5)
 
+	violin.comment(" scale pizz")
 	pluckWait(violin, 'vl_D', 0.0, pp, 0.25);
 	pluckWait(violin, 'vl_D', semitones(2), pp, 0.25);
 	pluckWait(violin, 'vl_D', semitones(4), pp, 0.25);
@@ -40,6 +42,7 @@ def main():
 	pluckWait(violin, 'vl_A', semitones(5), pp, 0.25);
 	violin.wait(1.0);
 
+	violin.comment(" scale arco")
 	force = 0.6
 	velocity = 1.0
 	violin.finger('vl_D', 0.0);
@@ -77,6 +80,7 @@ def main():
 	violin.comment('scale done')
 
 
+	violin.comment(" pizz chord")
 	pluckWait(violin, 'vl_G', 0.0, pp+0.2, 0.0);
 	pluckWait(violin, 'vl_D', 0.0, pp+0.15, 0.0);
 	pluckWait(violin, 'vl_A', semitones(1), pp+0.1, 0.0);
@@ -102,6 +106,7 @@ def main():
 	violin.wait(1.0);
 
 
+	violin.comment(" arco chords")
 	violin.finger('vl_G', semitones(2));
 	violin.bow('vl_G', bp, force, velocity, 0.1);
 	violin.wait(0.08);
@@ -136,7 +141,7 @@ def main():
 	violin.comment('chords done')
 
 
-	# gliss
+	violin.comment(" gliss pizz")
 	finger_pos = semitones(2)
 	violin.pluck('vl_D', finger_pos, pp);
 	for i in range(25):
@@ -153,6 +158,7 @@ def main():
 		violin.finger('vl_D', finger_pos)
 	violin.wait(0.2)
 
+	violin.comment(" gliss bow")
 	force = 0.4
 	velocity = 0.2
 	finger_pos = semitones(2)
@@ -177,6 +183,7 @@ def main():
 
 
 
+	violin.comment(" vibrato pizz")
 	import math
 	# vibrato
 	finger_pos = semitones(5)
@@ -199,6 +206,7 @@ def main():
 	violin.wait(0.3)
 
 
+	violin.comment(" vibrato arco")
 	finger_pos = semitones(5)
 	violin.finger('vl_D', finger_pos)
 	violin.bow('vl_D', bp, force, velocity, 0.1)

@@ -13,7 +13,8 @@ The latest tarball release can be downloaded from:
 http://percival-music.ca/artifastring/artifastring-latest.tar.gz
 
 Development takes place at:
-FIXME add github
+https://github.com/gperciva/artifastring
+
 
 \subsection compile 1.2 Compile
 
@@ -41,6 +42,12 @@ The format of the \c ".actions" file is described in
 You may also use it in C++ code directly; this is described in
 \ref use_in_code.  Python bindings are available; see \ref swig.
 
+
+\subsection generate_video 1.4 Generate video
+
+Video can be produced with \c blender.  At the moment, this is not
+integerated into the \c scons build system; instead, go to
+\c blender/ and follow the instructions in the README there.
 
 
 \section background 2. Background
