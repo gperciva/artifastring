@@ -14,8 +14,6 @@ Install stuff to:  bin/ include/ lib/
     scons --prefix=$HOME/.usr/ install
 """)
 
-dirs = """src swig doc"""
-
 env = Environment()
 
 ### destination
@@ -38,18 +36,37 @@ env.Append(
 		],
 )
 
-### test for swig
-swig = True
-config = Configure(env)
-status = config.CheckCXXHeader('Python.h')
-if not status:
-	print("Need Python.h")
-	swig = False
-status = config.CheckLib('python2.6')
-if not status:
-	print("Need python2.6")
-	swig = False
-env = config.Finish()
+### configure
+has_swig = True
+has_doxygen = True
+if (not env.GetOption('clean')) and (not env.GetOption('help')):
+	### test for swig
+	config = Configure(env)
+	#
+	status = config.CheckCXXHeader('Python.h')
+	if not status:
+		print("Need Python.h")
+		has_swig = False
+	#
+	status = config.CheckLib('python2.6')
+	if not status:
+		print("Need python2.6")
+		has_swig = False
+	#
+	status = WhereIs('swig')
+	if not status:
+		print("Need swig")
+		has_swig = False
+	#
+	### test for doc
+	status = WhereIs('doxygen')
+	if not status:
+		print("Need doxygen")
+		has_doxygen = False
+	#
+	#
+	env = config.Finish()
+	
 
 
 ### shared artifastring files
@@ -66,18 +83,18 @@ env.Alias('install', '$PREFIX')
 
 Export('env')
 
-for dirname in Split(dirs):
-	if dirname == "swig" and not swig:
-		print "Skipping over swig build"
-		continue
-	if dirname == "doc" and not 'doc' in COMMAND_LINE_TARGETS:
-		continue
-#	if dirname == "actions" and not 'unit' in COMMAND_LINE_TARGETS:
-#		continue
+def process_dir(dirname):
 	sconscript_filename = dirname + os.sep + "SConscript"
 	build_dirname = 'build' + os.sep + dirname
 	SConscript(sconscript_filename, build_dir=build_dirname, duplicate=0)
 	Clean(sconscript_filename, build_dirname)
+
+process_dir('src')
+if (has_swig) and (('swig' in COMMAND_LINE_TARGETS)
+		   or ('all' in COMMAND_LINE_TARGETS)):
+	process_dir('swig')
+if (has_doxygen) and ('doc' in COMMAND_LINE_TARGETS):
+	process_dir('doc')
 
 Clean('.', 'build')
 
