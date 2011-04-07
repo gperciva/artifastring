@@ -1,6 +1,10 @@
 import Blender
 import math
 
+# some computers need this, some don't.  No clue why.  :(
+import sys
+sys.path.append('.')
+
 import shared
 
 ## general time

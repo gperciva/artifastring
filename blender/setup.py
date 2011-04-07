@@ -2,6 +2,10 @@ import Blender
 import math
 import Blender.Library
 
+# some computers need this, some don't.  No clue why.  :(
+import sys
+sys.path.append('.')
+
 import shared
 
 fast_render = False
