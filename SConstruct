@@ -14,8 +14,6 @@ Install stuff to:  bin/ include/ lib/
     scons --prefix=$HOME/.usr/ install
 """)
 
-env = Environment()
-
 ### destination
 AddOption('--prefix',
 	dest='prefix',
@@ -24,7 +22,10 @@ AddOption('--prefix',
 	action='store',
 	metavar='DIR',
 	help='installation prefix')
-env = Environment(PREFIX = GetOption('prefix'))
+env = Environment(
+	ENV = os.environ,
+	PREFIX = GetOption('prefix'),
+)
 
 #print env.Dump()
 

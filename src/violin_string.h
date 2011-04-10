@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Graham Percival
+ * Copyright 2010--2011 Graham Percival
  * This file is part of Artifastring.
  *
  * Artifastring is free software: you can redistribute it and/or
@@ -172,6 +172,9 @@ protected:
 
     // actual output of model
     inline double compute_bridge_force();
+
+    // floating-point equality
+    inline bool almostEquals(double one, double two);
 };
 #endif
 

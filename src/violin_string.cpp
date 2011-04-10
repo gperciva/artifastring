@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Graham Percival
+ * Copyright 2010--2011 Graham Percival
  * This file is part of Artifastring.
  *
  * Artifastring is free software: you can redistribute it and/or
@@ -24,6 +24,8 @@
 #ifdef DEBUG
 #include <stdio.h>
 #endif
+
+const double FLOAT_EQUALITY_ABSOLUTE_ERROR = 1e-6;
 
 ViolinString::ViolinString(String_Type_t which_string, int random_seed)
 {
@@ -93,7 +95,7 @@ inline void ViolinString::calculate_eigens(double eigens[],
 void ViolinString::finger(const double ratio_from_nut)
 {
     const double ratio_from_bridge = 1.0 - ratio_from_nut;
-    if (vpa_finger_x1 != ratio_from_bridge) {
+    if (! (almostEquals(vpa_finger_x1, ratio_from_bridge)) ) {
         vpa_finger_x1 = ratio_from_bridge;
         recache_vpa_c = true;
 
@@ -106,7 +108,7 @@ void ViolinString::pluck(const double ratio_from_bridge,
 {
     vpa_pluck_force = pluck_force * PLUCK_FORCE_SCALE;
     m_active = true;
-    if (vpa_bow_x0 != ratio_from_bridge) {
+    if (! (almostEquals(vpa_bow_x0, ratio_from_bridge)) ) {
         vpa_bow_x0 = ratio_from_bridge;
         recache_vpa_c = true;
 
@@ -121,7 +123,7 @@ void ViolinString::bow(const double bow_ratio_from_bridge,
     m_active = true;
     vpa_bow_force = bow_force;
     vpa_bow_velocity = bow_velocity;
-    if (vpa_bow_x0 != bow_ratio_from_bridge) {
+    if (! (almostEquals(vpa_bow_x0, bow_ratio_from_bridge)) ) {
         vpa_bow_x0 = bow_ratio_from_bridge;
         recache_vpa_c = true;
 
@@ -428,5 +430,15 @@ inline double ViolinString::compute_bridge_force()
         result += m_a[n-1] * pc_c_bridge_forces[n-1];
     }
     return BRIDGE_AMPLIFY*result;
+}
+
+inline bool ViolinString::almostEquals(double one, double two)
+{
+    // maximum absolute error
+    if (fabs(one-two) < FLOAT_EQUALITY_ABSOLUTE_ERROR) {
+	return true;
+    }
+    // don't bother with relative error (yet?)
+    return false;
 }
 
