@@ -83,7 +83,7 @@ def bow(splitline):
 	bow_bridge_distance = float( splitline[3] )
 	bow_along = float( splitline[6] )
 
-	bow = Blender.Object.Get('arco')
+	bow = Blender.Object.Get('bow')
 	bow.layers = range(1,21)
 
 	angle = string_angle(bow_string_num)
@@ -95,11 +95,16 @@ def bow(splitline):
 	# X: along bow       (positive is frog)
 	# Y: off string-ish  (positive is off)
 	# Z: away from bridge-ish   (positive is fingerboard)
-	bow.RotX = angle
+	bow.RotY = angle
 	contact = shared.pos(bow_string_num, bow_bridge_distance)
-	bow.LocX = contact[0] + h*math.cos(angle)
-	bow.LocY = contact[1] + h*math.sin(angle)
-	bow.LocZ = contact[2]
+	print "bow parent:", bow.getParent()
+	bow.setLocation(
+		contact[0] + h*math.cos(angle),
+		contact[1],
+		contact[2] + h*math.sin(angle))
+	#bow.LocX = contact[0] + h*math.cos(angle)
+	#bow.LocY = contact[1] + h*math.sin(angle)
+	#bow.LocZ = contact[2]
 
 # TODO: we need this in both places, but it's icky
 if not Blender.useBow:

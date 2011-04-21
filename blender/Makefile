@@ -1,7 +1,4 @@
-# change this if you have blender 2.49 in a special location,
-# such as
-#BLENDER_BIN=$HOME/blender-2.49/blender
-# instead of using the normal blender on the PATH
+# change this if you have blender 2.57 in a special location,
 BLENDER_BIN=blender
 
 # if you change this, you need to change the value in
@@ -22,18 +19,33 @@ prep: unit.actions
 	mkdir -p $(TEMP_DIR)
 	rm -f $(TEMP_DIR)/*.jpg $(TEMP_DIR)/*.tga
 
+
 test: prep
-	$(BLENDER_BIN) -b blank.blend -P setup.py \
+	$(BLENDER_BIN) -noaudio \
+		-b fast-violin.blend -P setup-2.5.py \
 		-o $(TEMP_DIR)/#### \
-		-k \
-		-c_unit.actions \
-		-s 0 -e 3 -a > log-render.txt
+		-s 1 -e 2 -a > log-render.txt
+
+
+gui: prep
+	$(BLENDER_BIN) -noaudio \
+		fast-violin.blend -P setup-2.5.py
+
+show:
+	comix $(TEMP_DIR)/*
+
+low: prep
+	$(BLENDER_BIN) -noaudio \
+		-b fast-violin.blend -P setup-2.5.py \
+		-o $(TEMP_DIR)/#### \
+		-a > log-render.txt
+
 
 quality-test: prep
-	$(BLENDER_BIN) -b blank.blend -P setup.py \
+	$(BLENDER_BIN) -noaudio \
+		-b violin-and-bow.blend -P setup-2.5.py \
 		-o $(TEMP_DIR)/#### \
-		-c_unit.actions \
-		-s 0 -e 3 -a > log-render.txt
+		-s 1 -e 2 -a > log-render.txt
 
 images: prep
 	$(BLENDER_BIN) -b blank.blend -P setup.py \
@@ -67,14 +79,14 @@ avi: images unit.wav.mp3
 		-o unit.avi
 
 #mencoder "mf://$(TEMP_DIR)/*.jpg" -mf fps=$(FPS):type=jpg
-mpeg: images unit.wav.mp3
+mpeg: low unit.wav.mp3
 	mencoder "mf://$(TEMP_DIR)/*.tga" -mf fps=$(FPS):type=tga \
 		-of mpeg \
 		-mpegopts format=mpeg1:tsaf:muxrate=2000 \
     -ovc lavc \
     -lavcopts \
 	vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2 \
-		-vf scale=640:512 \
+		-vf scale=640:480 \
 		-audiofile unit.wav.mp3 -oac copy \
 		-o unit.mpeg
 

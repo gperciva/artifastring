@@ -1,6 +1,4 @@
-Video can only be produced with blender 2.49; their python API is
-changing significantly during the 2.5 development series.
-If blender 2.49 is not on your path, edit the Makefile.
+Video can only be produced with blender 2.5 or higher.
 
 
 BASIC TEST
@@ -15,8 +13,9 @@ To produce the entire video, use
   make
 or (same thing)
   make mpeg
-or (h264 output)
-  make avi
+# TODO: h264 not upgraded for the blender 2.5 system yet
+#or (h264 output)
+#  make avi
 
 
 LOW QUALITY

@@ -2,11 +2,10 @@ import Blender
 import math
 import Blender.Library
 
+
 # some computers need this, some don't.  No clue why.  :(
 import sys
 sys.path.append('.')
-
-import shared
 
 fast_render = False
 # get command-line options in a bad way
@@ -21,30 +20,37 @@ for arg in sys.argv:
 
 scene = Blender.Scene.GetCurrent()
 ### Remove cube
-cube = Blender.Object.Get('Cube')
-scene.objects.unlink(cube)
+#cube = Blender.Object.Get('Cube')
+#scene.objects.unlink(cube)
 
 ### Setup background color
 world = Blender.World.Get()
 world[0].setHor( [0.8,0.8,0.9] )
 
 ### Get violin and arco
-Blender.Library.Open("violin-and-bow.blend")
-Blender.Library.Load('violin', 'Object', 0)
-Blender.Library.Load('arco', 'Object', 0)
-Blender.Library.Update()
-Blender.Library.Close()
+#Blender.Library.Open("violin-and-bow.blend")
+#Blender.Library.Load('violin', 'Object', 0)
+#Blender.Library.Load('arco', 'Object', 0)
+#Blender.Library.Update()
+#Blender.Library.Close()
+#
+
+## must do this after adding violin and bow!
+import shared
 
 
 ### setup arco
-bow = Blender.Object.Get('arco')
-bow.RotX = 0.0 *math.pi/180.0
-bow.RotY = -90.0 *math.pi/180.0
-bow.RotZ = 180.0 *math.pi/180.0
+bow = Blender.Object.Get('bow')
+#bow.RotX = 0.0 *math.pi/180.0
+#bow.RotY = 90.0 *math.pi/180.0
+#bow.RotZ = 180.0 *math.pi/180.0
 #
 Blender.useBow = False
 # make invisible for now
 bow.layers = []
+
+#violin = Blender.Object.Get('violin')
+#violin.makeParent([bow])
 
 
 ### setup pluck
@@ -81,22 +87,22 @@ for i in range(4):
 	finger.setLocation( shared.pos(i, 1.0, finger=True) )
 
 ### setup camera
-camera = Blender.Object.Get('Camera')
-camera.LocX = 0.291
-camera.LocY = 0.608
-camera.LocZ = 0.040
+#camera = Blender.Object.Get('Camera')
+#camera.LocX = 0.291
+#camera.LocY = 0.608
+#camera.LocZ = 0.040
 #
-camera.RotX = -30.5 * math.pi/180.0
-camera.RotY = 113.5 * math.pi/180.0
-camera.RotZ = 29.7 * math.pi/180.0
+#camera.RotX = -30.5 * math.pi/180.0
+#camera.RotY = 113.5 * math.pi/180.0
+#camera.RotZ = 29.7 * math.pi/180.0
 
 
 ### setup lamp
 # TODO: add more lamps?
-lamp = Blender.Object.Get('Lamp')
-lamp.LocX = 2.5
-lamp.LocY = 8.0
-lamp.LocZ = -0.7
+#lamp = Blender.Object.Get('Lamp')
+#lamp.LocX = 2.5
+#lamp.LocY = 8.0
+#lamp.LocZ = -0.7
 
 
 ### add animation script
