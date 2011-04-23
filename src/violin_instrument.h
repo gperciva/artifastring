@@ -28,6 +28,7 @@
 const double NO_CONVOLUTION_AMPLIFY = 20.0;
 #endif
 
+const unsigned int NUM_VIOLIN_STRINGS = 4;
 const unsigned int NORMAL_BUFFER_SIZE = 512;
 const unsigned int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
 
@@ -116,8 +117,8 @@ public:
     void set_physical_constants(int which_string, String_Physical pc_new);
 
 private:
-    ViolinString *violinString[4];
-    double violin_string_buffer[4][NORMAL_BUFFER_SIZE];
+    ViolinString *violinString[NUM_VIOLIN_STRINGS];
+    double violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
 
     // only does up to NORMAL_BUFFER_SIZE !
     void handle_buffer(short output[], unsigned int num_samples);

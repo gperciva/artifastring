@@ -24,10 +24,10 @@
 #include <cstddef>
 
 ViolinInstrument::ViolinInstrument(int random_seed) {
-    violinString[3] = new ViolinString(vl_E, 4*random_seed+0);
-    violinString[2] = new ViolinString(vl_A, 4*random_seed+1);
-    violinString[1] = new ViolinString(vl_D, 4*random_seed+2);
-    violinString[0] = new ViolinString(vl_G, 4*random_seed+3);
+    violinString[3] = new ViolinString(vl_E, NUM_VIOLIN_STRINGS*random_seed+0);
+    violinString[2] = new ViolinString(vl_A, NUM_VIOLIN_STRINGS*random_seed+1);
+    violinString[1] = new ViolinString(vl_D, NUM_VIOLIN_STRINGS*random_seed+2);
+    violinString[0] = new ViolinString(vl_G, NUM_VIOLIN_STRINGS*random_seed+3);
 
     for (unsigned int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;
@@ -50,8 +50,8 @@ ViolinInstrument::~ViolinInstrument() {
 }
 
 void ViolinInstrument::reset() {
-    for (unsigned int id = 0; id<4; id++) {
-        violinString[id]->reset();
+    for (unsigned int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
+        violinString[st]->reset();
     }
     for (unsigned int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;
@@ -128,15 +128,15 @@ void ViolinInstrument::wait_samples(short *buffer, unsigned int num_samples)
 void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
 {
     // calculate string buffers
-    for (int id=0; id<4; id++) {
-        violinString[id]->fill_buffer(violin_string_buffer[id], num_samples);
+    for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+        violinString[st]->fill_buffer(violin_string_buffer[st], num_samples);
     }
 
     // calculate bridge buffer from strings
     for (unsigned int i=0; i<num_samples; i++) {
         bridge_buffer[bridge_write_index] = 0.0;
-        for (int id=0; id<4; id++) {
-            bridge_buffer[bridge_write_index] += violin_string_buffer[id][i];
+        for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+            bridge_buffer[bridge_write_index] += violin_string_buffer[st][i];
         }
         // update pointer
         bridge_write_index++;
