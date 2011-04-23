@@ -18,6 +18,7 @@ def main():
 	pp = 0.25
 	bp = 0.12
 
+	violin.wait(0.5)
 	violin.comment(" open strings arco")
 	violin.bow('vl_A', bp, 0.6, 1.0, 0.1)
 	violin.wait(0.5)
@@ -188,29 +189,29 @@ def main():
 	# vibrato
 	finger_pos = semitones(5)
 	violin.pluck('vl_D', finger_pos, pp);
-	for i in range(98):
+	for i in range(90):
 		violin.wait(1.0/49)
 		wiggle = math.sin(i*0.5)
 		#print wiggle
 		finger_pos += 0.003 * wiggle
 		violin.finger('vl_D', finger_pos)
-	violin.wait(0.3)
+	violin.wait(0.1)
 
 	finger_pos = semitones(3)
 	violin.pluck('vl_D', finger_pos, pp);
-	for i in range(98):
+	for i in range(90):
 		violin.wait(1.0/49)
 		wiggle = math.sin(i*0.2)
 		finger_pos += 0.006 * wiggle
 		violin.finger('vl_D', finger_pos)
-	violin.wait(0.3)
+	violin.wait(0.1)
 
 
 	violin.comment(" vibrato arco")
 	finger_pos = semitones(5)
 	violin.finger('vl_D', finger_pos)
 	violin.bow('vl_D', bp, force, velocity, 0.1)
-	for i in range(98):
+	for i in range(90):
 		violin.wait(1.0/49)
 		wiggle = math.sin(i*0.5)
 		finger_pos += 0.003 * wiggle
@@ -221,7 +222,7 @@ def main():
 	finger_pos = semitones(3)
 	violin.finger('vl_D', finger_pos)
 	violin.bow('vl_D', bp, force, -velocity)
-	for i in range(98):
+	for i in range(90):
 		violin.wait(1.0/49)
 		wiggle = math.sin(i*0.2)
 		finger_pos += 0.006 * wiggle
@@ -232,7 +233,8 @@ def main():
 
 
 	violin.comment('vibrato and gliss done')
-	violin.wait(0.32)
+	violin.wait(0.5)
+	violin.wait(0.3731)
 
 	# Bach
 #	semiquaver = 0.3;
