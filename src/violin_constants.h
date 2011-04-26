@@ -54,7 +54,8 @@ const double MU_PLUCK = 1.0;
 const double A_noise = 0.05; // estimated from listening
 
 // time length of each sample, in seconds
-const double dt = 1.0 / 44100.0;
+const unsigned int VIOLIN_SAMPLE_RATE = 44100;
+const double dt = 1.0 / VIOLIN_SAMPLE_RATE;
 
 
 /** \struct String_Physical
