@@ -10,11 +10,14 @@ class Finger(abstract_object.AbstractObject):
 		self.violin = violin
 		self.st = string_number
 
+		self.size = self.violin.string_length
+
 		self.obj = self.make_finger()
 		self.set_visible(True)
 
 	def make_finger(self):
-		bpy.ops.mesh.primitive_cone_add(radius=0.1, depth=0.2)
+		bpy.ops.mesh.primitive_cone_add(radius=0.01*self.size,
+			depth=0.02*self.size)
 		obj = bpy.data.objects["Cone"]
 		obj.name = "finger_%i" % self.st
 		finger_material = bpy.data.materials.new("finger_material")

@@ -11,8 +11,9 @@ class Bow(abstract_object.AbstractObject):
 		abstract_object.AbstractObject.__init__(self)
 		self.violin = violin
 
+		self.size = self.violin.string_length
+
 		self.obj = bpy.data.objects["bow"]
-		self.obj.parent = violin.obj
 		# normalized "coordinate system" of bow
 		self.frog, self.tip, self.winding = self.get_bow_points()
 		self.along_hair_towards_tip = self.get_along_hair_towards_tip()
@@ -28,8 +29,8 @@ class Bow(abstract_object.AbstractObject):
 		#only do this once, for efficency
 		vertex_groups = utils.getVertGroups(bow_obj)
 		frog = utils.mean_of_vertex_group(bow_obj, vertex_groups, "hair-frog")
-		tip  = utils.mean_of_vertex_group(bow_obj, vertex_groups, "hair-tip")
-		wind = utils.mean_of_vertex_group(bow_obj, vertex_groups, "winding")
+		tip  = utils.mean_of_vertex_group(bow_obj, vertex_groups, "hair-point")
+		wind = utils.mean_of_vertex_group(bow_obj, vertex_groups, "wrapping")
 		return frog, tip, wind
 
 	def get_along_hair_towards_tip(self):
@@ -74,7 +75,7 @@ class Bow(abstract_object.AbstractObject):
 		elif string_number == 3:
 			angle = -math.pi/5.0
 
-		rotation = mathutils.Vector((math.pi/2 + angle, 0, 0))
+		rotation = mathutils.Vector((angle, 0, 0))
 
 		# TODO: this is iffy
 		origin_transpose = mathutils.Vector((0,0,0))
@@ -83,7 +84,7 @@ class Bow(abstract_object.AbstractObject):
 
 		bow_loc = string_contact + origin_transpose
 		if bow_force == 0:
-			bow_loc += 0.5 * violin.away_from_string
+			bow_loc += 0.1*self.size * violin.away_from_string
 
 		# set properties
 		self.obj.rotation_euler = rotation

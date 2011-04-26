@@ -1,0 +1,33 @@
+
+The pythons scripts add "keyframes" to a blender file based on an
+.actions file in order to animate those actions.
+
+
+NAMES
+
+In order to this, the blender model MUST use certain standard
+names for objects and vertex groups.
+
+- an object named "violin".
+- 4 objects parented on the violin, named:
+  "e-string", "a-string", "d-string", "g-string"
+  - each object must contain (at least) 2 vertex groups:
+    - "bridge-mark"
+    - "nut-mark"
+- an object named "bow", parented on the violin.
+  - the bow must have (at least) 3 vertex groups:
+    - "hair-frog"   (where the hair touches the frog)
+    - "hair-point"  (at the "tip" of the bow)
+    - "wrapping"    (the silvery part on the stick near the bow)
+
+
+GENERAL NOTES
+
+- each vertex group can have more than one vertex in it, but only
+  one vertex is necessary.
+
+- no objects should have a scale or rotation transform.
+  (use object->apply->rotation to "save" a rotation once you are
+  happy with the modeling)
+
+

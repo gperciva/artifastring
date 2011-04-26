@@ -19,6 +19,7 @@ class Violin():
 		# these are in violin coordinates, due to difficulties
 		# in changing parents during animations
 		self.string_coords    = self.get_string_coords()
+		self.string_length    = self.get_string_length()
 
 		# normalized "coordinate system" of violin
 		self.away_from_bridge = self.get_away_from_bridge()
@@ -46,16 +47,23 @@ class Violin():
 		""" gets the coordinates of the strings at bridge and nut,
 		    using relative coordinates to the violin body. """
 		string_coords = []
-		for i in range(len(STRINGS)):
+		for i, st in enumerate(STRINGS):
 			string_object = self.get_string_obj(i)
 			# only do this once per string, for efficency
 			vertex_groups = utils.getVertGroups(string_object)
-			bridge = utils.mean_of_vertex_group(string_object, vertex_groups, "bridge-mark")
-			nut    = utils.mean_of_vertex_group(string_object, vertex_groups, "nut-mark")
+			bridge = utils.mean_of_vertex_group(string_object, vertex_groups,
+				"bridge-mark")
+			nut    = utils.mean_of_vertex_group(string_object, vertex_groups,
+				"nut-mark")
 			bridge *= string_object.matrix_local
 			nut    *= string_object.matrix_local
 			string_coords.append( StringEnds(bridge, nut) )
 		return string_coords
+
+	def get_string_length(self):
+		e_length = self.string_coords[0].bridge - self.string_coords[0].nut
+		return e_length.length
+
 
 	def get_away_from_bridge(self):
 		away_from_bridge = mathutils.Vector((0,0,0))

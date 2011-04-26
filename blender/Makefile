@@ -47,6 +47,11 @@ quality-test: prep
 		-o $(TEMP_DIR)/#### \
 		-s 1 -e 2 -a > log-render.txt
 
+quality-gui: prep
+	$(BLENDER_BIN) -noaudio \
+		violin-and-bow.blend -P setup-2.5.py
+
+
 images: prep
 	$(BLENDER_BIN) -b blank.blend -P setup.py \
 		-o $(TEMP_DIR)/#### \
