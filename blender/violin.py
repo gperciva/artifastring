@@ -16,15 +16,18 @@ StringEnds = collections.namedtuple("StringEnds", "bridge, nut")
 class Violin():
 	def __init__(self):
 		self.obj = bpy.data.objects["violin"]
-		# these are in violin coordinates, due to difficulties
-		# in changing parents during animations
+		### coordinates in violin-space
+		### (can't change parents during animation, so no string-space coords)
 		self.string_coords    = self.get_string_coords()
-		self.string_length    = self.get_string_length()
 
-		# normalized "coordinate system" of violin
+		### normalized "coordinate system" of violin
 		self.away_from_bridge = self.get_away_from_bridge()
 		self.towards_frog     = self.get_towards_frog()
 		self.away_from_string = self.get_away_from_string()
+
+		### other stup
+		self.string_length    = self.get_string_length()
+		self.string_angles    = self.get_string_angles()
 
 		### pluck
 		self.pluck = pluck.Pluck(self)
@@ -95,6 +98,25 @@ class Violin():
 		contact = self.string_coords[string_number].bridge.lerp(
 			self.string_coords[string_number].nut, along)
 		return contact
+
+	def get_string_angles(self):
+		# TODO: iffy calculations
+		g_a = self.string_coords[2].bridge - self.string_coords[0].nut
+		d_ang = self.towards_frog.angle(g_a) - math.pi/2
+		d_ang = -1*d_ang
+
+		# TODO: ouch hard-coding!
+		g_ang = d_ang - 0.3
+
+		#e_a = self.string_coords[3].bridge - self.string_coords[2].nut
+		e_d = self.string_coords[3].bridge - self.string_coords[1].nut
+		a_ang = self.towards_frog.angle(e_d) - math.pi/2
+		#a_ang = e_a.angle(e_d)
+		e_ang = a_ang + 0.3
+
+		angles = [g_ang, d_ang, a_ang, e_ang]
+#		print (angles)
+		return angles
 
 
 	### actions

@@ -33,7 +33,16 @@ bpy.context.scene.use_gravity = False
 violin = violin.Violin()
 #violin.debug()
 #violin.bow.debug()
+
 frame_end = parse_actions.load_keyframes(violin, "unit.actions", render.fps)
 bpy.context.scene.frame_end = frame_end
+
+# testing
+#bpy.context.scene.frame_end = 10
+#for i in range(10):
+#	for st in range(4):
+#		violin.finger_action(st, 0.1*i, i)
+	#violin.bow_action(i%4, 0.05*i, 0.1, 0.1*i, i)
+#	violin.bow_action((i-1)%4, 0.05, 0.1, 0.1*i, i)
 
 

@@ -16,7 +16,7 @@ class Bow(abstract_object.AbstractObject):
 		self.obj = bpy.data.objects["bow"]
 		# normalized "coordinate system" of bow
 		self.frog, self.tip, self.winding = self.get_bow_points()
-		self.along_hair_towards_tip = self.get_along_hair_towards_tip()
+		self.along_hair_towards_frog = self.get_along_hair_towards_frog()
 		self.away_from_string = self.get_away_from_string()
 		self.towards_lh_fingers = self.get_towards_lh_fingers()
 
@@ -33,7 +33,7 @@ class Bow(abstract_object.AbstractObject):
 		wind = utils.mean_of_vertex_group(bow_obj, vertex_groups, "wrapping")
 		return frog, tip, wind
 
-	def get_along_hair_towards_tip(self):
+	def get_along_hair_towards_frog(self):
 		frog_tip = self.tip - self.frog
 		frog_tip.normalize()
 		return frog_tip
@@ -46,7 +46,7 @@ class Bow(abstract_object.AbstractObject):
 		return intersect_line
 
 	def get_towards_lh_fingers(self):
-		lh_fingers = self.away_from_string.cross(self.along_hair_towards_tip)
+		lh_fingers = self.away_from_string.cross(self.along_hair_towards_frog)
 		return lh_fingers
 
 
@@ -62,27 +62,22 @@ class Bow(abstract_object.AbstractObject):
 			string_number, bow_bridge_distance)
 
 		hair_along = self.frog.lerp(self.tip, bow_along)
-		distance_along = hair_along.dot(self.along_hair_towards_tip)
+		distance_along = hair_along.dot(self.along_hair_towards_frog)
 
-		# TODO: generalize this as well!
-		angle = 0
-		if string_number == 0:
-			angle = math.pi/5.0
-		elif string_number == 1:
-			angle = math.pi/20.0
-		elif string_number == 2:
-			angle = -math.pi/20.0
-		elif string_number == 3:
-			angle = -math.pi/5.0
+		bow_hair_extra_away = -hair_along.project(self.violin.away_from_string)
 
-		rotation = mathutils.Vector((angle, 0, 0))
+		angle = self.violin.string_angles[string_number]
+		rotation = angle * violin.away_from_bridge
 
 		# TODO: this is iffy
 		origin_transpose = mathutils.Vector((0,0,0))
-		origin_transpose += -distance_along * violin.towards_frog * math.cos(angle)
-		origin_transpose += distance_along * violin.away_from_string * math.sin(angle)
+		origin_transpose += (distance_along * violin.towards_frog
+			* math.cos(angle) * -1)
+		origin_transpose += (distance_along * violin.away_from_string
+			* math.sin(angle) * -1)
 
 		bow_loc = string_contact + origin_transpose
+		bow_loc += bow_hair_extra_away
 		if bow_force == 0:
 			bow_loc += 0.1*self.size * violin.away_from_string
 
@@ -101,7 +96,7 @@ class Bow(abstract_object.AbstractObject):
 		print("\tfrog:\n", self.frog)
 		print("\twinding:\n", self.winding)
 		print()
-		print("\talong_hair_towards_tip:\n", self.along_hair_towards_tip)
+		print("\talong_hair_towards_frog:\n", self.along_hair_towards_frog)
 		print("\taway from string:\n", self.away_from_string)
 		print("\ttowars_lh_fingers:\n", self.towards_lh_fingers)
 
