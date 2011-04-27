@@ -83,6 +83,9 @@ MonoWav::MonoWav(const char *filename, unsigned int buffer_size)
 {
     size = buffer_size;
     data = new short[size];
+    for (unsigned int i=0; i<buffer_size; i++) {
+        data[i] = 0;
+    }
     index = 0;
     total_samples = 0;
     outfile = prep_wav_file(filename);

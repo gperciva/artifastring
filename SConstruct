@@ -32,6 +32,7 @@ env = Environment(
 
 env.Append(
 	CPPFLAGS=Split("-O3 -FPIC -funroll-loops"),
+#	CPPFLAGS=Split("-g -fbounds-check -Wall -Wextra"),
 	CPPPATH=[
 		"/usr/include/python2.6",
 		],

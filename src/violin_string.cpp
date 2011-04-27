@@ -436,7 +436,7 @@ inline bool ViolinString::almostEquals(double one, double two)
 {
     // maximum absolute error
     if (fabs(one-two) < FLOAT_EQUALITY_ABSOLUTE_ERROR) {
-	return true;
+        return true;
     }
     // don't bother with relative error (yet?)
     return false;
