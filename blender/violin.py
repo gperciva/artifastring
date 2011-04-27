@@ -54,10 +54,17 @@ class Violin():
 			string_object = self.get_string_obj(i)
 			# only do this once per string, for efficency
 			vertex_groups = utils.getVertGroups(string_object)
-			bridge = utils.mean_of_vertex_group(string_object, vertex_groups,
-				"bridge-mark")
-			nut    = utils.mean_of_vertex_group(string_object, vertex_groups,
-				"nut-mark")
+			# support two naming schemes
+			if "bridge-mark" in string_object.vertex_groups:
+				bridge = utils.mean_of_vertex_group(string_object,vertex_groups,
+					"bridge-mark")
+				nut    = utils.mean_of_vertex_group(string_object,vertex_groups,
+					"nut-mark")
+			else:
+				bridge = utils.mean_of_vertex_group(string_object,vertex_groups,
+					st+"-bridge-mark")
+				nut    = utils.mean_of_vertex_group(string_object,vertex_groups,
+					st+"-nut-mark")
 			bridge *= string_object.matrix_local
 			nut    *= string_object.matrix_local
 			string_coords.append( StringEnds(bridge, nut) )

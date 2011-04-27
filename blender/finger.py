@@ -10,14 +10,14 @@ class Finger(abstract_object.AbstractObject):
 		self.violin = violin
 		self.st = string_number
 
-		self.size = self.violin.string_length
+		self.base_size = 0.01*self.violin.string_length
 
 		self.obj = self.make_finger()
 		self.set_visible(True)
 
 	def make_finger(self):
-		bpy.ops.mesh.primitive_cone_add(radius=0.01*self.size,
-			depth=0.02*self.size)
+		bpy.ops.mesh.primitive_cone_add(radius=self.base_size,
+			depth=3*self.base_size)
 		obj = bpy.data.objects["Cone"]
 		obj.name = "finger_%i" % self.st
 		finger_material = bpy.data.materials.new("finger_material")
@@ -37,8 +37,10 @@ class Finger(abstract_object.AbstractObject):
 			self.obj.keyframe_insert("location", frame=frame-1)
 		#
 		pos = 1.0 - finger_position
+		loc = self.violin.string_contact(self.st, pos)
+		loc += 1.5*self.base_size * self.violin.away_from_string
 		# set properties and animation
-		self.obj.location = self.violin.string_contact(self.st, pos)
+		self.obj.location = loc
 		self.obj.keyframe_insert("location", frame=frame)
 
 
