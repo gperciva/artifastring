@@ -2,13 +2,11 @@
 BLENDER_BIN=blender
 
 # if you change this, you need to change the value in
-# setup.py as well.
+# setup-2.5.py as well.
 # TODO: make the fps controllable on the command-line
 FPS=25
 
 TEMP_DIR=/tmp/vivi-movie/
-
-
 
 all: mpeg
 
@@ -53,14 +51,16 @@ quality-gui: prep
 
 
 images: prep
-	$(BLENDER_BIN) -b blank.blend -P setup.py \
+	$(BLENDER_BIN) -noaudio \
+		-b fast-violin.blend -P setup-2.5.py \
 		-o $(TEMP_DIR)/#### \
 		-k \
 		-c_unit.actions \
 		-a > log-render.txt
 
 quality-images: prep
-	$(BLENDER_BIN) -b blank.blend -P setup.py \
+	$(BLENDER_BIN) -noaudio \
+		-b violin-and-bow.blend -P setup-2.5.py \
 		-o $(TEMP_DIR)/#### \
 		-c_unit.actions \
 		-a > log-render.txt
@@ -88,11 +88,9 @@ mpeg: low unit.wav.mp3
 	mencoder "mf://$(TEMP_DIR)/*.tga" -mf fps=$(FPS):type=tga \
 		-of mpeg \
 		-mpegopts format=mpeg1:tsaf:muxrate=2000 \
-    -ovc lavc \
-    -lavcopts \
-	vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2 \
+		-ovc lavc \
+		-lavcopts \
+			vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2 \
 		-vf scale=640:480 \
 		-audiofile unit.wav.mp3 -oac copy \
 		-o unit.mpeg
-
-
