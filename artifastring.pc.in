@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Artifastring
+Description: Artifastring ("artificial fast string") is a highly optimized physical simulation of a violin for sound synthesis.
+Requires:
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lartifastring
+Cflags: -I${includedir}
+
