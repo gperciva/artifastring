@@ -14,6 +14,7 @@ include_HEADERS = $(artifastring_h) $(monowav_h)
 
 bin_PROGRAMS = actions2wav
 actions2wav_SOURCES = $(libartifastring_a_SOURCES) \
+	$(libmonowav_a_SOURCES) \
 	src/actions2wav.cpp
 
 
