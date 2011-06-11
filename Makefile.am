@@ -1,3 +1,4 @@
+#ACLOCAL_AMFLAGS = -I m4/
 
 artifastring_h = src/violin_constants.h \
 	src/violin_body_impulse.h \

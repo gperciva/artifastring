@@ -6,4 +6,11 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc])
+
+#AX_PKG_SWIG(, [], [])
+#AC_MSG_ERROR([SWIG is recommended; python modules will not be built otherwise])])
+
+# required for swig
+CXXFLAGS="$CXXFLAGS -fPIC"
+
 AC_OUTPUT
