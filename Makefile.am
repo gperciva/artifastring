@@ -24,12 +24,12 @@ pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
 python_PYTHON = monowav.py violin_instrument.py
 
 _monowav_la_SOURCES = monowav_wrap.cxx
-_monowav_la_CPPFLAGS = -I$(PYTHON_INCLUDE)/
+_monowav_la_CPPFLAGS = -I$(PYTHON_INCLUDE)/ -I$(srcdir)/src/
 _monowav_la_LDFLAGS = -module
 monowav_wrap.cxx: $(srcdir)/swig/monowav.i
 	$(SWIG) -c++ -python -I$(srcdir)/src/ -o $@ $<
 _violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
-_violin_instrument_la_CPPFLAGS = -I$(PYTHON_INCLUDE)/
+_violin_instrument_la_CPPFLAGS = -I$(PYTHON_INCLUDE)/ -I$(srcdir)/src/
 _violin_instrument_la_LDFLAGS = -module
 violin_instrument_wrap.cxx: $(srcdir)/swig/violin_instrument.i
 	$(SWIG) -c++ -python -I$(srcdir)/src/ -o $@ $<
