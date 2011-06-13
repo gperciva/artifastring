@@ -1,45 +1,61 @@
+### general setup
 ACLOCAL_AMFLAGS = -I m4
+if HAS_DEBUG
+AM_CXXFLAGS = -fPIC -g -fbounds-check
+MORE_WARNINGS_CXXFLAGS = -Wall -Werror -Wextra
+else
+AM_CXXFLAGS = -fPIC -O3 -funroll-loops
+MORE_WARNINGS_CXXFLAGS =
+endif
 
-artifastring_h = src/violin_constants.h \
-	src/violin_body_impulse.h \
-	src/violin_string.h src/violin_instrument.h
-monowav_h = src/monowav.h
+
+### libraries
+artifastring_h = artifastring/violin_constants.h \
+	artifastring/violin_body_impulse.h \
+	artifastring/violin_string.h \
+	artifastring/violin_instrument.h
+monowav_h = artifastring/monowav.h
 
 lib_LIBRARIES = libartifastring.a libmonowav.a
 libartifastring_a_SOURCES = $(artifastring_h) \
-	src/violin_string.cpp \
-	src/violin_instrument.cpp
+	artifastring/violin_string.cpp \
+	artifastring/violin_instrument.cpp
+libartifastring_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
 libmonowav_a_SOURCES = $(monowav_h) \
-	src/monowav.cpp 
+	artifastring/monowav.cpp 
+libmonowav_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
 include_HEADERS = $(artifastring_h) $(monowav_h)
-
-bin_PROGRAMS = actions2wav
-actions2wav_SOURCES = $(libartifastring_a_SOURCES) \
-	$(libmonowav_a_SOURCES) \
-	src/actions2wav.cpp
-
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = artifastring.pc monowav.pc
 
+ARTIFASTRING_INCLUDE = -I$(srcdir)/artifastring/
 
-if HAS_SWIG
+### binaries
+
+bin_PROGRAMS = actions2wav
+actions2wav_SOURCES = src/actions2wav.cpp
+actions2wav_CXXFLAGS = $(ARTIFASTRING_INCLUDE) $(MORE_WARNINGS_CXXFLAGS)
+actions2wav_LDADD = $(lib_LIBRARIES)
+
+### swig
 # TODO: so far I'm unable to make this section nice.  :(
+if HAS_SWIG
 pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
 python_PYTHON = monowav.py violin_instrument.py
 
 _monowav_la_SOURCES = monowav_wrap.cxx
 _monowav_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
-	-I$(srcdir)/src/
+	$(ARTIFASTRING_INCLUDE)
 _monowav_la_LDFLAGS = $(PYTHON_LDFLAGS) -module
 monowav_wrap.cxx: $(srcdir)/swig/monowav.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) -I$(srcdir)/src/ -o $@ $<
+	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 _violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
-_violin_instrument_la_CPPFLAGS = $(PYTHON_CPPFLAGS) \
-	$(AX_SWIG_PYTHON_CPPFLAGS) -I$(srcdir)/src/
+_violin_instrument_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
+	$(ARTIFASTRING_INCLUDE)
 _violin_instrument_la_LDFLAGS = $(PYTHON_LDFLAGS) -module
 violin_instrument_wrap.cxx: $(srcdir)/swig/violin_instrument.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) -I$(srcdir)/src/ -o $@ $<
+	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 endif
 
 

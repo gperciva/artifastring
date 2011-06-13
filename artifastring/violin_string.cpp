@@ -17,7 +17,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "violin_string.h"
+#include "artifastring/violin_string.h"
 #include <math.h>
 #include <stdlib.h> // for rand()
 

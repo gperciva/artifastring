@@ -17,7 +17,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "monowav.h"
+#include "artifastring/monowav.h"
 
 // from marsyas WavSink.h
 struct wavhdr {

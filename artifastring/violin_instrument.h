@@ -20,8 +20,8 @@
 #ifndef VIOLIN_INSTRUMENT
 #define VIOLIN_INSTRUMENT
 
-#include "violin_string.h"
-#include "violin_body_impulse.h"
+#include "artifastring/violin_string.h"
+#include "artifastring/violin_body_impulse.h"
 
 //#define NO_CONVOLUTION
 #ifdef NO_CONVOLUTION

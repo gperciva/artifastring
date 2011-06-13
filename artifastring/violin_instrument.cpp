@@ -18,8 +18,8 @@
  *
  */
 
-#include "violin_instrument.h"
-#include "violin_constants.h"
+#include "artifastring/violin_instrument.h"
+#include "artifastring/violin_constants.h"
 #include <limits.h>
 #include <cstddef>
 

@@ -22,7 +22,7 @@
 
 //#define DEBUG
 
-#include "violin_constants.h"
+#include "artifastring/violin_constants.h"
 
 /// \brief Modal synthesis of a violin string.
 class ViolinString {
