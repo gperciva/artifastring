@@ -33,10 +33,12 @@ libartifastring_a_SOURCES = $(artifastring_h) \
 	artifastring/violin_string.cpp \
 	artifastring/violin_instrument.cpp
 libartifastring_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
+artifastring_includedir=$(includedir)/artifastring/
 libmonowav_a_SOURCES = $(monowav_h) \
 	artifastring/monowav.cpp 
 libmonowav_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
-include_HEADERS = $(artifastring_h) $(monowav_h)
+monowav_includedir=$(includedir)/artifastring/
+nobase_include_HEADERS = $(artifastring_h) $(monowav_h)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = artifastring.pc monowav.pc
