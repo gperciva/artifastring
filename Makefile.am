@@ -61,7 +61,7 @@ python_PYTHON = monowav.py violin_instrument.py
 _monowav_la_SOURCES = monowav_wrap.cxx
 _monowav_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
 	$(ARTIFASTRING_INCLUDE)
-_monowav_la_LDFLAGS = $(PYTHON_LDFLAGS) -module
+_monowav_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lmonowav
 monowav_wrap.cxx: $(srcdir)/swig/monowav.i
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 monowav.py: $(srcdir)/swig/monowav.i
@@ -69,7 +69,7 @@ monowav.py: $(srcdir)/swig/monowav.i
 _violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
 _violin_instrument_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
 	$(ARTIFASTRING_INCLUDE)
-_violin_instrument_la_LDFLAGS = $(PYTHON_LDFLAGS) -module
+_violin_instrument_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lartifastring
 violin_instrument_wrap.cxx: $(srcdir)/swig/violin_instrument.i
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 violin_instrument.py: $(srcdir)/swig/violin_instrument.i
