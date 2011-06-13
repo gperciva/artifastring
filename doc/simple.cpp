@@ -1,6 +1,6 @@
 // simple.cpp
-#include "violin_instrument.h"
-#include "monowav.h"
+#include "artifastring/violin_instrument.h"
+#include "artifastring/monowav.h"
 int main () {
     // make objects
     MonoWav *wavfile = new MonoWav("output.wav");
