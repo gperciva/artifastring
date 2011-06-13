@@ -32,11 +32,11 @@ lib_LIBRARIES = libartifastring.a libmonowav.a
 libartifastring_a_SOURCES = $(artifastring_h) \
 	artifastring/violin_string.cpp \
 	artifastring/violin_instrument.cpp
-libartifastring_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
+libartifastring_a_CXXFLAGS = $(AM_CXXFLAGS) $(MORE_WARNINGS_CXXFLAGS)
 artifastring_includedir=$(includedir)/artifastring/
 libmonowav_a_SOURCES = $(monowav_h) \
 	artifastring/monowav.cpp 
-libmonowav_a_CXXFLAGS = $(MORE_WARNINGS_CXXFLAGS)
+libmonowav_a_CXXFLAGS = $(AM_CXXFLAGS) $(MORE_WARNINGS_CXXFLAGS)
 monowav_includedir=$(includedir)/artifastring/
 nobase_include_HEADERS = $(artifastring_h) $(monowav_h)
 
@@ -49,7 +49,7 @@ ARTIFASTRING_INCLUDE = -I$(srcdir)/artifastring/
 
 bin_PROGRAMS = actions2wav
 actions2wav_SOURCES = src/actions2wav.cpp
-actions2wav_CXXFLAGS = $(ARTIFASTRING_INCLUDE) $(MORE_WARNINGS_CXXFLAGS)
+actions2wav_CXXFLAGS = $(AM_CXXFLAGS) $(ARTIFASTRING_INCLUDE) $(MORE_WARNINGS_CXXFLAGS)
 actions2wav_LDADD = $(lib_LIBRARIES)
 
 ### swig
