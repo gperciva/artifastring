@@ -1,9 +1,7 @@
-# scons build stuff -- to delete
 build/
-.sconf_temp/
-.sconsign.dblite
-config.log
 # autotools
+.config/
+.deps/
 Makefile.in
 aclocal.m4
 autom4te.cache/

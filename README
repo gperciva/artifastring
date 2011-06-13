@@ -5,7 +5,15 @@ Project webpage, description:
 http://percival-music.ca/artifastring/
 
 
-To build, either use scons:
-    scons -h
-or just use the .cpp .h files directly.
+To build from git, run
+  ./autogen.sh
+
+To build from a tarball, or to continue a build from git, run
+configure as normal, although I recommend a build dir:
+  mkdir build
+  cd build
+  ../configure
+
+To build docs, do
+  make docs
 
