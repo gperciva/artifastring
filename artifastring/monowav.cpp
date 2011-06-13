@@ -79,11 +79,11 @@ FILE* prep_wav_file(const char*filename) {
 // --------
 
 
-MonoWav::MonoWav(const char *filename, unsigned int buffer_size)
+MonoWav::MonoWav(const char *filename, int buffer_size)
 {
     size = buffer_size;
     data = new short[size];
-    for (unsigned int i=0; i<buffer_size; i++) {
+    for (int i=0; i<buffer_size; i++) {
         data[i] = 0;
     }
     index = 0;
@@ -103,7 +103,7 @@ MonoWav::~MonoWav()
     delete [] data;
 }
 
-void MonoWav::increase_size(unsigned int new_buffer_size)
+void MonoWav::increase_size(int new_buffer_size)
 {
     if (index > 0) {
         writeBuffer();
@@ -113,7 +113,7 @@ void MonoWav::increase_size(unsigned int new_buffer_size)
     data = new short[size];
 }
 
-short* MonoWav::request_fill(unsigned int num_samples)
+short* MonoWav::request_fill(int num_samples)
 {
     if (num_samples >= size) {
         increase_size(2*num_samples);

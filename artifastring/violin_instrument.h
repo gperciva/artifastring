@@ -28,9 +28,9 @@
 const double NO_CONVOLUTION_AMPLIFY = 20.0;
 #endif
 
-const unsigned int NUM_VIOLIN_STRINGS = 4;
-const unsigned int NORMAL_BUFFER_SIZE = 512;
-const unsigned int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
+const int NUM_VIOLIN_STRINGS = 4;
+const int NORMAL_BUFFER_SIZE = 512;
+const int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
 
 /// \brief Main class for violin synthesis  (if in doubt, use this one)
 class ViolinInstrument {
@@ -94,7 +94,7 @@ public:
      * @warning You are responsible for allocating sufficient
      * memory for the buffer.
      */
-    void wait_samples(short *buffer, unsigned int num_samples);
+    void wait_samples(short *buffer, int num_samples);
 
 
     /** \brief Returns a string's physical constants.
@@ -121,14 +121,14 @@ private:
     double violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
 
     // only does up to NORMAL_BUFFER_SIZE !
-    void handle_buffer(short output[], unsigned int num_samples);
+    void handle_buffer(short output[], int num_samples);
 
     double bridge_buffer[BRIDGE_BUFFER_SIZE];
-    unsigned int bridge_write_index;
-    unsigned int bridge_read_index;
+    int bridge_write_index;
+    int bridge_read_index;
 
     double f_hole[NORMAL_BUFFER_SIZE];
-    void body_impulse(unsigned int num_samples);
+    void body_impulse(int num_samples);
 
 };
 

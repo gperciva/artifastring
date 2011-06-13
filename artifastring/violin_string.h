@@ -78,7 +78,7 @@ public:
      * @warning You are responsible for allocating sufficient
      * memory for the buffer.
      */
-    void fill_buffer(double* buffer, const unsigned int num_samples);
+    void fill_buffer(double* buffer, const int num_samples);
 
 
     /** \brief Returns the string physical constants.

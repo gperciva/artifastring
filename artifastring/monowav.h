@@ -34,7 +34,7 @@ public:
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.
      */
-    MonoWav(const char *filename, unsigned int buffer_size=44100);
+    MonoWav(const char *filename, int buffer_size=44100);
 
     /// @brief writes data to disk before quitting
     ~MonoWav();
@@ -48,17 +48,17 @@ public:
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.
      */
-    short *request_fill(unsigned int num_samples);
+    short *request_fill(int num_samples);
 
 private:
     void writeBuffer();
-    void increase_size(unsigned int new_buffer_size);
+    void increase_size(int new_buffer_size);
 
-    unsigned int size;
-    unsigned int index;
+    int size;
+    int index;
     short *data;
 
-    unsigned int total_samples;
+    int total_samples;
     FILE *outfile;
 };
 #endif

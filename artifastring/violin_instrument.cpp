@@ -29,7 +29,7 @@ ViolinInstrument::ViolinInstrument(int random_seed) {
     violinString[1] = new ViolinString(vl_D, NUM_VIOLIN_STRINGS*random_seed+2);
     violinString[0] = new ViolinString(vl_G, NUM_VIOLIN_STRINGS*random_seed+3);
 
-    for (unsigned int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
+    for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;
     }
     // before you doubt this, draw a ring buffer diagram
@@ -50,10 +50,10 @@ ViolinInstrument::~ViolinInstrument() {
 }
 
 void ViolinInstrument::reset() {
-    for (unsigned int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
+    for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         violinString[st]->reset();
     }
-    for (unsigned int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
+    for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;
     }
 }
@@ -88,15 +88,15 @@ void ViolinInstrument::set_physical_constants(int which_string,
 }
 
 
-void ViolinInstrument::body_impulse(unsigned int num_samples)
+void ViolinInstrument::body_impulse(int num_samples)
 {
-    for (unsigned int i=0; i<num_samples; i++) {
+    for (int i=0; i<num_samples; i++) {
 #ifdef NO_CONVOLUTION
         f_hole[i] = NO_CONVOLUTION_AMPLIFY*bridge_buffer[bridge_read_index];
 #else
         f_hole[i] = 0.0;
-        unsigned int bi=bridge_read_index;
-        for (unsigned int ki=0; ki < PC_KERNEL_SIZE; ki++) {
+        int bi=bridge_read_index;
+        for (int ki=0; ki < PC_KERNEL_SIZE; ki++) {
             f_hole[i] += bridge_buffer[bi] * pc_kernel[ki];
             // update read pointer
             bi++;
@@ -109,10 +109,10 @@ void ViolinInstrument::body_impulse(unsigned int num_samples)
     }
 }
 
-void ViolinInstrument::wait_samples(short *buffer, unsigned int num_samples)
+void ViolinInstrument::wait_samples(short *buffer, int num_samples)
 {
-    unsigned int remaining = num_samples;
-    unsigned int position = 0;
+    int remaining = num_samples;
+    int position = 0;
     while (remaining > NORMAL_BUFFER_SIZE) {
         if (buffer == NULL) {
             handle_buffer(NULL, NORMAL_BUFFER_SIZE);
@@ -125,7 +125,7 @@ void ViolinInstrument::wait_samples(short *buffer, unsigned int num_samples)
     handle_buffer(buffer+position, remaining);
 }
 
-void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
+void ViolinInstrument::handle_buffer(short output[], int num_samples)
 {
     // calculate string buffers
     for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
@@ -133,7 +133,7 @@ void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
     }
 
     // calculate bridge buffer from strings
-    for (unsigned int i=0; i<num_samples; i++) {
+    for (int i=0; i<num_samples; i++) {
         bridge_buffer[bridge_write_index] = 0.0;
         for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
             bridge_buffer[bridge_write_index] += violin_string_buffer[st][i];
@@ -151,7 +151,7 @@ void ViolinInstrument::handle_buffer(short output[], unsigned int num_samples)
         return;
     }
 
-    for (unsigned int i=0; i<num_samples; i++) {
+    for (int i=0; i<num_samples; i++) {
         output[i] = SHRT_MAX*f_hole[i];
     }
 }

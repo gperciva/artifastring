@@ -1,7 +1,7 @@
 // This file was automatically generated
 #ifndef IMPULSE_DATA_H
 #define IMPULSE_DATA
-const unsigned int PC_KERNEL_SIZE = 512;
+const int PC_KERNEL_SIZE = 512;
 const double pc_kernel[] = {
     0.0010986328 ,
     0.00082397461 ,

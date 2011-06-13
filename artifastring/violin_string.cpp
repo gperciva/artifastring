@@ -65,7 +65,7 @@ void ViolinString::reset()
     m_string_excitation = 0.0;
     m_finger_dampening = 0.0;
 
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         m_a[n-1] = 0.0;
         m_adot[n-1] = 0.0;
         m_a_h[n-1] = 0.0;
@@ -84,8 +84,8 @@ inline void ViolinString::calculate_eigens(double eigens[],
     y[0] = sin(x);
     y[1] = 0.0;
     const double p = 2.0 * cos(x);
-    unsigned int latest = 0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    int latest = 0;
+    for (int n = 1; n <= MODES; ++n) {
         y[latest] = p*y[!latest] - y[latest];
         eigens[n-1] = pc_c_sqrt_two_div_l * y[latest];
         latest = !latest;
@@ -152,7 +152,7 @@ void ViolinString::cache_pc_c()
     const double pi_div_l = M_PI / pc.L;
     // text after eqn (2.5)
     const double I = M_PI * pc.d*pc.d*pc.d*pc.d / 64.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         // text after eqn (2.5)
         const double n_pi_div_L = n*pi_div_l;
         const double w0n = sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
@@ -198,7 +198,7 @@ void ViolinString::cache_vpa_c()
 
     double A01 = 0.0;
     double A11 = 0.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         const double phix0 = vpa_c_bow_eigens[n-1];
         const double phix1 = vpa_c_finger_eigens[n-1];
         const double X3n = X3[n-1];
@@ -212,7 +212,7 @@ void ViolinString::cache_vpa_c()
 
     double B00 = 0.0;
     double B01 = 0.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         const double phix0 = vpa_c_bow_eigens[n-1];
         const double phix1 = vpa_c_finger_eigens[n-1];
         const double Y3n = Y3[n-1];
@@ -274,7 +274,7 @@ inline void ViolinString::check_active(double bridge_force)
 {
     if (fabs(bridge_force) < SUM_BELOW) {
         bool should_stop = true;
-        for (unsigned int n = 1; n <= MODES; ++n) {
+        for (int n = 1; n <= MODES; ++n) {
             if (fabs(m_adot[n-1]) >= EACH_MODAL_VELOCITY_BELOW) {
                 should_stop = false;
                 break;
@@ -286,16 +286,16 @@ inline void ViolinString::check_active(double bridge_force)
     }
 }
 
-void ViolinString::fill_buffer(double* buffer, const unsigned int num_samples)
+void ViolinString::fill_buffer(double* buffer, const int num_samples)
 {
-    for (unsigned int i=0; i<num_samples; i++) {
+    for (int i=0; i<num_samples; i++) {
         buffer[i] = tick();
     }
 }
 
 inline void ViolinString::compute_hist_modes()
 {
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         m_a_h[n-1]     = X1[n-1]*m_a[n-1] + X2[n-1]*m_adot[n-1];
         m_adot_h[n-1]  = Y1[n-1]*m_a[n-1] + Y2[n-1]*m_adot[n-1];
     }
@@ -304,7 +304,7 @@ inline void ViolinString::compute_hist_modes()
 inline void ViolinString::compute_hist_finger()
 {
     m_y1_h = 0.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         m_y1_h += m_a_h[n-1] * vpa_c_finger_eigens[n-1];
     }
 }
@@ -312,7 +312,7 @@ inline void ViolinString::compute_hist_finger()
 inline void ViolinString::compute_hist_bow()
 {
     m_y0dot_h = 0.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         m_y0dot_h += m_adot_h[n-1] * vpa_c_bow_eigens[n-1];
     }
 }
@@ -413,7 +413,7 @@ inline double ViolinString::compute_finger()
 
 inline void ViolinString::apply_forces()
 {
-    for (unsigned int n = 1; n <= MODES; ++n)
+    for (int n = 1; n <= MODES; ++n)
     {
         const double position_forces = vpa_c_bow_eigens[n-1]*m_string_excitation +
                                        vpa_c_finger_eigens[n-1]*m_finger_dampening;
@@ -426,7 +426,7 @@ inline double ViolinString::compute_bridge_force()
 {
     // equation (2.35)
     double result = 0.0;
-    for (unsigned int n = 1; n <= MODES; ++n) {
+    for (int n = 1; n <= MODES; ++n) {
         result += m_a[n-1] * pc_c_bridge_forces[n-1];
     }
     return BRIDGE_AMPLIFY*result;

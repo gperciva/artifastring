@@ -29,7 +29,7 @@
 const double PLUCK_FORCE_SCALE = 1e0;
 const double BRIDGE_AMPLIFY = 1e-2;
 
-const unsigned int MODES = 56;
+const int MODES = 56;
 
 // optimization for "turning off" a string which is barely vibrating.
 const double SUM_BELOW = 1e-6;
@@ -54,7 +54,7 @@ const double MU_PLUCK = 1.0;
 const double A_noise = 0.05; // estimated from listening
 
 // time length of each sample, in seconds
-const unsigned int VIOLIN_SAMPLE_RATE = 44100;
+const int VIOLIN_SAMPLE_RATE = 44100;
 const double dt = 1.0 / VIOLIN_SAMPLE_RATE;
 
 
