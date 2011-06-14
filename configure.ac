@@ -1,17 +1,20 @@
-AC_CONFIG_MACRO_DIR([m4])
-
 AC_INIT([Artifastring], [1.6], [graham@percival-music.ca], [artifastring], [http://percival-music.ca/artifastring/])
 # override flags from AC_INIT, but keeps any flags the user sets
 : ${CXXFLAGS=""}
 
+# directories
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([libtool-aux])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
+
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
-AC_CONFIG_HEADERS([config.h])
+
 
 ### libraries
 AC_PROG_CXX
 AC_PROG_LIBTOOL
-AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_ARG_ENABLE([debug],
   [  --enable-debug          Turn on debugging],
@@ -24,20 +27,18 @@ AM_CONDITIONAL([HAS_DEBUG], [test x$debug = xtrue])
 
 
 ### swig stuff
-AC_ARG_ENABLE([swig],
-  [  --enable-swig           Python bindings with swig],
-  [case "${enableval}" in
-    yes) swig=true ;;
-    no)  swig=false ;;
-    *) AC_MSG_ERROR([bad value ${enableval} for --enable-swig]) ;; esac],
-  [swig=false])
-m4_ifval(set, [
-  AM_CONDITIONAL([HAS_SWIG], [test "x$SWIG" != 'x'])
+AC_ARG_WITH(swig,
+  [AS_HELP_STRING(--with-swig,[Python bindings with swig])],
+  [],
+  with_swig="no")
+AM_CONDITIONAL([HAS_SWIG], [test "x$with_swig" != xno])
+AS_IF([test "x$with_swig" != xno],
+  [
+  AM_PATH_PYTHON
+  AX_PYTHON_DEVEL
   AX_PKG_SWIG()
   AX_SWIG_ENABLE_CXX
   AX_SWIG_PYTHON
-  AX_PYTHON_DEVEL
-  AM_PATH_PYTHON
   ], [])
 
 ### doc stuff

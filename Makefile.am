@@ -58,9 +58,9 @@ if HAS_SWIG
 EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/violin_instrument.i
 
 pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
-python_PYTHON = monowav.py violin_instrument.py
+nodist_python_PYTHON = monowav.py violin_instrument.py
 
-_monowav_la_SOURCES = monowav_wrap.cxx
+nodist__monowav_la_SOURCES = monowav_wrap.cxx
 _monowav_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
 	$(ARTIFASTRING_INCLUDE)
 _monowav_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lmonowav
@@ -68,7 +68,7 @@ monowav_wrap.cxx: $(srcdir)/swig/monowav.i
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 monowav.py: $(srcdir)/swig/monowav.i
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
-_violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
+nodist__violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
 _violin_instrument_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
 	$(ARTIFASTRING_INCLUDE)
 _violin_instrument_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lartifastring
