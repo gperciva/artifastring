@@ -14,7 +14,7 @@ AC_PROG_LIBTOOL
 AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_ARG_ENABLE([debug],
-  [  --enable-debug    Turn on debugging],
+  [  --enable-debug          Turn on debugging],
   [case "${enableval}" in
     yes) debug=true ;;
     no)  debug=false ;;
@@ -24,12 +24,21 @@ AM_CONDITIONAL([HAS_DEBUG], [test x$debug = xtrue])
 
 
 ### swig stuff
-AX_PKG_SWIG()
-AM_CONDITIONAL(HAS_SWIG, [test "x$SWIG" != 'x'])
-AX_SWIG_ENABLE_CXX
-AX_SWIG_PYTHON
-AX_PYTHON_DEVEL
-AM_PATH_PYTHON
+AC_ARG_ENABLE([swig],
+  [  --enable-swig           Python bindings with swig],
+  [case "${enableval}" in
+    yes) swig=true ;;
+    no)  swig=false ;;
+    *) AC_MSG_ERROR([bad value ${enableval} for --enable-swig]) ;; esac],
+  [swig=false])
+m4_ifval(set, [
+  AM_CONDITIONAL([HAS_SWIG], [test "x$SWIG" != 'x'])
+  AX_PKG_SWIG()
+  AX_SWIG_ENABLE_CXX
+  AX_SWIG_PYTHON
+  AX_PYTHON_DEVEL
+  AM_PATH_PYTHON
+  ], [])
 
 ### doc stuff
 DX_INIT_DOXYGEN(artifastring, doc/doxygen, [out-www/])

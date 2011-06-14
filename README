@@ -13,6 +13,8 @@ configure as normal, although I recommend a build dir:
   mkdir build
   cd build
   ../configure
+To build with debug and swig python bindings, use:
+  ../configure --enable-debug --enable-swig
 
 To build docs, do
   make docs
