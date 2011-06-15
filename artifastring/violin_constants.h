@@ -84,23 +84,23 @@ const String_Physical string_params[] = {
 
     /* Violin D string */
     {   /* T= */ 34.8,  /* l= */ 0.33, /* d= */ 0.8e-3,
-                 /* pl= */ 0.92e-3,
-                 /* E= */ 4.0e9,
-                 3.12, 7.0,
+        /* pl= */ 0.92e-3,
+        /* E= */ 4.0e9,
+        3.12, 7.0,
     },
 
     /* Violin A string */
     {   /* T= */ 50.0,  /* l= */ 0.33, /* d= */ 0.56e-3,
-                 /* pl= */ 0.59e-3,
-                 /* E= */ 4.0e9,
-                 3.12, 7.0,
+        /* pl= */ 0.59e-3,
+        /* E= */ 4.0e9,
+        3.12, 7.0,
     },
 
     /* Violin E string */
     {   /* T= */ 72.6,  /* l= */ 0.33, /* d= */ 0.31e-3,
-                 /* pl= */ 0.38e-3,
-                 /* E= */ 4.0e9,
-                 4.0, 7.0, // B1 "should be a big greater"
+        /* pl= */ 0.38e-3,
+        /* E= */ 4.0e9,
+        4.0, 7.0, // B1 "should be a big greater"
     },
 };
 
