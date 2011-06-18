@@ -4,6 +4,12 @@ import bpy
 import sys
 sys.path.append('.')
 
+if '--' not in sys.argv:
+	custom_argv = [] # as if no args are passed
+else:
+	custom_argv = sys.argv[sys.argv.index('--')+1: ] # get all args after "--"
+print (custom_argv)
+
 import violin
 import parse_actions
 

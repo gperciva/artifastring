@@ -71,5 +71,6 @@ def main():
     wavfile = monowav.MonoWav(outfilename)
     parseFile(lines, wavfile)
 
-main()
+if __name__ == "__main__":
+    main()
 

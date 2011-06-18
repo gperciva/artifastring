@@ -2,7 +2,7 @@
 BLENDER_BIN=blender
 
 # if you change this, you need to change the value in
-# setup-2.5.py as well.
+# artifastring-blender.py as well.
 # TODO: make the fps controllable on the command-line
 FPS=25
 
@@ -20,39 +20,39 @@ prep: unit.actions
 
 test: prep
 	$(BLENDER_BIN) -noaudio \
-		-b fast-violin.blend -P setup-2.5.py \
+		-b fast-violin.blend -P artifastring-blender.py \
 		-o $(TEMP_DIR)/#### \
 		-s 1 -e 2 -a > log-render.txt
 
 
 gui: prep
 	$(BLENDER_BIN) -noaudio \
-		fast-violin.blend -P setup-2.5.py
+		fast-violin.blend -P artifastring-blender.py
 
 show:
 	comix $(TEMP_DIR)/*
 
 low: prep
 	$(BLENDER_BIN) -noaudio \
-		-b fast-violin.blend -P setup-2.5.py \
+		-b fast-violin.blend -P artifastring-blender.py \
 		-o $(TEMP_DIR)/#### \
 		-a > log-render.txt
 
 
 quality-test: prep
 	$(BLENDER_BIN) -noaudio \
-		-b violin-and-bow.blend -P setup-2.5.py \
+		-b violin-and-bow.blend -P artifastring-blender.py \
 		-o $(TEMP_DIR)/#### \
 		-s 1 -e 2 -a > log-render.txt
 
 quality-gui: prep
 	$(BLENDER_BIN) -noaudio \
-		violin-and-bow.blend -P setup-2.5.py
+		violin-and-bow.blend -P artifastring-blender.py
 
 
 images: prep
 	$(BLENDER_BIN) -noaudio \
-		-b fast-violin.blend -P setup-2.5.py \
+		-b fast-violin.blend -P artifastring-blender.py \
 		-o $(TEMP_DIR)/#### \
 		-k \
 		-c_unit.actions \
@@ -60,7 +60,7 @@ images: prep
 
 quality-images: prep
 	$(BLENDER_BIN) -noaudio \
-		-b violin-and-bow.blend -P setup-2.5.py \
+		-b violin-and-bow.blend -P artifastring-blender.py \
 		-o $(TEMP_DIR)/#### \
 		-c_unit.actions \
 		-a > log-render.txt
