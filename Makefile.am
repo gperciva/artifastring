@@ -87,4 +87,25 @@ docs:
 	cd doc && $(DX_DOXYGEN) doxyfile
 endif
 
+if HAS_BLENDER
+BLENDER_PYTHON_MODULES = blender/abstract_object.py \
+	blender/artifastring-blender.py \
+	blender/bow.py \
+	blender/finger.py \
+	blender/parse_actions.py \
+	blender/pluck.py \
+	blender/render_quality.py \
+	blender/utils.py \
+	blender/violin.py
+
+dist_pkgdata_DATA = blender/fast-violin.blend blender/violin-and-bow.blend
+dist_pkgdata_DATA += $(BLENDER_PYTHON_MODULES)
+# WTF?!  I started using autotools because I thought it would take
+# care of this garbage for me.  :/
+blender/artifastring-animate.sh: blender/artifastring-render.sh
+	sed -e 's,$${prefix},${prefix},g' < $< > $@
+bin_SCRIPTS = blender/artifastring-animate.sh
+
+endif
+
 

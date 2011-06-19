@@ -6,7 +6,7 @@ AC_INIT([Artifastring], [1.6], [graham@percival-music.ca], [artifastring], [http
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([libtool-aux])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
+AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile blender/artifastring-render.sh])
 
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
@@ -17,7 +17,7 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 AC_ARG_ENABLE([debug],
-  [  --enable-debug          Turn on debugging],
+  [AS_HELP_STRING(--enable-debug,[Compile with debug support])],
   [case "${enableval}" in
     yes) debug=true ;;
     no)  debug=false ;;
@@ -44,5 +44,17 @@ AS_IF([test "x$with_swig" != xno],
 ### doc stuff
 DX_INIT_DOXYGEN(artifastring, doc/doxygen, [out-www/])
 AM_CONDITIONAL([HAS_DOXYGEN], [test "x$DX_DOXYGEN" != 'x'])
+
+### blender stuff
+AC_ARG_ENABLE([blender],
+  [AS_HELP_STRING(--enable-blender,[Install blender animation support.])],
+  [],
+  [blender="no"])
+AM_CONDITIONAL([HAS_BLENDER], [test "x$blender" != xno])
+AS_IF([test "x$blender" != xno],
+  [
+  AC_CHECK_PROG(BLENDER, blender, [yes],
+    [Blender 2.5+ is required to generate animations])
+  ], [])
 
 AC_OUTPUT
