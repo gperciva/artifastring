@@ -43,4 +43,3 @@ class Finger(abstract_object.AbstractObject):
         self.obj.location = loc
         self.obj.keyframe_insert("location", frame=frame)
 
-

@@ -8,19 +8,19 @@ import glob
 
 def get_options():
     parser = optparse.OptionParser(
-    	description="Combines a .wav and *.tga into a movie for Artifastring.")
+        description="Combines a .wav and *.tga into a movie for Artifastring.")
     parser.add_option("-o", "--output",
-    	default=None,
-    	help="Output filename")
+        default=None,
+        help="Output filename")
     parser.add_option("-i", "--images-dir",
-    	default="/tmp/artifastring-images/",
-    	help="Directory of images")
+        default="/tmp/artifastring-images/",
+        help="Directory of images")
     parser.add_option("--fps",
-    	metavar="N", default="25",
-    	help="Frames per second")
+        metavar="N", default="25",
+        help="Frames per second")
     parser.add_option("--h264",
         action="store_true",
-    	help="Generate avi with h264 instead of mpeg-2")
+        help="Generate avi with h264 instead of mpeg-2")
     (options, args) = parser.parse_args()
     try:
         options.audio_filename = args[0]

@@ -26,7 +26,7 @@ def get_options():
         help="Filename of .actions", required=True)
     parser.add_argument("-q", "--quality", type=int,
         metavar="N", default=0,
-       	help="Quality of rending: 0 (terrible) to 2 (best)")
+        help="Quality of rending: 0 (terrible) to 2 (best)")
 
     args = parser.parse_args(custom_argv)
     return args
