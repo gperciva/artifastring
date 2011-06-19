@@ -1,4 +1,5 @@
-AC_INIT([Artifastring], [1.6], [graham@percival-music.ca], [artifastring], [http://percival-music.ca/artifastring/])
+AC_INIT([Artifastring], [1.6], [graham@percival-music.ca], [artifastring],
+  [http://percival-music.ca/artifastring/])
 # override flags from AC_INIT, but keeps any flags the user sets
 : ${CXXFLAGS=""}
 
@@ -6,7 +7,7 @@ AC_INIT([Artifastring], [1.6], [graham@percival-music.ca], [artifastring], [http
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([libtool-aux])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile blender/artifastring-render.sh])
+AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
@@ -18,19 +19,16 @@ AC_PROG_LIBTOOL
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING(--enable-debug,[Compile with debug support])],
-  [case "${enableval}" in
-    yes) debug=true ;;
-    no)  debug=false ;;
-    *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;; esac],
-  [debug=false])
-AM_CONDITIONAL([HAS_DEBUG], [test x$debug = xtrue])
+  [],
+  [enable_debug="no"])
+AM_CONDITIONAL([HAS_DEBUG], [test "x$enable_debug" != xno])
 
 
 ### swig stuff
 AC_ARG_WITH(swig,
   [AS_HELP_STRING(--with-swig,[Python bindings with swig])],
   [],
-  with_swig="no")
+  [with_swig="no"])
 AM_CONDITIONAL([HAS_SWIG], [test "x$with_swig" != xno])
 AS_IF([test "x$with_swig" != xno],
   [
@@ -41,20 +39,23 @@ AS_IF([test "x$with_swig" != xno],
   AX_SWIG_PYTHON
   ], [])
 
+
 ### doc stuff
 DX_INIT_DOXYGEN(artifastring, doc/doxygen, [out-www/])
 AM_CONDITIONAL([HAS_DOXYGEN], [test "x$DX_DOXYGEN" != 'x'])
+
 
 ### blender stuff
 AC_ARG_ENABLE([blender],
   [AS_HELP_STRING(--enable-blender,[Install blender animation support.])],
   [],
-  [blender="no"])
-AM_CONDITIONAL([HAS_BLENDER], [test "x$blender" != xno])
-AS_IF([test "x$blender" != xno],
+  [enable_blender="no"])
+AM_CONDITIONAL([HAS_BLENDER], [test "x$enable_blender" != xno])
+AS_IF([test "x$enable_blender" != xno],
   [
   AC_CHECK_PROG(BLENDER, blender, [yes],
     [Blender 2.5+ is required to generate animations])
   ], [])
+
 
 AC_OUTPUT

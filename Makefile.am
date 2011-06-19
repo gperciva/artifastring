@@ -102,9 +102,10 @@ dist_pkgdata_DATA = blender/fast-violin.blend blender/violin-and-bow.blend
 dist_pkgdata_DATA += $(BLENDER_PYTHON_MODULES)
 # WTF?!  I started using autotools because I thought it would take
 # care of this garbage for me.  :/
-blender/artifastring-animate.sh: blender/artifastring-render.sh
-	sed -e 's,$${prefix},${prefix},g' < $< > $@
-bin_SCRIPTS = blender/artifastring-animate.sh
+blender/actions2images.py: $(srcdir)/blender/actions2images.in.py
+	mkdir -p blender/
+	sed -e 's,$${datarootdir},${datarootdir},g' < $< > $@
+bin_SCRIPTS = blender/actions2images.py
 
 endif
 
