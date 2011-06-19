@@ -5,18 +5,21 @@ def setup(quality, fps):
     render = bpy.context.scene.render
     render.fps = fps
 
-    #render.file_format = 'TARGA'
+    render.file_format = 'TARGA'
     render.parts_x = 1
     render.parts_y = 1
     # HDTV 720p resolution
     render.resolution_x = 1280
     render.resolution_y = 720
-    if quality:
+    if quality==2:
         render.resolution_percentage = 100
+    elif quality == 1:
+        render.resolution_percentage = 50
     else:
         # VGA resolution
         render.resolution_percentage = 40
-        #
+    # other options
+    if quality < 2:
         render.use_antialiasing = False
         render.use_color_management = False
         render.use_compositing = False

@@ -78,7 +78,7 @@ class Bow(abstract_object.AbstractObject):
 
         bow_loc = string_contact + origin_transpose
         bow_loc += bow_hair_extra_away
-        if bow_force == 0:
+        if bow_force < 0:
             bow_loc += 0.1*self.size * violin.away_from_string
 
         # set properties

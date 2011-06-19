@@ -31,8 +31,15 @@ def get_options():
     parser.add_option("-e", "--end",
     	metavar="N", default="0",
     	help="End frame (0 means end of file)")
+    parser.add_option("-q", "--quality",
+    	metavar="N", default="0",
+    	help="Quality of rending: 0 (terrible) to 2 (best)")
     (options, args) = parser.parse_args()
-    options.filename = args[0]
+    try:
+        options.audio_filename = args[0]
+    except IndexError:
+        print parser.print_help()
+        return None
     if not options.filename:
         print "Must have a filename"
         return None
@@ -50,21 +57,27 @@ def prepare_dir(dirname):
     return True
 
 BLENDER_COMMAND = """blender -noaudio \
-  -b ${datarootdir}/artifastring/fast-violin.blend \
+  -b %(blender_model)s \
   -P ${datarootdir}/artifastring/artifastring-blender.py \
   -o %(output_dir)s/#### \
   -s %(start)s %(end_flag)s -a \
   -- \
   -f %(filename)s \
+  --fps %(fps)s \
+  -q %(quality)s \
   > %(output_dir)s/render.log
   """
 
-def generate_movie(options):
+def generate_images(options):
     # workaround for behavior of blender -e option
     if options['end'] == '0':
         options['end_flag'] = ""
     else:
         options['end_flag'] = "-e %(end)s" % options
+    if options['quality'] == '0':
+        options['blender_model'] = "${datarootdir}/artifastring/fast-violin.blend"
+    else:
+        options['blender_model'] = "${datarootdir}/artifastring/violin-and-bow.blend"
     cmd = BLENDER_COMMAND % options
     #print cmd
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -75,7 +88,7 @@ if check_blender_version(2.56):
     if options:
         if prepare_dir(options['output_dir']):
             if os.path.exists(options['filename']):
-                generate_movie(options)
+                generate_images(options)
             else:
                 print "ERROR: filename does not exist!"
 

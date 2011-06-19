@@ -105,7 +105,8 @@ dist_pkgdata_DATA += $(BLENDER_PYTHON_MODULES)
 blender/actions2images.py: $(srcdir)/blender/actions2images.in.py
 	mkdir -p blender/
 	sed -e 's,$${datarootdir},${datarootdir},g' < $< > $@
-bin_SCRIPTS = blender/actions2images.py
+bin_SCRIPTS = blender/actions2images.py \
+	blender/artifastring-movie.py
 
 endif
 
