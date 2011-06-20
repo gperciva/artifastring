@@ -46,7 +46,6 @@ def get_options():
     except IndexError:
         print parser.print_help()
         return None
-    print options
     return options.__dict__
 
 def prepare_dir(options):
