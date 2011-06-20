@@ -15,6 +15,9 @@ def get_options():
     parser.add_option("-i", "--images-dir",
         default="/tmp/artifastring-images/",
         help="Directory of images")
+    parser.add_option("-l", "--logfile",
+        default="render.log",
+        help="Log filename (relative to output dir)")
     parser.add_option("--fps",
         metavar="N", default="25",
         help="Frames per second")
@@ -29,8 +32,6 @@ def get_options():
         parser.print_help()
         return None
     return options.__dict__
-
-options = get_options()
 
 MPEG = """mencoder \
     "mf://%(images_dir)s/*.tga" \
@@ -58,17 +59,26 @@ vcodec=mpeg4:mbd=1:vbitrate=2000 \
 -o %(output)s
 """
 
-if options['h264']:
-    if not options['output']:
-        options['output'] = "artifastring-movie.avi"
-    cmd = H264 % options
-else:
-    if not options['output']:
-        options['output'] = "artifastring-movie.mpeg"
-    cmd = MPEG % options
+def main():
+    options = get_options()
+    if not options:
+        exit()
 
-print options
-print cmd
-os.system(cmd)
+    if options['h264']:
+        if not options['output']:
+            options['output'] = "artifastring-movie.avi"
+        cmd = H264 % options
+    else:
+        if not options['output']:
+            options['output'] = "artifastring-movie.mpeg"
+        cmd = MPEG % options
 
+    log_filename = options['logfile']
+    logfile = open(log_filename, 'w')
+    #print cmd
+    p = subprocess.Popen(cmd, shell=True, stdout=logfile)
+    p.wait()
+    logfile.close()
+
+main()
 
