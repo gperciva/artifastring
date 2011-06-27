@@ -96,6 +96,7 @@ BLENDER_PYTHON_MODULES = blender/abstract_object.py \
 	blender/pluck.py \
 	blender/render_quality.py \
 	blender/utils.py \
+	blender/cameras.py \
 	blender/violin.py
 
 dist_pkgdata_DATA = blender/fast-violin.blend blender/violin-and-bow.blend

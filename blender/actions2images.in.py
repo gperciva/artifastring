@@ -28,6 +28,9 @@ def get_options():
     parser.add_option("--fps",
         metavar="N", default="25",
         help="Frames per second")
+    parser.add_option("--cycle-cameras",
+        metavar="X", default="0",
+        help="Change cameras every X seconds")
     parser.add_option("-s", "--start",
         metavar="N", default="1",
         help="Start frame")
@@ -66,6 +69,7 @@ BLENDER_COMMAND = """blender -noaudio \
   -- \
   -f %(actions_filename)s \
   --fps %(fps)s \
+  --cycle-cameras %(cycle_cameras)s \
   -q %(quality)s \
   """
 
@@ -87,8 +91,9 @@ def generate_images(options):
     p.wait()
     logfile.close()
 
+# process options first, so that we can view --help without blender
+options = get_options()
 if check_blender_version(2.56):
-    options = get_options()
     if options:
         if prepare_dir(options):
             if os.path.exists(options['actions_filename']):
