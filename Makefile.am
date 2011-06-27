@@ -54,9 +54,9 @@ actions2wav_LDADD = $(lib_LIBRARIES)
 
 ### swig
 # TODO: so far I'm unable to make this section nice.  :(
-if HAS_SWIG
 EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/violin_instrument.i
 
+if HAS_SWIG
 pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
 nodist_python_PYTHON = monowav.py violin_instrument.py
 
@@ -110,5 +110,6 @@ bin_SCRIPTS = blender/actions2images.py \
 	blender/artifastring-movie.py
 
 endif
-
+EXTRA_DIST += $(srcdir)/blender/actions2images.in.py
+EXTRA_DIST += $(srcdir)/blender/artifastring-movie.py
 

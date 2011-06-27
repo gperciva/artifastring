@@ -1,44 +1,22 @@
-Video can only be produced with blender 2.5 or higher.
+Images and video can only be produced with blender 2.5 or higher.
 
 
 BASIC TEST
 
-You can produce 3 images in /tmp/vivi-movie/  with:
-  make test
+You can produce images in /tmp/artifastring/images/  with:
+  actions2images.py testfile.actions
+
+For options, use
+  actions2images.py --help
 
 
 ENTIRE VIDEO
 
 To produce the entire video, use
-  make
-or (same thing)
-  make mpeg
-# TODO: h264 not upgraded for the blender 2.5 system yet
-#or (h264 output)
-#  make avi
+  actions2images.py testfile.actions
+  actions2wav testfile.actions
+  artifastring-movie.py testfile.wav
 
-
-LOW QUALITY
-
-Output currently defaults to low quality (by using our
-custom -k "flag" when calling blender).  To see a sample
-of high quality, run
-  make quality-test
-for an entire movie, run
-  make quality-avi
-
-
-ACTIONS FILES
-
-The Makefile is pretty much just an example.  It's based around
-unit.actions, which is probably not what you want to view.  In the
-main Vivi code base, this Makefile is never used; instead, we
-construct different command-lines and call them with python.
-
-I'll be thinking about providing a nicer way of handling alternate
-actions files... it kind-of depends if anybody wants to use this
-by itself, without Vivi to generate sensible .actions files.  I'll
-also accept patches that improve the Makefile and/or add it to
-scons and/or other better solutions.  :)
-
+For options, use
+  artifastring-movie.py --help
 
