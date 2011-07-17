@@ -53,29 +53,27 @@ actions2wav_CXXFLAGS = $(AM_CXXFLAGS) $(ARTIFASTRING_INCLUDE) $(MORE_WARNINGS_CX
 actions2wav_LDADD = $(lib_LIBRARIES)
 
 ### swig
-# TODO: so far I'm unable to make this section nice.  :(
 EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/violin_instrument.i
 
 if HAS_SWIG
+# unified definitions
+SWIGCPP = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) $(ARTIFASTRING_INCLUDE)
+SWIGLD = $(PYTHON_LDFLAGS) -module -lmonowav
+%_wrap.cxx %.py: $(srcdir)/swig/%.i
+	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
+
+# per-file definitions
 pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
 nodist_python_PYTHON = monowav.py violin_instrument.py
 
 nodist__monowav_la_SOURCES = monowav_wrap.cxx
-_monowav_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
-	$(ARTIFASTRING_INCLUDE)
-_monowav_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lmonowav
-monowav_wrap.cxx: $(srcdir)/swig/monowav.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
-monowav.py: $(srcdir)/swig/monowav.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
+_monowav_la_CPPFLAGS = $(SWIGCPP)
+_monowav_la_LDFLAGS = $(SWIGLD)
+
 nodist__violin_instrument_la_SOURCES = violin_instrument_wrap.cxx
-_violin_instrument_la_CPPFLAGS = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) \
-	$(ARTIFASTRING_INCLUDE)
-_violin_instrument_la_LDFLAGS = $(PYTHON_LDFLAGS) -module -lartifastring
-violin_instrument_wrap.cxx: $(srcdir)/swig/violin_instrument.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
-violin_instrument.py: $(srcdir)/swig/violin_instrument.i
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
+_violin_instrument_la_CPPFLAGS = $(SWIGCPP)
+_violin_instrument_la_LDFLAGS = $(SWIGLD)
+
 endif
 
 
