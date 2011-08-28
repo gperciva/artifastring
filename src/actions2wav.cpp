@@ -149,7 +149,6 @@ int main(int argc, char **argv) {
         if (argc > 2) {
             instrument_number = atoi(argv[2]);
         }
-        cout<<instrument_number<<endl;
 
         vector<string> input = gulp_file(filename.c_str());
         size_t suffix_position = filename.find(".actions");
