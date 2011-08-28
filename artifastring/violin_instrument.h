@@ -29,8 +29,9 @@ const double NO_CONVOLUTION_AMPLIFY = 20.0;
 #endif
 
 const int NUM_VIOLIN_STRINGS = 4;
-const int NORMAL_BUFFER_SIZE = 512;
-const int BRIDGE_BUFFER_SIZE = 1024; // string + impulse size
+// size optimization: allows for AND-based ring buffers
+const int NORMAL_BUFFER_SIZE = PC_KERNEL_SIZE;
+const int BRIDGE_BUFFER_SIZE = 2*NORMAL_BUFFER_SIZE;
 
 /// \brief Main class for violin synthesis  (if in doubt, use this one)
 class ViolinInstrument {
@@ -129,6 +130,7 @@ private:
 
     double f_hole[NORMAL_BUFFER_SIZE];
     void body_impulse(int num_samples);
+    const double *pc_kernel;
 
 };
 

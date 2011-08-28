@@ -40,6 +40,8 @@ ViolinInstrument::ViolinInstrument(int random_seed) {
     bridge_read_index = BRIDGE_BUFFER_SIZE-PC_KERNEL_SIZE+1;
 #endif
 
+    int instrument_number = random_seed % PC_KERNEL_NUMBER;
+    pc_kernel = pc_kernels[instrument_number];
 }
 
 ViolinInstrument::~ViolinInstrument() {

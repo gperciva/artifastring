@@ -108,8 +108,8 @@ void command_bow(ViolinInstrument *violin, MonoWav *wavfile, string command)
 }
 
 
-void play_file(vector<string> input, MonoWav *wavfile) {
-    ViolinInstrument *violin = new ViolinInstrument();
+void play_file(vector<string> input, MonoWav *wavfile, int instrument_number) {
+    ViolinInstrument *violin = new ViolinInstrument(instrument_number);
     total_samples = 0;
 
     for (unsigned int i=0; i<input.size(); i++) {
@@ -141,12 +141,17 @@ void play_file(vector<string> input, MonoWav *wavfile) {
 
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        printf("Usage: ./action2wav FILENAME.action\n");
+    if (argc < 2) {
+        printf("Usage: ./action2wav FILENAME.action {{INSTRUMENT_NUMBER}}\n");
     } else {
-        vector<string> input = gulp_file(argv[1]);
-
         string filename = argv[1];
+        int instrument_number = 0;
+        if (argc > 2) {
+            instrument_number = atoi(argv[2]);
+        }
+        cout<<instrument_number<<endl;
+
+        vector<string> input = gulp_file(filename.c_str());
         size_t suffix_position = filename.find(".actions");
         if (suffix_position == string::npos) {
             printf("File should end in .actions\n");
@@ -156,7 +161,7 @@ int main(int argc, char **argv) {
 
         MonoWav *wavfile = new MonoWav(filename.c_str(),10);
 
-        play_file(input, wavfile);
+        play_file(input, wavfile, instrument_number);
 
         delete wavfile;
     }
