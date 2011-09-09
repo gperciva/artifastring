@@ -58,7 +58,7 @@ EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/violin_instrument.i
 if HAS_SWIG
 # unified definitions
 SWIGCPP = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) $(ARTIFASTRING_INCLUDE)
-SWIGLD = $(PYTHON_LDFLAGS) -module -lmonowav
+SWIGLD = $(PYTHON_LDFLAGS) -module -lmonowav -lartifastring
 %_wrap.cxx %.py: $(srcdir)/swig/%.i
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 
