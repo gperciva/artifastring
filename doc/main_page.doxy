@@ -134,7 +134,7 @@ command.
 - bow: 4 extra parameters: string number, bow position, bow force,
   and bow velocity
   \code
-  p       3.0       3       0.12       0.6       0.4
+  b       3.0       3       0.12       0.6       0.4
   \endcode
 
 See files in the \c music/ directory for examples.
