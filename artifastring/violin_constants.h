@@ -29,7 +29,7 @@
 const double PLUCK_FORCE_SCALE = 1e0;
 const double BRIDGE_AMPLIFY = 1e-2;
 
-const int MODES = 56;
+const int MODES = 60;
 
 // optimization for "turning off" a string which is barely vibrating.
 const double SUM_BELOW = 1e-6;
@@ -70,8 +70,10 @@ typedef struct {
     double d;  /**< \brief Diameter         (m) */
     double pl; /**< \brief Linear Density   (kg/m) */
     double E;  /**< \brief Young's elastic modulus */
+    // FIXME: remove B1 and B2
     double B1; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
     double B2; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
+    double modes[MODES];
 } String_Physical;
 
 const String_Physical string_params[] = {
@@ -80,6 +82,7 @@ const String_Physical string_params[] = {
         /* pl= */ 2.66e-3,
         /* E= */ 4.0e9,
         2.0, 7.0, // extra resonance
+        #include "violin_g_modes.h"
     },
 
     /* Violin D string */
@@ -87,6 +90,7 @@ const String_Physical string_params[] = {
         /* pl= */ 0.92e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
+        #include "violin_d_modes.h"
     },
 
     /* Violin A string */
@@ -94,6 +98,7 @@ const String_Physical string_params[] = {
         /* pl= */ 0.59e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
+        #include "violin_a_modes.h"
     },
 
     /* Violin E string */
@@ -101,6 +106,7 @@ const String_Physical string_params[] = {
         /* pl= */ 0.38e-3,
         /* E= */ 4.0e9,
         4.0, 7.0, // B1 "should be a big greater"
+        #include "violin_e_modes.h"
     },
 };
 
