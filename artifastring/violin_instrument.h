@@ -38,10 +38,13 @@ class ViolinInstrument {
 public:
     /**
      * \brief Constructor
-     * @param[in] random_seed Initializes the randomness (for added
-     * noise in the model).
+     * @param[in] instrument_number Selects instrument (see
+     * documentation); values above the maximum instrument are
+     * reduced with modulus (to select the instrument) but will
+     * still initialize the randomness (for added noise in the
+     * string model).
      */
-    ViolinInstrument(int random_seed=0);
+    ViolinInstrument(int instrument_number=0);
     /// \brief Destructor; nothing special
     ~ViolinInstrument();
     /// \brief Stops all movement

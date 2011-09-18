@@ -39,7 +39,7 @@ const double EACH_MODAL_VELOCITY_BELOW = 1e-4;
 /**
  * \brief enumeration type to access string physical constants
  */
-enum String_Type_t {vl_G, vl_D, vl_A, vl_E};
+enum String_Type_t {vl_G, vl_D, vl_A, vl_E, cl_C, cl_G, cl_D, cl_A};
 
 // friction constants
 const double mu_s = 0.8;
@@ -108,6 +108,42 @@ const String_Physical string_params[] = {
         4.0, 7.0, // B1 "should be a big greater"
         #include "violin_e_modes.h"
     },
+// TODO: insert viola here?
+
+// FIXME: only vague tuned "by ear" with pizzicato
+// FIXME: complete guesses for linear density
+    /* Cello C string */
+    {   /* T= */ 31.0,  /* l= */ 0.682, /* d= */ 1.68e-3,
+        /* pl= */ 4.0e-3,
+        /* E= */ 4.0e9,
+        4.0, 7.0,
+        #include "cello_c_modes.h"
+    },
+
+    /* Cello G string */
+    {   /* T= */ 71.0,  /* l= */ 0.682, /* d= */ 1.12e-3,
+        /* pl= */ 4.0e-3,
+        /* E= */ 4.0e9,
+        2.0, 7.0,
+        #include "cello_g_modes.h"
+    },
+
+    /* Cello D string */
+    {   /* T= */ 121.0,  /* l= */ 0.682, /* d= */ 0.98e-3,
+        /* pl= */ 3.02e-3,
+        /* E= */ 4.0e9,
+        3.12, 7.0,
+        #include "cello_d_modes.h"
+    },
+
+    /* Cello A string */
+    {   /* T= */ 224.0,  /* l= */ 0.682, /* d= */ 0.65e-3,
+        /* pl= */ 2.5e-3,
+        /* E= */ 4.0e9,
+        3.12, 7.0,
+        #include "cello_a_modes.h"
+    },
+
 };
 
 

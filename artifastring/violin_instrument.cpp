@@ -23,11 +23,35 @@
 #include <limits.h>
 #include <cstddef>
 
-ViolinInstrument::ViolinInstrument(int random_seed) {
-    violinString[3] = new ViolinString(vl_E, NUM_VIOLIN_STRINGS*random_seed+0);
-    violinString[2] = new ViolinString(vl_A, NUM_VIOLIN_STRINGS*random_seed+1);
-    violinString[1] = new ViolinString(vl_D, NUM_VIOLIN_STRINGS*random_seed+2);
-    violinString[0] = new ViolinString(vl_G, NUM_VIOLIN_STRINGS*random_seed+3);
+ViolinInstrument::ViolinInstrument(int instrument_number) {
+    int actual_instrument_number = instrument_number % PC_KERNEL_NUMBER;
+    if (actual_instrument_number == 4) {
+        // viola
+    } else {
+        if (actual_instrument_number == 5) {
+            // cello
+            violinString[0] = new ViolinString(cl_C,
+                                               NUM_VIOLIN_STRINGS*instrument_number+0);
+            violinString[1] = new ViolinString(cl_G,
+                                               NUM_VIOLIN_STRINGS*instrument_number+1);
+            violinString[2] = new ViolinString(cl_D,
+                                               NUM_VIOLIN_STRINGS*instrument_number+2);
+            violinString[3] = new ViolinString(cl_A,
+                                               NUM_VIOLIN_STRINGS*instrument_number+3);
+        } else {
+            // violin
+            violinString[0] = new ViolinString(vl_G,
+                                               NUM_VIOLIN_STRINGS*instrument_number+0);
+            violinString[1] = new ViolinString(vl_D,
+                                               NUM_VIOLIN_STRINGS*instrument_number+1);
+            violinString[2] = new ViolinString(vl_A,
+                                               NUM_VIOLIN_STRINGS*instrument_number+2);
+            violinString[3] = new ViolinString(vl_E,
+                                               NUM_VIOLIN_STRINGS*instrument_number+3);
+        }
+    }
+
+    pc_kernel = pc_kernels[actual_instrument_number];
 
     for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;
@@ -39,9 +63,6 @@ ViolinInstrument::ViolinInstrument(int random_seed) {
 #else
     bridge_read_index = BRIDGE_BUFFER_SIZE-PC_KERNEL_SIZE+1;
 #endif
-
-    int instrument_number = random_seed % PC_KERNEL_NUMBER;
-    pc_kernel = pc_kernels[instrument_number];
 }
 
 ViolinInstrument::~ViolinInstrument() {
