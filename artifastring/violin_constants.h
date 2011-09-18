@@ -78,7 +78,7 @@ typedef struct {
 
 const String_Physical string_params[] = {
     /* Violin G string */
-    {   /* T= */ 44.6,  /* l= */ 0.33, /* d= */ 0.8e-3,
+    {   /* T= */ 44.6,  /* l= */ 0.325, /* d= */ 0.79e-3,
         /* pl= */ 2.66e-3,
         /* E= */ 4.0e9,
         2.0, 7.0, // extra resonance
@@ -86,7 +86,7 @@ const String_Physical string_params[] = {
     },
 
     /* Violin D string */
-    {   /* T= */ 34.8,  /* l= */ 0.33, /* d= */ 0.8e-3,
+    {   /* T= */ 34.8,  /* l= */ 0.325, /* d= */ 0.63e-3,
         /* pl= */ 0.92e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
@@ -94,7 +94,7 @@ const String_Physical string_params[] = {
     },
 
     /* Violin A string */
-    {   /* T= */ 50.0,  /* l= */ 0.33, /* d= */ 0.56e-3,
+    {   /* T= */ 50.0,  /* l= */ 0.325, /* d= */ 0.52e-3,
         /* pl= */ 0.59e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
@@ -102,7 +102,7 @@ const String_Physical string_params[] = {
     },
 
     /* Violin E string */
-    {   /* T= */ 72.6,  /* l= */ 0.33, /* d= */ 0.31e-3,
+    {   /* T= */ 72.6,  /* l= */ 0.325, /* d= */ 0.30e-3,
         /* pl= */ 0.38e-3,
         /* E= */ 4.0e9,
         4.0, 7.0, // B1 "should be a big greater"
