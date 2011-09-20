@@ -23,6 +23,14 @@ distclean-local:
 
 ### libraries
 artifastring_h = artifastring/violin_constants.h \
+	artifastring/violin_e_modes.h \
+	artifastring/violin_a_modes.h \
+	artifastring/violin_d_modes.h \
+	artifastring/violin_g_modes.h \
+	artifastring/cello_a_modes.h \
+	artifastring/cello_d_modes.h \
+	artifastring/cello_g_modes.h \
+	artifastring/cello_c_modes.h \
 	artifastring/violin_body_impulse.h \
 	artifastring/violin_string.h \
 	artifastring/violin_instrument.h
