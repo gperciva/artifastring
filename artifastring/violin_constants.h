@@ -105,7 +105,7 @@ const String_Physical string_params[] = {
     {   /* T= */ 72.6,  /* l= */ 0.325, /* d= */ 0.30e-3,
         /* pl= */ 0.38e-3,
         /* E= */ 4.0e9,
-        4.0, 7.0, // B1 "should be a big greater"
+        5.0, 8.0, // B1 "should be a big greater"
         #include "violin_e_modes.h"
     },
 // TODO: insert viola here?
