@@ -26,6 +26,7 @@ import curses
 import numpy
 
 import pyaudio
+import aubio.aubiowrapper
 
 class InteractiveViolin():
     violin = violin_instrument.ViolinInstrument(0)
@@ -122,14 +123,27 @@ class InteractiveViolin():
         self.row += 1
         if self.row > 20:
             self.row = 5
+        self.stdscr.addstr(self.row, 0, str(" "*40))
+        self.stdscr.move(self.row, 0)
         return True
     
     
     def main_loop(self):
-        buf = monowav.shortArray(256)
-        arr = numpy.zeros(256)
+        hopsize = 256
+        windowsize = 1024
+        pitch_results_buffer = numpy.zeros(10)
+        pitch_results_index = 0
+
+        buf = monowav.shortArray(hopsize)
+        arr = numpy.zeros(hopsize)
     
-    
+        pitch_obj = aubio.aubiowrapper.new_aubio_pitchdetection(
+            windowsize, hopsize, 1, 44100,
+            aubio.aubiowrapper.aubio_pitch_yinfft,
+            aubio.aubiowrapper.aubio_pitchm_freq,
+            )
+        fvec = aubio.aubiowrapper.new_fvec(hopsize, 1)
+ 
         while True:
             c = self.stdscr.getch()
             if c != -1:
@@ -144,8 +158,18 @@ class InteractiveViolin():
     
             for i in range(256):
                 arr[i] = buf[i]
+                aubio.aubiowrapper.fvec_write_sample(
+                    fvec, buf[i], 0, i)
             self.audio_stream.write( arr.astype(numpy.int16).tostring() )
-    
+
+            pitch = aubio.aubiowrapper.aubio_pitchdetection(
+                pitch_obj, fvec)
+            pitch_results_buffer[pitch_results_index] = pitch
+            pitch_results_index += 1
+            if pitch_results_index >= 10:
+                pitch_results_index = 0
+            pitch_mean = numpy.mean(pitch_results_buffer)
+            self.stdscr.addstr(23, 50, str("%.1f" % pitch_mean))
     
 
 def main(stdscr):
