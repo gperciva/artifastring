@@ -24,26 +24,34 @@ import violin_instrument
 import monowav
 import curses
 import numpy
+import math
 
 import pyaudio
 import aubio.aubiowrapper
 
 class InteractiveViolin():
-    violin = violin_instrument.ViolinInstrument(0)
+    violin = None
     audio_stream = None
 
     violin_string = 0
     finger_position = 0.0
-    bow_position = 0.12
+    bow_position = 0.08
     force = 1.0
     velocity = 0.4
 
     stdscr = None
     row = 5
+    instrument_number = 0
 
-    def __init__(self, stdscr, audio_stream):
+    cats = [0]*7
+
+    def __init__(self, instrument_number, stdscr, audio_stream):
+        self.instrument_number = instrument_number
         self.stdscr = stdscr
         self.audio_stream = audio_stream
+
+        self.violin = violin_instrument.ViolinInstrument(
+            self.instrument_number)
         self.stdscr.nodelay(1)
         self.print_help()
 
@@ -61,11 +69,14 @@ class InteractiveViolin():
             "h: force--",
         ], [
             "u: velocity++",
-            "j: velocity--"
+            "j: velocity--",
+        ], [
+            "z,x: tension+",
+            "c,v: tension-",
         ]]
-        for self.row, line in enumerate(helpstr):
+        for row, line in enumerate(helpstr):
             for i, text in enumerate(line):
-                self.stdscr.addstr(self.row, 16*i, text)
+                self.stdscr.addstr(row, 16*i, text)
 
     def keypress(self, c):
         if c == 'q':
@@ -113,10 +124,34 @@ class InteractiveViolin():
         if c == 'j':
             self.velocity /= 1.1
 
+        skip_violin_print = False
+        if c == 'z' or c == 'x' or c == 'c' or c == 'v':
+            if c == 'z':
+                alter = 1.0/1.1
+            if c == 'x':
+                alter = 1.0/1.01
+            if c == 'c':
+                alter = 1.01
+            if c == 'v':
+                alter = 1.1
+
+            pc = self.violin.get_physical_constants(
+                self.violin_string)
+            pc.T *= alter
+            self.violin.set_physical_constants(
+                self.violin_string, pc)
+            self.stdscr.addstr(self.row, 0, str("T=%.3f" % pc.T))
+            skip_violin_print = True
+        if c >= '1' and c <= '7':
+            skip_violin_print = True
+            self.snapshot(int(c))
+            self.stdscr.addstr(self.row, 0, str("file written"))
+
         if c == ord('b'):
             self.force /= 1.1
-        self.stdscr.addstr(self.row, 0, str(
-            "%i\t%.3f\t%.3f\t%.3f\t%.3f" % (
+        if not skip_violin_print:
+            self.stdscr.addstr(self.row, 0, str(
+                "%i\t%.3f\t%.3f\t%.3f\t%.3f" % (
                 self.violin_string, self.finger_position,
                 self.bow_position, self.force, self.velocity)))
         # next line
@@ -126,11 +161,33 @@ class InteractiveViolin():
         self.stdscr.addstr(self.row, 0, str(" "*40))
         self.stdscr.move(self.row, 0)
         return True
-    
-    
+
+    def snapshot(self, cat):
+        prev_num = self.cats[cat-1]
+        num = prev_num + 1
+        self.cats[cat-1] += 1
+
+        finger_midi = 12.0*math.log(1.0 /
+            (1.0 - self.finger_position)) / math.log(2.0)
+        filename = "audio_%i_%.3f_%.3f_%.3f_%.3f_%i.wav" % (
+            self.violin_string,
+            finger_midi,
+            self.bow_position,
+            self.force,
+            self.velocity,
+            num)
+        wavfile = monowav.MonoWav(filename)
+        num_samples = int(0.2 * 44100)
+        buf = wavfile.request_fill( num_samples )
+        self.violin.wait_samples(buf, num_samples)
+
+        mf_file = open('collection.mf', 'a')
+        mf_file.write(str("%s\t%.1f\n" % (filename, cat)) )
+        mf_file.close()
+
     def main_loop(self):
         hopsize = 256
-        windowsize = 1024
+        windowsize = 2048
         pitch_results_buffer = numpy.zeros(10)
         pitch_results_index = 0
 
@@ -173,6 +230,11 @@ class InteractiveViolin():
     
 
 def main(stdscr):
+    try:
+        instrument_number = int(sys.argv[1])
+    except:
+        instrument_number = 0
+
     p = pyaudio.PyAudio()
     audio_stream = p.open(
         rate = 44100,
@@ -181,7 +243,7 @@ def main(stdscr):
         output = True
     )
 
-    vln = InteractiveViolin(stdscr, audio_stream)
+    vln = InteractiveViolin(instrument_number, stdscr, audio_stream)
     vln.main_loop()
 
     audio_stream.close()
