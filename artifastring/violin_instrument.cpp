@@ -27,26 +27,34 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     int actual_instrument_number = instrument_number % PC_KERNEL_NUMBER;
     if (actual_instrument_number == 4) {
         // viola
+        violinString[0] = new ViolinString(viola_C,
+                                           NUM_VIOLIN_STRINGS*instrument_number+0);
+        violinString[1] = new ViolinString(viola_G,
+                                           NUM_VIOLIN_STRINGS*instrument_number+1);
+        violinString[2] = new ViolinString(viola_D,
+                                           NUM_VIOLIN_STRINGS*instrument_number+2);
+        violinString[3] = new ViolinString(viola_A,
+                                           NUM_VIOLIN_STRINGS*instrument_number+3);
     } else {
         if (actual_instrument_number == 5) {
             // cello
-            violinString[0] = new ViolinString(cl_C,
+            violinString[0] = new ViolinString(cello_C,
                                                NUM_VIOLIN_STRINGS*instrument_number+0);
-            violinString[1] = new ViolinString(cl_G,
+            violinString[1] = new ViolinString(cello_G,
                                                NUM_VIOLIN_STRINGS*instrument_number+1);
-            violinString[2] = new ViolinString(cl_D,
+            violinString[2] = new ViolinString(cello_D,
                                                NUM_VIOLIN_STRINGS*instrument_number+2);
-            violinString[3] = new ViolinString(cl_A,
+            violinString[3] = new ViolinString(cello_A,
                                                NUM_VIOLIN_STRINGS*instrument_number+3);
         } else {
             // violin
-            violinString[0] = new ViolinString(vl_G,
+            violinString[0] = new ViolinString(violin_G,
                                                NUM_VIOLIN_STRINGS*instrument_number+0);
-            violinString[1] = new ViolinString(vl_D,
+            violinString[1] = new ViolinString(violin_D,
                                                NUM_VIOLIN_STRINGS*instrument_number+1);
-            violinString[2] = new ViolinString(vl_A,
+            violinString[2] = new ViolinString(violin_A,
                                                NUM_VIOLIN_STRINGS*instrument_number+2);
-            violinString[3] = new ViolinString(vl_E,
+            violinString[3] = new ViolinString(violin_E,
                                                NUM_VIOLIN_STRINGS*instrument_number+3);
         }
     }
@@ -66,10 +74,9 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
 }
 
 ViolinInstrument::~ViolinInstrument() {
-    delete violinString[vl_E];
-    delete violinString[vl_A];
-    delete violinString[vl_D];
-    delete violinString[vl_G];
+    for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
+        delete violinString[st];
+    }
 }
 
 void ViolinInstrument::reset() {
