@@ -106,11 +106,13 @@ class InteractiveViolin():
                 self.finger_position = 0.02
             else:
                 self.finger_position *= 1.1
+            self.violin.finger(self.violin_string, self.finger_position)
         if c == 'd':
             if self.finger_position < 0.02:
-                self.finger_position = 0.02
+                self.finger_position = 0.00
             else:
                 self.finger_position /= 1.1
+            self.violin.finger(self.violin_string, self.finger_position)
         if c == 't':
             self.bow_position *= 1.01
         if c == 'g':
@@ -186,13 +188,11 @@ class InteractiveViolin():
         mf_file.close()
 
     def main_loop(self):
-        hopsize = 256
+        hopsize = 512
         windowsize = 2048
-        pitch_results_buffer = numpy.zeros(10)
-        pitch_results_index = 0
 
         buf = monowav.shortArray(hopsize)
-        arr = numpy.zeros(hopsize)
+        arr = numpy.zeros(hopsize, dtype=numpy.int16)
     
         pitch_obj = aubio.aubiowrapper.new_aubio_pitchdetection(
             windowsize, hopsize, 1, 44100,
@@ -200,33 +200,32 @@ class InteractiveViolin():
             aubio.aubiowrapper.aubio_pitchm_freq,
             )
         fvec = aubio.aubiowrapper.new_fvec(hopsize, 1)
+        show_pitch = 0
  
+        self.violin.bow(self.violin_string, self.bow_position,
+            self.force, self.velocity)
         while True:
             c = self.stdscr.getch()
             if c != -1:
-    #            stdscr.addstr(self.row, 0, str(c))
                 if not self.keypress( chr(c) ):
                     break
+                self.violin.bow(self.violin_string, self.bow_position,
+                    self.force, self.velocity)
     
-            self.violin.finger(self.violin_string, self.finger_position)
-            self.violin.bow(self.violin_string, self.bow_position,
-                self.force, self.velocity)
-            self.violin.wait_samples(buf, 256)
+            self.violin.wait_samples(buf, hopsize)
     
-            for i in range(256):
+            for i in xrange(hopsize):
                 arr[i] = buf[i]
                 aubio.aubiowrapper.fvec_write_sample(
                     fvec, buf[i], 0, i)
-            self.audio_stream.write( arr.astype(numpy.int16).tostring() )
+            self.audio_stream.write( arr.tostring() )
 
             pitch = aubio.aubiowrapper.aubio_pitchdetection(
                 pitch_obj, fvec)
-            pitch_results_buffer[pitch_results_index] = pitch
-            pitch_results_index += 1
-            if pitch_results_index >= 10:
-                pitch_results_index = 0
-            pitch_mean = numpy.mean(pitch_results_buffer)
-            self.stdscr.addstr(23, 50, str("%.1f" % pitch_mean))
+            show_pitch -= 1
+            if show_pitch <= 0:
+                self.stdscr.addstr(23, 50, str("%.1f" % pitch))
+                show_pitch = 20
     
 
 def main(stdscr):
