@@ -49,7 +49,7 @@ vector<string> gulp_file(const char *filename) {
     return input;
 }
 
-inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, double until)
+inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, float until)
 {
     int delta = until*44100.0 - total_samples;
     if (delta > 0) {
@@ -59,7 +59,7 @@ inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, double until)
     } else {
         if (delta < 0) {
             printf("ERROR: going back in time!\n");
-            printf("  now: %lf, requested: %lf\n",
+            printf("  now: %f, requested: %f\n",
                    total_samples/44100.0, until);
             exit(1);
         }
@@ -68,10 +68,10 @@ inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, double until)
 
 void command_finger(ViolinInstrument *violin, MonoWav *wavfile, string command)
 {
-    double next_time;
+    float next_time;
     int which_string;
-    double finger_position;
-    sscanf(command.c_str(), "f\t%lf\t%i\t%lf",
+    float finger_position;
+    sscanf(command.c_str(), "f\t%f\t%i\t%f",
            &next_time, &which_string, &finger_position);
     waitUntil(violin, wavfile, next_time);
     violin->finger(which_string, finger_position);
@@ -79,18 +79,18 @@ void command_finger(ViolinInstrument *violin, MonoWav *wavfile, string command)
 
 void command_wait(ViolinInstrument *violin, MonoWav *wavfile, string command)
 {
-    double next_time;
-    sscanf(command.c_str(), "w\t%lf", &next_time);
+    float next_time;
+    sscanf(command.c_str(), "w\t%f", &next_time);
     waitUntil(violin, wavfile, next_time);
 }
 
 void command_pluck(ViolinInstrument *violin, MonoWav *wavfile, string command)
 {
-    double next_time;
+    float next_time;
     int which_string;
-    double pluck_position;
-    double pluck_force;
-    sscanf(command.c_str(), "p\t%lf\t%i\t%lf\t%lf", &next_time,
+    float pluck_position;
+    float pluck_force;
+    sscanf(command.c_str(), "p\t%f\t%i\t%f\t%f", &next_time,
            &which_string, &pluck_position, &pluck_force);
     waitUntil(violin, wavfile, next_time);
     violin->pluck(which_string, pluck_position, pluck_force);
@@ -98,10 +98,10 @@ void command_pluck(ViolinInstrument *violin, MonoWav *wavfile, string command)
 
 void command_bow(ViolinInstrument *violin, MonoWav *wavfile, string command)
 {
-    double next_time;
+    float next_time;
     int which_string;
-    double bow_position, force, velocity;
-    sscanf(command.c_str(), "b\t%lf\t%i\t%lf\t%lf\t%lf", &next_time,
+    float bow_position, force, velocity;
+    sscanf(command.c_str(), "b\t%f\t%i\t%f\t%f\t%f", &next_time,
            &which_string, &bow_position, &force, &velocity);
     waitUntil(violin, wavfile, next_time);
     violin->bow(which_string, bow_position, force, velocity);

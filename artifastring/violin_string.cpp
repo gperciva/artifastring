@@ -25,7 +25,7 @@
 #include <stdio.h>
 #endif
 
-const double FLOAT_EQUALITY_ABSOLUTE_ERROR = 1e-6;
+const float FLOAT_EQUALITY_ABSOLUTE_ERROR = 1e-6;
 
 ViolinString::ViolinString(String_Type_t which_string, int random_seed)
 {
@@ -73,17 +73,17 @@ void ViolinString::reset()
     }
 }
 
-inline void ViolinString::calculate_eigens(double eigens[],
-        const double position)
+inline void ViolinString::calculate_eigens(float eigens[],
+        const float position)
 {
     // optimization from
     // http://groovit.disjunkt.com/analog/time-domain/fasttrig.html
     // except that w=b
-    double y[2];
-    const double x = M_PI*position;
+    float y[2];
+    const float x = M_PI*position;
     y[0] = sin(x);
     y[1] = 0.0;
-    const double p = 2.0 * cos(x);
+    const float p = 2.0 * cos(x);
     int latest = 0;
     for (int n = 1; n <= MODES; ++n) {
         y[latest] = p*y[!latest] - y[latest];
@@ -92,9 +92,9 @@ inline void ViolinString::calculate_eigens(double eigens[],
     }
 }
 
-void ViolinString::finger(const double ratio_from_nut)
+void ViolinString::finger(const float ratio_from_nut)
 {
-    const double ratio_from_bridge = 1.0 - ratio_from_nut;
+    const float ratio_from_bridge = 1.0 - ratio_from_nut;
     if (! (almostEquals(vpa_finger_x1, ratio_from_bridge)) ) {
         vpa_finger_x1 = ratio_from_bridge;
         recache_vpa_c = true;
@@ -103,8 +103,8 @@ void ViolinString::finger(const double ratio_from_nut)
     }
 }
 
-void ViolinString::pluck(const double ratio_from_bridge,
-                         const double pluck_force)
+void ViolinString::pluck(const float ratio_from_bridge,
+                         const float pluck_force)
 {
     vpa_pluck_force = pluck_force * PLUCK_FORCE_SCALE;
     m_active = true;
@@ -117,8 +117,8 @@ void ViolinString::pluck(const double ratio_from_bridge,
 }
 
 
-void ViolinString::bow(const double bow_ratio_from_bridge,
-                       const double bow_force, const double bow_velocity)
+void ViolinString::bow(const float bow_ratio_from_bridge,
+                       const float bow_force, const float bow_velocity)
 {
     m_active = true;
     vpa_bow_force = bow_force;
@@ -148,26 +148,26 @@ void ViolinString::cache_pc_c()
 {
     pc_c_sqrt_two_div_l = sqrt(2.0 / pc.L);
 
-    const double div_pc_pl = 1.0 / pc.pl;
-    const double pi_div_l = M_PI / pc.L;
+    const float div_pc_pl = 1.0 / pc.pl;
+    const float pi_div_l = M_PI / pc.L;
     // text after eqn (2.5)
-    const double I = M_PI * pc.d*pc.d*pc.d*pc.d / 64.0;
+    const float I = M_PI * pc.d*pc.d*pc.d*pc.d / 64.0;
     for (int n = 1; n <= MODES; ++n) {
         // text after eqn (2.5)
-        const double n_pi_div_L = n*pi_div_l;
-        const double w0n = sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
+        const float n_pi_div_L = n*pi_div_l;
+        const float w0n = sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
                                  + ((pc.E * I * div_pc_pl)
                                     * n_pi_div_L*n_pi_div_L
                                     * n_pi_div_L*n_pi_div_L ));
 
         // text on p. 78
-        const double r_n = pc.B1 + pc.B2*(n-1)*(n-1);
-        //const double r_n = pc.modes[n-1];
+        const float r_n = pc.B1 + pc.B2*(n-1)*(n-1);
+        //const float r_n = pc.modes[n-1];
 
         // Other abbreviations
-        const double w_n         = sqrt(w0n*w0n - r_n*r_n);
-        const double theta_n     = w_n*dt;
-        const double R_n         = exp(-r_n*dt);
+        const float w_n         = sqrt(w0n*w0n - r_n*r_n);
+        const float theta_n     = w_n*dt;
+        const float R_n         = exp(-r_n*dt);
 
         // Coefficients for calculation of new a
         X1[n-1] = (cos(theta_n) + (r_n/w_n)*sin(theta_n)) * R_n;
@@ -197,12 +197,12 @@ void ViolinString::cache_vpa_c()
         cache_pc_c();
     }
 
-    double A01 = 0.0;
-    double A11 = 0.0;
+    float A01 = 0.0;
+    float A11 = 0.0;
     for (int n = 1; n <= MODES; ++n) {
-        const double phix0 = vpa_c_bow_eigens[n-1];
-        const double phix1 = vpa_c_finger_eigens[n-1];
-        const double X3n = X3[n-1];
+        const float phix0 = vpa_c_bow_eigens[n-1];
+        const float phix1 = vpa_c_finger_eigens[n-1];
+        const float X3n = X3[n-1];
         A01 += phix1 * phix0 * X3n;
         A11 += phix1 * phix1 * X3n;
     }
@@ -211,12 +211,12 @@ void ViolinString::cache_vpa_c()
     vpa_c_C11 = -1.0 / A11;  // infinitely stiff spring
     vpa_c_C12 = A01 * vpa_c_C11;
 
-    double B00 = 0.0;
-    double B01 = 0.0;
+    float B00 = 0.0;
+    float B01 = 0.0;
     for (int n = 1; n <= MODES; ++n) {
-        const double phix0 = vpa_c_bow_eigens[n-1];
-        const double phix1 = vpa_c_finger_eigens[n-1];
-        const double Y3n = Y3[n-1];
+        const float phix0 = vpa_c_bow_eigens[n-1];
+        const float phix1 = vpa_c_finger_eigens[n-1];
+        const float Y3n = Y3[n-1];
         B00 += phix0 * phix0 * Y3n;
         B01 += phix0 * phix1 * Y3n;
     }
@@ -228,7 +228,7 @@ void ViolinString::cache_vpa_c()
 }
 
 
-inline double ViolinString::tick()
+inline float ViolinString::tick()
 {
     if (!m_active) {
         return 0.0;
@@ -256,7 +256,7 @@ inline double ViolinString::tick()
 
     apply_forces();
 
-    const double bridge_force = compute_bridge_force();
+    const float bridge_force = compute_bridge_force();
 
 #ifdef DEBUG
     printf("%g\t%i\t%g\t%g\t%g\t%g\t%g\n", time_seconds, !m_bow_slipping,
@@ -271,7 +271,7 @@ inline double ViolinString::tick()
     return bridge_force;
 }
 
-inline void ViolinString::check_active(double bridge_force)
+inline void ViolinString::check_active(float bridge_force)
 {
     if (fabs(bridge_force) < SUM_BELOW) {
         bool should_stop = true;
@@ -287,7 +287,7 @@ inline void ViolinString::check_active(double bridge_force)
     }
 }
 
-void ViolinString::fill_buffer(double* buffer, const int num_samples)
+void ViolinString::fill_buffer(float* buffer, const int num_samples)
 {
     for (int i=0; i<num_samples; i++) {
         buffer[i] = tick();
@@ -319,16 +319,16 @@ inline void ViolinString::compute_hist_bow()
 }
 
 // a pluck is just a bow that disappears once it slips
-inline double ViolinString::compute_pluck( )
+inline float ViolinString::compute_pluck( )
 {
-    const double F0 = vpa_c_C01*(PLUCK_VELOCITY - m_y0dot_h) + vpa_c_C02*m_y1_h;
+    const float F0 = vpa_c_C01*(PLUCK_VELOCITY - m_y0dot_h) + vpa_c_C02*m_y1_h;
     if ( fabs(F0) > MU_PLUCK*vpa_pluck_force ) {
         vpa_pluck_force = 0.0;
     }
     return F0;
 }
 
-inline double ViolinString::compute_bow()
+inline float ViolinString::compute_bow()
 {
     // vpa_bow_force is not 0.0
 
@@ -342,7 +342,7 @@ inline double ViolinString::compute_bow()
 
         // Has the maximum static force been exceeded yet?
         // eqn (2.31)
-        const double F0 = vpa_c_C01*( vpa_bow_velocity - m_y0dot_h)
+        const float F0 = vpa_c_C01*( vpa_bow_velocity - m_y0dot_h)
                           + vpa_c_C02*m_y1_h;
         // text after (2.31)
         if ( fabs(F0) > mu_s*vpa_bow_force ) {
@@ -353,11 +353,11 @@ inline double ViolinString::compute_bow()
         // is currently slipping
 
         // add random noise
-        const double ut = rand() / (double)RAND_MAX;
-        const double N = 1.0 - A_noise * ut;
+        const float ut = rand() / (float)RAND_MAX;
+        const float N = 1.0 - A_noise * ut;
 
-        double v_c;
-        double f_c;
+        float v_c;
+        float f_c;
         if (vpa_bow_velocity != 0) {
             // normal, from (2.33, second part)
             v_c = (vpa_bow_velocity > 0.0) ? N*v0 : -N*v0;
@@ -369,13 +369,13 @@ inline double ViolinString::compute_bow()
         }
 
         // (2.34 exactly)
-        const double div_v_c = 1.0 / v_c;
-        const double c2 = -vpa_c_C01*div_v_c;
-        const double c1 = (vpa_c_C01*((v_c - vpa_bow_velocity + m_y0dot_h))
+        const float div_v_c = 1.0 / v_c;
+        const float c2 = -vpa_c_C01*div_v_c;
+        const float c1 = (vpa_c_C01*((v_c - vpa_bow_velocity + m_y0dot_h))
                            + mu_d*f_c - vpa_c_C02*m_y1_h) * div_v_c;
-        const double c0 = vpa_c_C01*(vpa_bow_velocity - m_y0dot_h)
+        const float c0 = vpa_c_C01*(vpa_bow_velocity - m_y0dot_h)
                           + vpa_c_C02*m_y1_h - mu_s*f_c;
-        const double Delta = c1*c1 - 4.0*c0*c2;
+        const float Delta = c1*c1 - 4.0*c0*c2;
 
         if (Delta < 0.0) {
             // no real solutions for relative bow velocity:
@@ -384,7 +384,7 @@ inline double ViolinString::compute_bow()
             return vpa_c_C01*(vpa_bow_velocity - m_y0dot_h) + vpa_c_C02*m_y1_h;
         } else {
             // bow might still slipping
-            const double dv = (-c1 + sqrt(Delta))/(2.0*c2);
+            const float dv = (-c1 + sqrt(Delta))/(2.0*c2);
 
             // use v_c instead of vpa_bow_velocity so that
             // a stationary bow can still capture the string!
@@ -403,7 +403,7 @@ inline double ViolinString::compute_bow()
 }
 
 
-inline double ViolinString::compute_finger()
+inline float ViolinString::compute_finger()
 {
     if (vpa_finger_x1 != 0.0) {
         return vpa_c_C11 * m_y1_h  +  vpa_c_C12 * m_string_excitation;
@@ -416,24 +416,24 @@ inline void ViolinString::apply_forces()
 {
     for (int n = 1; n <= MODES; ++n)
     {
-        const double position_forces = vpa_c_bow_eigens[n-1]*m_string_excitation +
+        const float position_forces = vpa_c_bow_eigens[n-1]*m_string_excitation +
                                        vpa_c_finger_eigens[n-1]*m_finger_dampening;
         m_a[n-1] = m_a_h[n-1] + X3[n-1] * position_forces;
         m_adot[n-1] = m_adot_h[n-1] + Y3[n-1] * position_forces;
     }
 }
 
-inline double ViolinString::compute_bridge_force()
+inline float ViolinString::compute_bridge_force()
 {
     // equation (2.35)
-    double result = 0.0;
+    float result = 0.0;
     for (int n = 1; n <= MODES; ++n) {
         result += m_a[n-1] * pc_c_bridge_forces[n-1];
     }
     return BRIDGE_AMPLIFY*result;
 }
 
-inline bool ViolinString::almostEquals(double one, double two)
+inline bool ViolinString::almostEquals(float one, float two)
 {
     // maximum absolute error
     if (fabs(one-two) < FLOAT_EQUALITY_ABSOLUTE_ERROR) {

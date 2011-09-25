@@ -3,7 +3,7 @@
 #define IMPULSE_DATA_H
 const int PC_KERNEL_SIZE = 2048;
 const int PC_KERNEL_NUMBER = 6;
-const double pc_kernels[][2048] = {
+const float pc_kernels[][2048] = {
     {
         /* 01-glasgow.wav */
         0.001495361328125,

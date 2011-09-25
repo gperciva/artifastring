@@ -25,7 +25,7 @@
 
 //#define NO_CONVOLUTION
 #ifdef NO_CONVOLUTION
-const double NO_CONVOLUTION_AMPLIFY = 20.0;
+const float NO_CONVOLUTION_AMPLIFY = 20.0;
 #endif
 
 const int NUM_VIOLIN_STRINGS = 4;
@@ -58,7 +58,7 @@ public:
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
      */
-    void finger(int which_string, double ratio_from_nut);
+    void finger(int which_string, float ratio_from_nut);
 
     /** \brief Plucks a string.
      *
@@ -72,8 +72,8 @@ public:
      * @param[in] pluck_force Measured in 0.0 to 1.0 (ARBITRARY).
      * @todo Re-think the pluck force paramater + constants
      */
-    void pluck(int which_string, double ratio_from_bridge,
-               double pluck_force);
+    void pluck(int which_string, float ratio_from_bridge,
+               float pluck_force);
 
     /** \brief Sets the bow's action.
      *
@@ -85,8 +85,8 @@ public:
      * @param[in] bow_force Measured in Newtons.
      * @param[in] bow_velocity Measured in meters / second.
      */
-    void bow(int which_string, double bow_ratio_from_bridge,
-             double bow_force, double bow_velocity);
+    void bow(int which_string, float bow_ratio_from_bridge,
+             float bow_force, float bow_velocity);
 
     /** \brief Advances time and writes data to a buffer.
      *
@@ -122,18 +122,18 @@ public:
 
 private:
     ViolinString *violinString[NUM_VIOLIN_STRINGS];
-    double violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
+    float violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
 
     // only does up to NORMAL_BUFFER_SIZE !
     void handle_buffer(short output[], int num_samples);
 
-    double bridge_buffer[BRIDGE_BUFFER_SIZE];
+    float bridge_buffer[BRIDGE_BUFFER_SIZE];
     int bridge_write_index;
     int bridge_read_index;
 
-    double f_hole[NORMAL_BUFFER_SIZE];
+    float f_hole[NORMAL_BUFFER_SIZE];
     void body_impulse(int num_samples);
-    const double *pc_kernel;
+    const float *pc_kernel;
 
 };
 

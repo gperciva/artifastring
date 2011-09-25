@@ -88,19 +88,19 @@ void ViolinInstrument::reset() {
     }
 }
 
-void ViolinInstrument::finger(int which_string, double ratio_from_nut)
+void ViolinInstrument::finger(int which_string, float ratio_from_nut)
 {
     violinString[which_string]->finger(ratio_from_nut);
 }
 
-void ViolinInstrument::pluck(int which_string, double ratio_from_bridge,
-                             double pluck_force)
+void ViolinInstrument::pluck(int which_string, float ratio_from_bridge,
+                             float pluck_force)
 {
     violinString[which_string]->pluck(ratio_from_bridge, pluck_force);
 }
 
-void ViolinInstrument::bow(int which_string, double bow_ratio_from_bridge,
-                           double bow_force, double bow_velocity)
+void ViolinInstrument::bow(int which_string, float bow_ratio_from_bridge,
+                           float bow_force, float bow_velocity)
 {
     violinString[which_string]->bow(bow_ratio_from_bridge,
                                     bow_force, bow_velocity);

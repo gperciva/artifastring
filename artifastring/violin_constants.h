@@ -26,14 +26,14 @@
  * \brief Physical constants of a violin.
  */
 
-const double PLUCK_FORCE_SCALE = 1e0;
-const double BRIDGE_AMPLIFY = 1e-2;
+const float PLUCK_FORCE_SCALE = 1e0;
+const float BRIDGE_AMPLIFY = 1e-2;
 
 const int MODES = 60;
 
 // optimization for "turning off" a string which is barely vibrating.
-const double SUM_BELOW = 1e-6;
-const double EACH_MODAL_VELOCITY_BELOW = 1e-4;
+const float SUM_BELOW = 1e-6;
+const float EACH_MODAL_VELOCITY_BELOW = 1e-4;
 
 
 /**
@@ -46,20 +46,20 @@ enum String_Type_t {
 };
 
 // friction constants
-const double mu_s = 0.8;
-const double mu_d = 0.3;
-const double v0 = 0.1; // Demoucron's estimate intuition and/or listening
+const float mu_s = 0.8;
+const float mu_d = 0.3;
+const float v0 = 0.1; // Demoucron's estimate intuition and/or listening
 
 // pluck constants, estimated from listening
-const double PLUCK_VELOCITY = 0.1; // in m/s
-const double MU_PLUCK = 1.0;
+const float PLUCK_VELOCITY = 0.1; // in m/s
+const float MU_PLUCK = 1.0;
 
 // noise
-const double A_noise = 0.05; // estimated from listening
+const float A_noise = 0.05; // estimated from listening
 
 // time length of each sample, in seconds
 const int VIOLIN_SAMPLE_RATE = 44100;
-const double dt = 1.0 / VIOLIN_SAMPLE_RATE;
+const float dt = 1.0 / VIOLIN_SAMPLE_RATE;
 
 
 /** \struct String_Physical
@@ -69,15 +69,15 @@ const double dt = 1.0 / VIOLIN_SAMPLE_RATE;
  *  and some ad-hoc experimentation.
  */
 typedef struct {
-    double T;  /**< \brief Tension          (N) */
-    double L;  /**< \brief Length           (m) */
-    double d;  /**< \brief Diameter         (m) */
-    double pl; /**< \brief Linear Density   (kg/m) */
-    double E;  /**< \brief Young's elastic modulus */
+    float T;  /**< \brief Tension          (N) */
+    float L;  /**< \brief Length           (m) */
+    float d;  /**< \brief Diameter         (m) */
+    float pl; /**< \brief Linear Density   (kg/m) */
+    float E;  /**< \brief Young's elastic modulus */
     // FIXME: remove B1 and B2
-    double B1; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
-    double B2; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
-    double modes[MODES];
+    float B1; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
+    float B2; /**< \brief modal dampening factor; r_n = B1 + B2*(n-1)*(n-1); */
+    float modes[MODES];
 } String_Physical;
 
 const String_Physical string_params[] = {

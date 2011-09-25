@@ -10,7 +10,7 @@ HEADER_BEGIN = """/* This file was automatically generated */
 #define IMPULSE_DATA_H
 const int PC_KERNEL_SIZE = 2048;
 const int PC_KERNEL_NUMBER = %i;
-const double pc_kernels[][2048] = {
+const float pc_kernels[][2048] = {
     {
 """
 HEADER_MIDDLE = """    }, {
