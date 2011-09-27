@@ -28,6 +28,7 @@ import math
 
 import multiprocessing
 import time
+import scipy.io.wavfile
 
 import pyaudio
 import aubio.aubiowrapper
@@ -240,19 +241,25 @@ class InteractiveViolin():
         self.cats[cat-1] += 1
 
         finger_midi = 12.0*math.log(1.0 /
-            (1.0 - self.finger_position)) / math.log(2.0)
+            (1.0 - self.params.finger_position)) / math.log(2.0)
         filename = "audio_%i_%.3f_%.3f_%.3f_%.3f_%i.wav" % (
-            self.violin_string,
+            self.params.violin_string,
             finger_midi,
-            self.bow_position,
-            self.force,
-            self.velocity,
+            self.params.bow_position,
+            self.params.force,
+            self.params.velocity,
             num)
-        wavfile = monowav.MonoWav(filename)
-        num_samples = int(0.2 * 44100)
-        buf = wavfile.request_fill( num_samples )
-        self.violin.wait_samples(buf, num_samples)
+        complete = None
+        seconds = 0.2
+        for j in xrange( int(math.ceil(seconds * 44100.0 / HOPSIZE)) ):
+            arr = self.output_audio_queue.get()
+            if complete == None:
+                complete = numpy.array(arr)
+            else:
+                complete = numpy.append(complete, arr)
+            self.input_audio_queue.put(arr)
 
+        scipy.io.wavfile.write(filename, 44100, complete)
         mf_file = open('collection.mf', 'a')
         mf_file.write(str("%s\t%.1f\n" % (filename, cat)) )
         mf_file.close()
