@@ -67,19 +67,20 @@ if HAS_SWIG
 # unified definitions
 SWIGCPP = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) $(ARTIFASTRING_INCLUDE)
 SWIGLD = $(PYTHON_LDFLAGS) -module
-%_wrap.cxx %.py: $(srcdir)/swig/%.i
+swig/%_wrap.cxx swig/%.py: $(srcdir)/swig/%.i
+	mkdir -p swig
 	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 
 # per-file definitions
 pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
-nodist_python_PYTHON = monowav.py violin_instrument.py
+nodist_python_PYTHON = swig/monowav.py swig/violin_instrument.py
 
-nodist__monowav_la_SOURCES = monowav_wrap.cxx \
+nodist__monowav_la_SOURCES = swig/monowav_wrap.cxx \
 	artifastring/monowav.cpp
 _monowav_la_CPPFLAGS = $(SWIGCPP)
 _monowav_la_LDFLAGS = $(SWIGLD)
 
-nodist__violin_instrument_la_SOURCES = violin_instrument_wrap.cxx \
+nodist__violin_instrument_la_SOURCES = swig/violin_instrument_wrap.cxx \
 	artifastring/violin_string.cpp \
 	artifastring/violin_instrument.cpp
 _violin_instrument_la_CPPFLAGS = $(SWIGCPP)
