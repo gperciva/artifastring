@@ -2,7 +2,10 @@
 SPLIT_PNG=split-png/
 mkdir -p $SPLIT_PNG
 
-#rm -f *.pickle
+rm -f *.pickle
+rm -f split-png/*.png
+rm -f *.png
+
 ./pluck-detect.py violin-e
 ./pluck-detect.py violin-a
 ./pluck-detect.py violin-d

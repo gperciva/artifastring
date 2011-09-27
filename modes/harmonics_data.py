@@ -20,10 +20,10 @@ PNG_OUTPUT_DIR = "split-png"
 
 # the middle-to-end of a file is more likely to be pure noise
 NOISE_BEGIN_PERCENT = 0.50
-NOISE_END_PERCENT = 0.95
+NOISE_END_PERCENT = 0.90
 
 # beginnings of notes aren't always trustworthy
-SKIP_PERCENT_BEGIN = 0.30
+SKIP_PERCENT_BEGIN = 0.0
 SKIP_PERCENT_END = 0.0
 MIN_HOPS_AFTER_NOISE = 20
 
@@ -78,7 +78,7 @@ class HarmonicsData():
         noise_values = values[noise_start:noise_end]
         median = numpy.median(noise_values)
         std = numpy.std(noise_values)
-        noise_floor = median + 10*std
+        noise_floor = median + 3*std
         for i, value in enumerate(values):
             if value < noise_floor:
                 cutoff_index = i
@@ -141,25 +141,30 @@ class HarmonicsData():
         return tn
 
 
-    def plot_decays(self, tss, tns, harmonics, png_filename, instrument_string):
+    def plot_decays(self, tss, tns, harmonics, png_filename, instrument_string,
+            start, end, name):
+        if start >= len(harmonics):
+            return
         pylab.figure()
-        for i in range(len(harmonics)):
+        for i in range(start, end):
+            if i >= len(harmonics):
+                break
             ts = tss[i]
             tn = tns[i]
-            color = matplotlib.cm.jet(float(i)/len(harmonics))
+            color = matplotlib.cm.jet(float(i-start)/(end-start))
             pylab.semilogy(ts, harmonics[i],
                 '.', color=color, label="harmonic %i" % (i+1))
             # Demoucron, p. 60
             test_formula = map(lambda t: math.exp(-t/(2*tn)), ts)
             pylab.semilogy(ts, test_formula,
                 '-', color=color, label="predict %i" % (i+1))
-        if len(harmonics) < 10:
-            pylab.legend()
+        pylab.legend()
         pylab.xlabel("Time (seconds)")
         pylab.ylabel("Relative strength of harmonic")
         pylab.title("Decay envelopes and linear-fit lines, %s" %
             instrument_string)
-        pylab.savefig(png_filename.replace(".png", "-decays.png"))
+        pylab.savefig(png_filename.replace(".png",
+            str("-%s-decays.png" % name)))
         if SHOW_DECAY:
             pylab.show()
  
@@ -199,7 +204,9 @@ class HarmonicsData():
             png_filename = os.path.join(PNG_OUTPUT_DIR,
                 os.path.basename(wav_filename).replace(".wav", ".png"))
             instrument_string = os.path.basename(wav_filename)
-            self.plot_decays(tss, tns, harmonics, png_filename, instrument_string)
+            for i, name in enumerate(['a', 'b', 'c', 'd']):
+                self.plot_decays(tss, tns, harmonics, png_filename,
+                    instrument_string, 5*i, 5*(i+1), name)
         return tnss, tsss
 
 

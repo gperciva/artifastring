@@ -119,7 +119,7 @@ def plot_all_modes_log(nodes, extra_fit):
         pylab.plot(i+1, m, 'bo')
         iqgm_last += 1
     en = range(1, len(extra_fit)+1)
-    print extra_fit
+    #print extra_fit
     extra_fit_log = map(math.log, extra_fit)
     pylab.plot(en, extra_fit_log, 'r-')
     #
@@ -187,7 +187,7 @@ def make_extra_fits(nodes):
     plsq = scipy.optimize.leastsq(residuals, guess,
         args=(y,x)
         )
-    print plsq
+    #print plsq
 
     n_more = range(1, num_modes+1) # we want to predict this many
     yfit = []

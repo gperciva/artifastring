@@ -1,9 +1,9 @@
 #!/usr/bin/evn python
 import marsyas
 
-NUM_HARMONICS = 20
+NUM_HARMONICS = 40
 HOPSIZE = 256
-WINDOWSIZE = 1024
+WINDOWSIZE = 2048
 
 # create a MarSystem from a recursive list specification
 def create(net):
@@ -42,7 +42,7 @@ def get_harmonics(wav_filename, base_frequency):
     net.updControl("ShiftInput/shift/mrs_natural/winSize", WINDOWSIZE)
     
     net.updControl("HarmonicStrength/harms/mrs_natural/harmonicsSize", num_harmonics)
-    net.updControl("HarmonicStrength/harms/mrs_real/harmonicsWidth", 0.01)
+    net.updControl("HarmonicStrength/harms/mrs_real/harmonicsWidth", 0.00)
     net.updControl("HarmonicStrength/harms/mrs_real/base_frequency", base_frequency)
     net.updControl("HarmonicStrength/harms/mrs_natural/type", 1)
     
