@@ -4,3 +4,4 @@ original_recordings
 *.pickle
 split-png
 split-wav
+spectrum

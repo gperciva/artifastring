@@ -23,9 +23,9 @@ NOISE_BEGIN_PERCENT = 0.50
 NOISE_END_PERCENT = 0.90
 
 # beginnings of notes aren't always trustworthy
-SKIP_PERCENT_BEGIN = 0.0
+SKIP_PERCENT_BEGIN = 0.20
 SKIP_PERCENT_END = 0.0
-MIN_HOPS_AFTER_NOISE = 20
+MIN_HOPS_AFTER_NOISE = 10
 
 
 class HarmonicsData():
@@ -43,31 +43,43 @@ class HarmonicsData():
             pickle.dump( (self.tnss, self.tsss), pickle_file, -1)
             pickle_file.close()
 
-    def get_freq_from_filename(self, wav_filename):
+    def get_freq_B_from_filename(self, wav_filename):
+        # violin
         if "violin-g" in wav_filename:
             frequency = 196.0
+            B = 14.0e-5
         elif "violin-d" in wav_filename:
             frequency = 293.0
+            B = 12.5e-5
         elif "violin-a" in wav_filename:
             frequency = 440.0
+            B = 5.0e-5 # this one's a bit iffy
         elif "violin-e" in wav_filename:
             frequency = 660.0
+            B = 5.8e-5
+        # cello
         elif "cello-a" in wav_filename:
             frequency = 220.0
+            B = 5.0e-5
         elif "cello-d" in wav_filename:
             frequency = 146.7
+            B = 12.0e-5
         elif "cello-g-finger-a" in wav_filename: # do these before the open string!
             frequency = 111.0
+            B = 14.0e-5
         elif "cello-g-finger-c" in wav_filename:
             frequency = 130.8
+            B = 14.0e-5
         elif "cello-g" in wav_filename:
             frequency = 97.8
+            B = 10.0e-5
         elif "cello-c" in wav_filename:
             frequency = 65.2
+            B = 27.0e-5
         else:
             print "Need a frequency!"
             sys.exit(1)
-        return frequency
+        return frequency, B
 
 
     # truncate list when it falls below the noise floor
@@ -179,9 +191,9 @@ class HarmonicsData():
         tsss = []
         for wav_filename in filenames:
             print "Processing", wav_filename
-            frequency = self.get_freq_from_filename(wav_filename)
+            frequency, B = self.get_freq_B_from_filename(wav_filename)
             harmonics, hop_rate = marsyas_interface.get_harmonics(
-                wav_filename, frequency)
+                wav_filename, frequency, B)
 
             harmonics = map(self.truncate_list_below_noise_floor, harmonics)
             harmonics = map(self.remove_after_zero, harmonics)
