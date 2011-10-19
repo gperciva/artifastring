@@ -36,8 +36,9 @@ import aubio.aubiowrapper
 HOPSIZE = 1024
 NUM_AUDIO_BUFFERS = 4
 
+TUNING_SETTLE_BUFFERS = 10
 # for pitch and buffers
-PRINT_EXTRA_DISPLAY = 0
+PRINT_EXTRA_DISPLAY = 1
 
 class Parameters():
     def __init__(self, st=0, fp=0, bp=.08, f=1.0, v=0.4, T=1.0):
@@ -111,6 +112,8 @@ class InteractiveViolin():
                   self.tension_queue)
             )
         self.violin_process.daemon = True
+
+        self.tuning = -1
 
         self.stdscr.nodelay(1)
         self.print_help()
@@ -198,6 +201,9 @@ class InteractiveViolin():
         if c == 'j':
             self.params.velocity /= 1.1
 
+        if c == 'm':
+            self.tuning = TUNING_SETTLE_BUFFERS
+
         skip_violin_print = False
         if c == 'z' or c == 'x' or c == 'c' or c == 'v':
             if c == 'z':
@@ -264,6 +270,36 @@ class InteractiveViolin():
         mf_file.write(str("%s\t%.1f\n" % (filename, cat)) )
         mf_file.close()
 
+    def expected_pitch(self):
+        # tuned to equal temperament
+        if 0 <= self.instrument_number < 4:
+            if self.params.violin_string == 3:
+                return 659.3
+            if self.params.violin_string == 2:
+                return 440.0
+            if self.params.violin_string == 1:
+                return 293.7
+            if self.params.violin_string == 0:
+                return 196.0
+        if self.instrument_number == 4:
+            if self.params.violin_string == 3:
+                return 440.0
+            if self.params.violin_string == 2:
+                return 293.7
+            if self.params.violin_string == 1:
+                return 196.0
+            if self.params.violin_string == 0:
+                return 130.8
+        if self.instrument_number == 5:
+            if self.params.violin_string == 3:
+                return 220.0
+            if self.params.violin_string == 2:
+                return 146.8
+            if self.params.violin_string == 1:
+                return 98.0
+            if self.params.violin_string == 0:
+                return 65.4
+
     def main_loop(self):
         windowsize = 2048
 
@@ -292,7 +328,8 @@ class InteractiveViolin():
             if c != -1:
                 if not self.keypress( chr(c) ):
                     break
-    
+
+   
             while not self.tension_queue.empty():
                 self.print_tension( self.tension_queue.get() )
 
@@ -318,6 +355,22 @@ class InteractiveViolin():
                 if show_pitch <= 0:
                     self.stdscr.addstr(23, 50, str("%.1f" % pitch))
                     show_pitch = 20
+
+                expected = self.expected_pitch()
+                delta_pitch = expected - pitch
+                adjust = delta_pitch / expected
+                self.stdscr.addstr(14, 50, str("%.1f Hz   " % delta_pitch))
+                self.stdscr.addstr(16, 50, str("%.4f" % adjust))
+                if abs(delta_pitch) < 0.5:
+                    self.tuning = -1
+
+                self.stdscr.addstr(15, 50, str("%i" % self.tuning))
+                if self.tuning > 0:
+                    self.tuning -= 1
+                    if self.tuning == 0:
+                        alter = 1.0 + adjust
+                        self.change_tension(alter)
+                        self.tuning = TUNING_SETTLE_BUFFERS
             self.input_audio_queue.put(arr)
 
     

@@ -15,9 +15,9 @@ num_modes = 60
 
 REQUIRE_TRIALS_PERCENT = 0.75
 FIT_FROM_NODE_BEGIN = 0
-FIT_FROM_NODE_END = 7
+FIT_FROM_NODE_END = 8
 #FIT_FROM_NODE_PERCENT = 0.0
-USE_FIT_FROM_NODE = 7
+USE_FIT_FROM_NODE = 0
 
 HEADER_BEGIN = """/* This file was automatically generated */
 {
@@ -187,7 +187,7 @@ def make_extra_fits(nodes):
     plsq = scipy.optimize.leastsq(residuals, guess,
         args=(y,x)
         )
-    #print plsq
+    print plsq
 
     n_more = range(1, num_modes+1) # we want to predict this many
     yfit = []
