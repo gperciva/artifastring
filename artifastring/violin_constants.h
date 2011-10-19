@@ -27,7 +27,7 @@
  */
 
 const float PLUCK_FORCE_SCALE = 1e0;
-const float BRIDGE_AMPLIFY = 1e-2;
+const float BRIDGE_AMPLIFY = 1e-3;
 
 const int MODES = 60;
 
@@ -82,29 +82,37 @@ typedef struct {
 
 const String_Physical string_params[] = {
     /* Violin E string */
-    {   /* T= */ 72.0,  /* l= */ 0.325, /* d= */ 0.30e-3,
-        /* pl= */ 0.38e-3,
-        /* E= */ 4.0e9,
+    {   /* T= */ 81.1,
+        /* l= */ 0.328,
+        /* d= */ 0.30e-3,
+        /* pl= */ 0.43e-3,
+        /* E= */ 220.0e9,
         5.0, 8.0, // B1 "should be a big greater"
 #include "violin_e_modes.h"
     },
-    /* Violin A string */
-    {   /* T= */ 49.0,  /* l= */ 0.325, /* d= */ 0.52e-3,
-        /* pl= */ 0.59e-3,
+    /* Violin A strig */
+    {   /* T= */ 55.1,
+        /* l= */ 0.325,
+        /* d= */ 0.62e-3,
+        /* pl= */ 0.67e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
 #include "violin_a_modes.h"
     },
     /* Violin D string */
-    {   /* T= */ 34.2,  /* l= */ 0.325, /* d= */ 0.63e-3,
-        /* pl= */ 0.92e-3,
+    {   /* T= */ 46.6,
+        /* l= */ 0.325,
+        /* d= */ 0.63e-3,
+        /* pl= */ 1.28e-3,
         /* E= */ 4.09,
         3.12, 7.0,
 #include "violin_d_modes.h"
     },
     /* Violin G string */
-    {   /* T= */ 44.1,  /* l= */ 0.325, /* d= */ 0.79e-3,
-        /* pl= */ 2.66e-3,
+    {   /* T= */ 41.8,
+        /* l= */ 0.325,
+        /* d= */ 0.79e-3,
+        /* pl= */ 2.61e-3,
         /* E= */ 4.0e9,
         2.0, 7.0, // extra resonance
 #include "violin_g_modes.h"
@@ -116,58 +124,76 @@ const String_Physical string_params[] = {
 // FIXME: complete garbage for measured modes
 // FIXME: all measurements for viola made up
     /* Viola A string */
-    {   /* T= */ 95.5,  /* l= */ 0.37, /* d= */ 0.62e-3,
-        /* pl= */ 0.9e-3,
+    {   /* T= */ 78.9,
+        /* l= */ 0.37,
+        /* d= */ 0.62e-3,
+        /* pl= */ 0.74e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
 #include "violin_a_modes.h"
     },
     /* Viola D string */
-    {   /* T= */ 71.4,  /* l= */ 0.37, /* d= */ 0.83e-3,
-        /* pl= */ 1.5e-3,
+    {   /* T= */ 52.6,
+        /* l= */ 0.37,
+        /* d= */ 0.83e-3,
+        /* pl= */ 1.12e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
 #include "violin_d_modes.h"
     },
     /* Viola G string */
-    {   /* T= */ 61.5,  /* l= */ 0.37, /* d= */ 0.89e-3,
-        /* pl= */ 2.9e-3,
+    {   /* T= */ 51.8,
+        /* l= */ 0.37,
+        /* d= */ 0.89e-3,
+        /* pl= */ 2.5e-3,
         /* E= */ 4.0e9,
         2.0, 7.0, // extra resonance
 #include "violin_g_modes.h"
     },
     /* Viola C string */
-    {   /* T= */ 30.1,  /* l= */ 0.37, /* d= */ 0.99e-3,
-        /* pl= */ 3.2e-3,
+    {   /* T= */ 52.0,
+        /* l= */ 0.37,
+        /* d= */ 0.99e-3,
+        /* pl= */ 5.63e-3,
         /* E= */ 4.0e9,
         2.0, 7.0, // extra resonance
 #include "violin_g_modes.h"
     },
 
+
+
     /* Cello A string */
-    {   /* T= */ 249.5,  /* l= */ 0.682, /* d= */ 0.65e-3,
-        /* pl= */ 2.8e-3,
+    {   /* T= */ 153.8,
+        /* l= */ 0.682,
+        /* d= */ 0.65e-3,
+        /* pl= */ 1.71e-3,
         /* E= */ 4.0e9,
         3.0, 7.0,
 #include "cello_a_modes.h"
     },
     /* Cello D string */
-    {   /* T= */ 121.0,  /* l= */ 0.682, /* d= */ 0.98e-3,
-        /* pl= */ 3.02e-3,
+    {   /* T= */ 128.4,
+        /* l= */ 0.682,
+        /* d= */ 0.98e-3,
+        /* pl= */ 3.26e-3,
         /* E= */ 4.0e9,
         3.12, 7.0,
 #include "cello_d_modes.h"
     },
     /* Cello G string */
-    {   /* T= */ 71.0,  /* l= */ 0.682, /* d= */ 1.12e-3,
-        /* pl= */ 4.0e-3,
+    {   /* T= */ 122.7,
+        /* l= */ 0.682,
+        /* d= */ 1.12e-3,
+        /* pl= */ 6.97e-3,
         /* E= */ 4.0e9,
         2.0, 7.0,
 #include "cello_g_modes.h"
     },
     /* Cello C string */
-    {   /* T= */ 32.5,  /* l= */ 0.682, /* d= */ 1.68e-3,
-        /* pl= */ 4.0e-3,
+    {   /* T= */ 123.0,
+        /* l= */ 0.682,
+        /* d= */ 1.68e-3,
+        /* pl= */ 15.66e-3,
         /* E= */ 4.0e9,
         4.0, 7.0,
 #include "cello_c_modes.h"

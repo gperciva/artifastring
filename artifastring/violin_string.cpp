@@ -161,8 +161,8 @@ void ViolinString::cache_pc_c()
                                     * n_pi_div_L*n_pi_div_L ));
 
         // text on p. 78
-        const float r_n = pc.B1 + pc.B2*(n-1)*(n-1);
-        //const float r_n = pc.modes[n-1];
+        //const float r_n = pc.B1 + pc.B2*(n-1)*(n-1);
+        const float r_n = pc.modes[n-1];
 
         // Other abbreviations
         const float w_n         = sqrt(w0n*w0n - r_n*r_n);
