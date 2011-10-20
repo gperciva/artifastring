@@ -24,42 +24,22 @@
 #include <cstddef>
 
 ViolinInstrument::ViolinInstrument(int instrument_number) {
-    int actual_instrument_number = instrument_number % PC_KERNEL_NUMBER;
-    if (actual_instrument_number == 4) {
-        // viola
-        violinString[0] = new ViolinString(viola_C,
-                                           NUM_VIOLIN_STRINGS*instrument_number+0);
-        violinString[1] = new ViolinString(viola_G,
-                                           NUM_VIOLIN_STRINGS*instrument_number+1);
-        violinString[2] = new ViolinString(viola_D,
-                                           NUM_VIOLIN_STRINGS*instrument_number+2);
-        violinString[3] = new ViolinString(viola_A,
-                                           NUM_VIOLIN_STRINGS*instrument_number+3);
-    } else {
-        if (actual_instrument_number == 5) {
-            // cello
-            violinString[0] = new ViolinString(cello_C,
-                                               NUM_VIOLIN_STRINGS*instrument_number+0);
-            violinString[1] = new ViolinString(cello_G,
-                                               NUM_VIOLIN_STRINGS*instrument_number+1);
-            violinString[2] = new ViolinString(cello_D,
-                                               NUM_VIOLIN_STRINGS*instrument_number+2);
-            violinString[3] = new ViolinString(cello_A,
-                                               NUM_VIOLIN_STRINGS*instrument_number+3);
-        } else {
-            // violin
-            violinString[0] = new ViolinString(violin_G,
-                                               NUM_VIOLIN_STRINGS*instrument_number+0);
-            violinString[1] = new ViolinString(violin_D,
-                                               NUM_VIOLIN_STRINGS*instrument_number+1);
-            violinString[2] = new ViolinString(violin_A,
-                                               NUM_VIOLIN_STRINGS*instrument_number+2);
-            violinString[3] = new ViolinString(violin_E,
-                                               NUM_VIOLIN_STRINGS*instrument_number+3);
-        }
+    InstrumentType distinct_instrument;
+    switch (instrument_number) {
+    case 4:
+        distinct_instrument = Viola;
+        break;
+    case 5:
+        distinct_instrument = Cello;
+        break;
+    default:
+        distinct_instrument = Violin;
+    }
+    for (int st; st < NUM_VIOLIN_STRINGS; st++) {
+        violinString[st] = new ViolinString(distinct_instrument, st);
     }
 
-    pc_kernel = pc_kernels[actual_instrument_number];
+    pc_kernel = pc_kernels[instrument_number];
 
     for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
         bridge_buffer[i] = 0.0;

@@ -29,11 +29,12 @@ class ViolinString {
 public:
     /**
      * \brief Constructor
-     * @param[in] which_string The violin string to simulate.
-     * @param[in] random_seed Initializes the randomness (for added
-     * noise in the model).
+     * @param[in] which_instrument The member of the violin family to simulate.
+     * @param[in] string_number The string (higher numbers are
+     * higher strings).  This values is also used to initializes
+     * the randomness (for added noise in the model).
      */
-    ViolinString(String_Type_t which_string, int random_seed=0);
+    ViolinString(InstrumentType which_instrument, int string_number);
     /// \brief Destructor; nothing special
     ~ViolinString();
     /// \brief Stops all movement
@@ -95,6 +96,7 @@ public:
      * @param[in] pc_new String physical constants.
      */
     void set_physical_constants(String_Physical pc_new);
+    void set_bow_friction(float mu_s_next, float mu_d_next);
 
 protected:
 #ifdef DEBUG
@@ -175,6 +177,10 @@ protected:
 
     // floating-point equality
     inline bool almostEquals(float one, float two);
+
+    // instrument-specific constants
+    float mu_s;
+    float mu_d;
 };
 #endif
 

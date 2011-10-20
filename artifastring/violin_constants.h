@@ -39,15 +39,13 @@ const float EACH_MODAL_VELOCITY_BELOW = 1e-4;
 /**
  * \brief enumeration type to access string physical constants
  */
-enum String_Type_t {
-    violin_E, violin_A, violin_D, violin_G,
-    viola_A, viola_D, viola_G, viola_C,
-    cello_A, cello_D, cello_G, cello_C
+enum InstrumentType {
+    Violin, Viola, Cello,
 };
 
 // friction constants
-const float mu_s = 0.8;
-const float mu_d = 0.3;
+const float inst_mu_s[] = { 0.8, 0.8, 1.0 };
+const float inst_mu_d[] = { 0.3, 0.3, 0.4 };
 const float v0 = 0.1; // Demoucron's estimate intuition and/or listening
 
 // pluck constants, estimated from listening
@@ -80,127 +78,124 @@ typedef struct {
     float modes[MODES];
 } String_Physical;
 
-const String_Physical string_params[] = {
-    /* Violin E string */
-    {   /* T= */ 81.1,
-        /* l= */ 0.328,
-        /* d= */ 0.30e-3,
-        /* pl= */ 0.43e-3,
-        /* E= */ 220.0e9,
-        5.0, 8.0, // B1 "should be a big greater"
+const String_Physical string_params[][4] = {
+    {
+        /* Violin G string */
+        {   /* T= */ 41.8,
+            /* l= */ 0.325,
+            /* d= */ 0.79e-3,
+            /* pl= */ 2.61e-3,
+            /* E= */ 4.0e9,
+            2.0, 7.0, // extra resonance
+#include "violin_g_modes.h"
+        },
+        /* Violin D string */
+        {   /* T= */ 46.6,
+            /* l= */ 0.325,
+            /* d= */ 0.63e-3,
+            /* pl= */ 1.28e-3,
+            /* E= */ 4.09,
+            3.12, 7.0,
+#include "violin_d_modes.h"
+        },
+        /* Violin A string */
+        {   /* T= */ 55.3,
+            /* l= */ 0.325,
+            /* d= */ 0.62e-3,
+            /* pl= */ 0.67e-3,
+            /* E= */ 4.0e9,
+            3.12, 7.0,
+#include "violin_a_modes.h"
+        },
+        /* Violin E string */
+        {   /* T= */ 81.2,
+            /* l= */ 0.328,
+            /* d= */ 0.30e-3,
+            /* pl= */ 0.43e-3,
+            /* E= */ 200.0e9,
+            5.0, 8.0, // B1 "should be a big greater"
 #include "violin_e_modes.h"
+        },
     },
-    /* Violin A strig */
-    {   /* T= */ 55.1,
-        /* l= */ 0.325,
-        /* d= */ 0.62e-3,
-        /* pl= */ 0.67e-3,
-        /* E= */ 4.0e9,
-        3.12, 7.0,
-#include "violin_a_modes.h"
-    },
-    /* Violin D string */
-    {   /* T= */ 46.6,
-        /* l= */ 0.325,
-        /* d= */ 0.63e-3,
-        /* pl= */ 1.28e-3,
-        /* E= */ 4.09,
-        3.12, 7.0,
+
+    {
+        /* Viola C string */
+        {   /* T= */ 52.0,
+            /* l= */ 0.37,
+            /* d= */ 0.99e-3,
+            /* pl= */ 5.63e-3,
+            /* E= */ 4.0e9,
+            2.0, 7.0, // extra resonance
+#include "violin_g_modes.h"
+        },
+        /* Viola G string */
+        {   /* T= */ 51.8,
+            /* l= */ 0.37,
+            /* d= */ 0.89e-3,
+            /* pl= */ 2.5e-3,
+            /* E= */ 4.0e9,
+            2.0, 7.0, // extra resonance
+#include "violin_g_modes.h"
+        },
+        /* Viola D string */
+        {   /* T= */ 53.6,
+            /* l= */ 0.37,
+            /* d= */ 0.83e-3,
+            /* pl= */ 1.12e-3,
+            /* E= */ 4.0e9,
+            3.12, 7.0,
 #include "violin_d_modes.h"
-    },
-    /* Violin G string */
-    {   /* T= */ 41.8,
-        /* l= */ 0.325,
-        /* d= */ 0.79e-3,
-        /* pl= */ 2.61e-3,
-        /* E= */ 4.0e9,
-        2.0, 7.0, // extra resonance
-#include "violin_g_modes.h"
-    },
-
-// FIXME: from here below,
-// FIXME: only vague tuned "by ear" with pizzicato
-// FIXME: complete guesses for linear density and B1,B2
-// FIXME: complete garbage for measured modes
-// FIXME: all measurements for viola made up
-    /* Viola A string */
-    {   /* T= */ 78.9,
-        /* l= */ 0.37,
-        /* d= */ 0.62e-3,
-        /* pl= */ 0.74e-3,
-        /* E= */ 4.0e9,
-        3.12, 7.0,
+        },
+        /* Viola A string */
+        {   /* T= */ 80.1,
+            /* l= */ 0.37,
+            /* d= */ 0.62e-3,
+            /* pl= */ 0.74e-3,
+            /* E= */ 4.0e9,
+            3.12, 7.0,
 #include "violin_a_modes.h"
-    },
-    /* Viola D string */
-    {   /* T= */ 52.6,
-        /* l= */ 0.37,
-        /* d= */ 0.83e-3,
-        /* pl= */ 1.12e-3,
-        /* E= */ 4.0e9,
-        3.12, 7.0,
-#include "violin_d_modes.h"
-    },
-    /* Viola G string */
-    {   /* T= */ 51.8,
-        /* l= */ 0.37,
-        /* d= */ 0.89e-3,
-        /* pl= */ 2.5e-3,
-        /* E= */ 4.0e9,
-        2.0, 7.0, // extra resonance
-#include "violin_g_modes.h"
-    },
-    /* Viola C string */
-    {   /* T= */ 52.0,
-        /* l= */ 0.37,
-        /* d= */ 0.99e-3,
-        /* pl= */ 5.63e-3,
-        /* E= */ 4.0e9,
-        2.0, 7.0, // extra resonance
-#include "violin_g_modes.h"
+        },
     },
 
-
-
-    /* Cello A string */
-    {   /* T= */ 153.8,
-        /* l= */ 0.682,
-        /* d= */ 0.65e-3,
-        /* pl= */ 1.71e-3,
-        /* E= */ 4.0e9,
-        3.0, 7.0,
-#include "cello_a_modes.h"
-    },
-    /* Cello D string */
-    {   /* T= */ 128.4,
-        /* l= */ 0.682,
-        /* d= */ 0.98e-3,
-        /* pl= */ 3.26e-3,
-        /* E= */ 4.0e9,
-        3.12, 7.0,
-#include "cello_d_modes.h"
-    },
-    /* Cello G string */
-    {   /* T= */ 122.7,
-        /* l= */ 0.682,
-        /* d= */ 1.12e-3,
-        /* pl= */ 6.97e-3,
-        /* E= */ 4.0e9,
-        2.0, 7.0,
-#include "cello_g_modes.h"
-    },
-    /* Cello C string */
-    {   /* T= */ 123.0,
-        /* l= */ 0.682,
-        /* d= */ 1.68e-3,
-        /* pl= */ 15.66e-3,
-        /* E= */ 4.0e9,
-        4.0, 7.0,
+    {
+        /* Cello C string */
+        {   /* T= */ 123.0,
+            /* l= */ 0.682,
+            /* d= */ 1.68e-3,
+            /* pl= */ 15.66e-3,
+            /* E= */ 4.0e9,
+            4.0, 7.0,
 #include "cello_c_modes.h"
-    },
-
+        },
+        /* Cello G string */
+        {   /* T= */ 122.7,
+            /* l= */ 0.682,
+            /* d= */ 1.12e-3,
+            /* pl= */ 6.97e-3,
+            /* E= */ 4.0e9,
+            2.0, 7.0,
+#include "cello_g_modes.h"
+        },
+        /* Cello D string */
+        {   /* T= */ 128.4,
+            /* l= */ 0.682,
+            /* d= */ 0.98e-3,
+            /* pl= */ 3.26e-3,
+            /* E= */ 4.0e9,
+            3.12, 7.0,
+#include "cello_d_modes.h"
+        },
+        /* Cello A string */
+        {   /* T= */ 153.8,
+            /* l= */ 0.682,
+            /* d= */ 0.65e-3,
+            /* pl= */ 1.71e-3,
+            /* E= */ 4.0e9,
+            3.0, 7.0,
+#include "cello_a_modes.h"
+        },
+    }
 };
-
 
 #endif
 

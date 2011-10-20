@@ -27,15 +27,16 @@
 
 const float FLOAT_EQUALITY_ABSOLUTE_ERROR = 1e-6;
 
-ViolinString::ViolinString(String_Type_t which_string, int random_seed)
+ViolinString::ViolinString(InstrumentType which_instrument, int string_number)
 {
     // do NOT make this time(NULL); we want repeated
     // runs of the program to be identical!
-    srand( random_seed );
+    srand( string_number );
 
     reset();
 
-    set_physical_constants( string_params[which_string] );
+    set_physical_constants( string_params[which_instrument][string_number] );
+    set_bow_friction(inst_mu_s[which_instrument], inst_mu_d[which_instrument]);
 
 #ifdef DEBUG
     time_seconds = 0.0;
@@ -143,6 +144,10 @@ void ViolinString::set_physical_constants(String_Physical pc_new)
     recache_vpa_c = true;
 }
 
+void ViolinString::set_bow_friction(float mu_s_next, float mu_d_next) {
+    mu_s = mu_s_next;
+    mu_d = mu_d_next;
+}
 
 void ViolinString::cache_pc_c()
 {
@@ -156,9 +161,9 @@ void ViolinString::cache_pc_c()
         // text after eqn (2.5)
         const float n_pi_div_L = n*pi_div_l;
         const float w0n = sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
-                                 + ((pc.E * I * div_pc_pl)
-                                    * n_pi_div_L*n_pi_div_L
-                                    * n_pi_div_L*n_pi_div_L ));
+                                + ((pc.E * I * div_pc_pl)
+                                   * n_pi_div_L*n_pi_div_L
+                                   * n_pi_div_L*n_pi_div_L ));
 
         // text on p. 78
         //const float r_n = pc.B1 + pc.B2*(n-1)*(n-1);
@@ -343,7 +348,7 @@ inline float ViolinString::compute_bow()
         // Has the maximum static force been exceeded yet?
         // eqn (2.31)
         const float F0 = vpa_c_C01*( vpa_bow_velocity - m_y0dot_h)
-                          + vpa_c_C02*m_y1_h;
+                         + vpa_c_C02*m_y1_h;
         // text after (2.31)
         if ( fabs(F0) > mu_s*vpa_bow_force ) {
             m_bow_slipping = true;
@@ -372,9 +377,9 @@ inline float ViolinString::compute_bow()
         const float div_v_c = 1.0 / v_c;
         const float c2 = -vpa_c_C01*div_v_c;
         const float c1 = (vpa_c_C01*((v_c - vpa_bow_velocity + m_y0dot_h))
-                           + mu_d*f_c - vpa_c_C02*m_y1_h) * div_v_c;
+                          + mu_d*f_c - vpa_c_C02*m_y1_h) * div_v_c;
         const float c0 = vpa_c_C01*(vpa_bow_velocity - m_y0dot_h)
-                          + vpa_c_C02*m_y1_h - mu_s*f_c;
+                         + vpa_c_C02*m_y1_h - mu_s*f_c;
         const float Delta = c1*c1 - 4.0*c0*c2;
 
         if (Delta < 0.0) {
@@ -417,7 +422,7 @@ inline void ViolinString::apply_forces()
     for (int n = 1; n <= MODES; ++n)
     {
         const float position_forces = vpa_c_bow_eigens[n-1]*m_string_excitation +
-                                       vpa_c_finger_eigens[n-1]*m_finger_dampening;
+                                      vpa_c_finger_eigens[n-1]*m_finger_dampening;
         m_a[n-1] = m_a_h[n-1] + X3[n-1] * position_forces;
         m_adot[n-1] = m_adot_h[n-1] + Y3[n-1] * position_forces;
     }
