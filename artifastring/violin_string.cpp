@@ -21,7 +21,14 @@
 #include <math.h>
 #include <stdlib.h> // for rand()
 
+//#define DEBUG_INIT
+
+
 #ifdef DEBUG
+#include <stdio.h>
+#endif
+
+#ifdef DEBUG_INIT
 #include <stdio.h>
 #endif
 
@@ -35,6 +42,7 @@ ViolinString::ViolinString(InstrumentType which_instrument, int string_number)
 
     reset();
 
+    m_instrument_type = which_instrument;
     set_physical_constants( string_params[which_instrument][string_number] );
     set_bow_friction(inst_mu_s[which_instrument], inst_mu_d[which_instrument]);
 
@@ -166,8 +174,13 @@ void ViolinString::cache_pc_c()
                                    * n_pi_div_L*n_pi_div_L ));
 
         // text on p. 78
-        //const float r_n = pc.B1 + pc.B2*(n-1)*(n-1);
-        const float r_n = pc.modes[n-1];
+        float r_n;
+        // TODO: get decent constants so we don't need this special case
+        if (m_instrument_type == Violin) {
+            r_n = pc.B1 + pc.B2*(n-1)*(n-1);
+        } else {
+            r_n = pc.modes[n-1];
+        }
 
         // Other abbreviations
         const float w_n         = sqrt(w0n*w0n - r_n*r_n);
@@ -189,6 +202,13 @@ void ViolinString::cache_pc_c()
                                   * (pc.T * n_pi_div_L
                                      + pc.E * I *
                                      n_pi_div_L*n_pi_div_L*n_pi_div_L);
+#ifdef DEBUG_INIT
+        printf("# %i\t %g\t%g\t%g\t %g\t%g\t%g\t %g\n",
+               n-1,
+               X1[n-1], X2[n-1], X3[n-1],
+               Y1[n-1], Y2[n-1], Y3[n-1],
+               pc_c_bridge_forces[n-1]);
+#endif
     }
     calculate_eigens(vpa_c_finger_eigens, vpa_finger_x1);
     calculate_eigens(vpa_c_bow_eigens, vpa_bow_x0);
@@ -264,7 +284,8 @@ inline float ViolinString::tick()
     const float bridge_force = compute_bridge_force();
 
 #ifdef DEBUG
-    printf("%g\t%i\t%g\t%g\t%g\t%g\t%g\n", time_seconds, !m_bow_slipping,
+    printf("%.5f\t%i\t%.3g\t%.3g\t%.3g\t%.3g\t%.3g\n",
+           time_seconds, !m_bow_slipping,
            m_y0dot_h, m_string_excitation, m_finger_dampening,
            bridge_force, vpa_bow_force);
     time_seconds += dt;
@@ -296,6 +317,12 @@ void ViolinString::fill_buffer(float* buffer, const int num_samples)
 {
     for (int i=0; i<num_samples; i++) {
         buffer[i] = tick();
+#ifdef DEBUG
+        if (fabs(buffer[i]) > 1.0) {
+            printf("ARTIFASTRING FATAL: clipped 1.0!");
+            exit(1);
+        }
+#endif
     }
 }
 

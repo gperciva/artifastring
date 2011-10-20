@@ -181,6 +181,7 @@ protected:
     // instrument-specific constants
     float mu_s;
     float mu_d;
+    InstrumentType m_instrument_type;
 };
 #endif
 
