@@ -43,6 +43,7 @@ ViolinString::ViolinString(InstrumentType which_instrument, int string_number)
     reset();
 
     m_instrument_type = which_instrument;
+    m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[m_instrument_type];
     set_physical_constants( string_params[which_instrument][string_number] );
     set_bow_friction(inst_mu_s[which_instrument], inst_mu_d[which_instrument]);
 
@@ -202,6 +203,8 @@ void ViolinString::cache_pc_c()
                                   * (pc.T * n_pi_div_L
                                      + pc.E * I *
                                      n_pi_div_L*n_pi_div_L*n_pi_div_L);
+        // we can avoid doing this later
+        pc_c_bridge_forces[n-1] *= m_bridge_force_amplify;
 #ifdef DEBUG_INIT
         printf("# %i\t %g\t%g\t%g\t %g\t%g\t%g\t %g\n",
                n-1,
@@ -323,6 +326,15 @@ void ViolinString::fill_buffer(float* buffer, const int num_samples)
             exit(1);
         }
 #endif
+    }
+}
+
+void ViolinString::fill_buffer_forces(float* buffer, float* forces,
+                                      const int num_samples)
+{
+    for (int i=0; i<num_samples; i++) {
+        buffer[i] = tick();
+        forces[i] = 10*m_bridge_force_amplify * m_string_excitation;
     }
 }
 
@@ -462,7 +474,7 @@ inline float ViolinString::compute_bridge_force()
     for (int n = 1; n <= MODES; ++n) {
         result += m_a[n-1] * pc_c_bridge_forces[n-1];
     }
-    return BRIDGE_AMPLIFY*result;
+    return result;
 }
 
 inline bool ViolinString::almostEquals(float one, float two)

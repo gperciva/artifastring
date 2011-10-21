@@ -82,6 +82,7 @@ void ViolinInstrument::pluck(int which_string, float ratio_from_bridge,
 void ViolinInstrument::bow(int which_string, float bow_ratio_from_bridge,
                            float bow_force, float bow_velocity)
 {
+    bow_string = which_string;
     violinString[which_string]->bow(bow_ratio_from_bridge,
                                     bow_force, bow_velocity);
 }
@@ -135,6 +136,25 @@ void ViolinInstrument::wait_samples(short *buffer, int num_samples)
     handle_buffer(buffer+position, remaining);
 }
 
+void ViolinInstrument::wait_samples_forces(short *buffer, short *forces,
+        int num_samples)
+{
+    int remaining = num_samples;
+    int position = 0;
+    while (remaining > NORMAL_BUFFER_SIZE) {
+        if (buffer == NULL) {
+            handle_buffer(NULL, NORMAL_BUFFER_SIZE); // special case
+        } else {
+            handle_buffer_forces(buffer+position, forces+position,
+                                 NORMAL_BUFFER_SIZE);
+        }
+        remaining -= NORMAL_BUFFER_SIZE;
+        position += NORMAL_BUFFER_SIZE;
+    }
+    handle_buffer_forces(buffer+position, forces+position, remaining);
+}
+
+
 void ViolinInstrument::handle_buffer(short output[], int num_samples)
 {
     // calculate string buffers
@@ -166,4 +186,43 @@ void ViolinInstrument::handle_buffer(short output[], int num_samples)
     }
 }
 
+void ViolinInstrument::handle_buffer_forces(short output[], short forces[],
+        int num_samples)
+{
+    // calculate string buffers
+    for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+        if (st == bow_string) {
+            violinString[st]->fill_buffer_forces(violin_string_buffer[st],
+                                                 bow_string_forces,
+                                                 num_samples);
+        } else {
+            violinString[st]->fill_buffer(violin_string_buffer[st],
+                                          num_samples);
+        }
+    }
+
+    // calculate bridge buffer from strings
+    for (int i=0; i<num_samples; i++) {
+        bridge_buffer[bridge_write_index] = 0.0;
+        for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+            bridge_buffer[bridge_write_index] += violin_string_buffer[st][i];
+        }
+        // update pointer
+        bridge_write_index++;
+        bridge_write_index &= BRIDGE_BUFFER_SIZE - 1;
+    }
+
+    // calculates f_hole
+    body_impulse(num_samples);
+
+    // bail if we don't want the output
+    if (output == NULL) {
+        return;
+    }
+
+    for (int i=0; i<num_samples; i++) {
+        output[i] = SHRT_MAX * f_hole[i];
+        forces[i] = SHRT_MAX * bow_string_forces[i];
+    }
+}
 

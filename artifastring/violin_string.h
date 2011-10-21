@@ -81,6 +81,9 @@ public:
      */
     void fill_buffer(float* buffer, const int num_samples);
 
+    void fill_buffer_forces(float* buffer, float* forces,
+                            const int num_samples);
+
 
     /** \brief Returns the string physical constants.
      *
@@ -181,6 +184,7 @@ protected:
     // instrument-specific constants
     float mu_s;
     float mu_d;
+    float m_bridge_force_amplify;
     InstrumentType m_instrument_type;
 };
 #endif

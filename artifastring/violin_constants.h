@@ -26,8 +26,15 @@
  * \brief Physical constants of a violin.
  */
 
+/**
+ * \brief enumeration type to access string physical constants
+ */
+enum InstrumentType {
+    Violin, Viola, Cello,
+};
+
 const float PLUCK_FORCE_SCALE = 1e0;
-const float BRIDGE_AMPLIFY = 1e-3;
+const float BRIDGE_FORCE_AMPLIFY [] = {1e-2, 2e-3, 2e-3};
 
 const int MODES = 60;
 
@@ -35,13 +42,6 @@ const int MODES = 60;
 const float SUM_BELOW = 1e-6;
 const float EACH_MODAL_VELOCITY_BELOW = 1e-4;
 
-
-/**
- * \brief enumeration type to access string physical constants
- */
-enum InstrumentType {
-    Violin, Viola, Cello,
-};
 
 // friction constants
 const float inst_mu_s[] = { 0.8, 0.8, 1.0 };

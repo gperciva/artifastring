@@ -100,6 +100,7 @@ public:
      */
     void wait_samples(short *buffer, int num_samples);
 
+    void wait_samples_forces(short *buffer, short *forces, int num_samples);
 
     /** \brief Returns a string's physical constants.
      *
@@ -126,6 +127,7 @@ private:
 
     // only does up to NORMAL_BUFFER_SIZE !
     void handle_buffer(short output[], int num_samples);
+    void handle_buffer_forces(short output[], short forces[], int num_samples);
 
     float bridge_buffer[BRIDGE_BUFFER_SIZE];
     int bridge_write_index;
@@ -135,6 +137,8 @@ private:
     void body_impulse(int num_samples);
     const float *pc_kernel;
 
+    float bow_string_forces[NORMAL_BUFFER_SIZE];
+    int bow_string;
 };
 
 #endif

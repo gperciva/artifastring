@@ -49,12 +49,14 @@ vector<string> gulp_file(const char *filename) {
     return input;
 }
 
-inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, float until)
+inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, float until)
 {
     int delta = until*44100.0 - total_samples;
     if (delta > 0) {
         short *array = wavfile->request_fill(delta);
-        violin->wait_samples(array, delta);
+        short *forces = forces_file->request_fill(delta);
+        violin->wait_samples_forces(array, forces, delta);
         total_samples += delta;
     } else {
         if (delta < 0) {
@@ -66,25 +68,28 @@ inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile, float until)
     }
 }
 
-void command_finger(ViolinInstrument *violin, MonoWav *wavfile, string command)
+void command_finger(ViolinInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
 {
     float next_time;
     int which_string;
     float finger_position;
     sscanf(command.c_str(), "f\t%f\t%i\t%f",
            &next_time, &which_string, &finger_position);
-    waitUntil(violin, wavfile, next_time);
+    waitUntil(violin, wavfile, forces_file, next_time);
     violin->finger(which_string, finger_position);
 }
 
-void command_wait(ViolinInstrument *violin, MonoWav *wavfile, string command)
+void command_wait(ViolinInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
 {
     float next_time;
     sscanf(command.c_str(), "w\t%f", &next_time);
-    waitUntil(violin, wavfile, next_time);
+    waitUntil(violin, wavfile, forces_file, next_time);
 }
 
-void command_pluck(ViolinInstrument *violin, MonoWav *wavfile, string command)
+void command_pluck(ViolinInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
 {
     float next_time;
     int which_string;
@@ -92,23 +97,25 @@ void command_pluck(ViolinInstrument *violin, MonoWav *wavfile, string command)
     float pluck_force;
     sscanf(command.c_str(), "p\t%f\t%i\t%f\t%f", &next_time,
            &which_string, &pluck_position, &pluck_force);
-    waitUntil(violin, wavfile, next_time);
+    waitUntil(violin, wavfile, forces_file, next_time);
     violin->pluck(which_string, pluck_position, pluck_force);
 }
 
-void command_bow(ViolinInstrument *violin, MonoWav *wavfile, string command)
+void command_bow(ViolinInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
 {
     float next_time;
     int which_string;
     float bow_position, force, velocity;
     sscanf(command.c_str(), "b\t%f\t%i\t%f\t%f\t%f", &next_time,
            &which_string, &bow_position, &force, &velocity);
-    waitUntil(violin, wavfile, next_time);
+    waitUntil(violin, wavfile, forces_file, next_time);
     violin->bow(which_string, bow_position, force, velocity);
 }
 
 
-void play_file(vector<string> input, MonoWav *wavfile, int instrument_number) {
+void play_file(vector<string> input, MonoWav *wavfile, 
+        MonoWav *forces_file, int instrument_number) {
     ViolinInstrument *violin = new ViolinInstrument(instrument_number);
     total_samples = 0;
 
@@ -118,16 +125,16 @@ void play_file(vector<string> input, MonoWav *wavfile, int instrument_number) {
             // comment line; do nothing
             break;
         case 'w':
-            command_wait(violin, wavfile, input[i]);
+            command_wait(violin, wavfile, forces_file, input[i]);
             break;
         case 'f':
-            command_finger(violin, wavfile, input[i]);
+            command_finger(violin, wavfile, forces_file, input[i]);
             break;
         case 'b':
-            command_bow(violin, wavfile, input[i]);
+            command_bow(violin, wavfile, forces_file, input[i]);
             break;
         case 'p':
-            command_pluck(violin, wavfile, input[i]);
+            command_pluck(violin, wavfile, forces_file, input[i]);
             break;
         default:
             printf("Unrecognized command: ");
@@ -156,12 +163,17 @@ int main(int argc, char **argv) {
             printf("File should end in .actions\n");
             exit(2);
         }
-        filename.replace(suffix_position, 8, ".wav");
+        string wav_filename = filename;
+        wav_filename.replace(suffix_position, 8, ".wav");
+        string forces_filename = filename;
+        forces_filename.replace(suffix_position, 8, ".forces");
 
-        MonoWav *wavfile = new MonoWav(filename.c_str(),10);
+        MonoWav *wavfile = new MonoWav(wav_filename.c_str(),4096);
+        MonoWav *forces_file = new MonoWav(forces_filename.c_str(),4096);
 
-        play_file(input, wavfile, instrument_number);
+        play_file(input, wavfile, forces_file, instrument_number);
 
         delete wavfile;
+        delete forces_file;
     }
 }
