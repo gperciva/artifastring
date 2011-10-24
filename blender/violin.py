@@ -8,6 +8,8 @@ import bow
 import pluck
 import finger
 
+import cameras
+
 import utils
 
 STRINGS=['g', 'd', 'a', 'e']
@@ -38,6 +40,9 @@ class Violin():
         ### fingers
         self.fingers = list(map(lambda x: finger.Finger(self, x),
                             range(len(STRINGS))))
+
+        ### camera
+        self.camera = 0
 
         ### initialize positions
         self.bow_action(0, 0, 0, 0, 1)
@@ -142,6 +147,9 @@ class Violin():
         self.bow.move(self, string_number, bow_bridge_distance,
             bow_force, bow_along, frame)
 
+    def camera_action(self, camera_number, frame):
+        print ("HARDCORE camera action")
+        cameras.set_camera(camera_number, frame, frame-1)
 
 
     def debug(self):

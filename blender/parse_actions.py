@@ -30,7 +30,8 @@ def load_keyframes(violin, filename, fps):
                 process_bow(violin, prev_bow, prev_frame)
                 prev_bow = None
 
-        if splitline[0] == 'b':
+        action_text = splitline[0]
+        if action_text == 'b':
             # skip over the tons of bowing
             # TODO: take average of them instead of skipping?
             if frame == prev_frame:
@@ -38,18 +39,25 @@ def load_keyframes(violin, filename, fps):
             else:
                 process_bow(violin, splitline, frame)
                 prev_frame = frame
-        if splitline[0] == 'f':
+        elif action_text == 'f':
            # print ("FINGER:", splitline)
             string_number = int(splitline[2])
             finger_position = float(splitline[3])
             violin.finger_action(string_number, finger_position, frame)
             prev_frame = frame
-        if splitline[0] == 'p':
+        elif action_text == 'p':
             #print (splitline)
             string_number = int(splitline[2])
             pluck_position = float(splitline[3])
             violin.pluck_action(string_number, pluck_position, frame)
             prev_frame = frame
+        elif action_text == 'c':
+            camera_number = int(splitline[2])
+            violin.camera_action(camera_number, frame)
+        elif action_text == 'w':
+            pass
+        else:
+            print ("ERROR: unrecognized command: %s" % action_text)
     seconds_end = float(lines[-1].split()[1])
     frame_end = int(seconds_end * fps)
     return frame_end

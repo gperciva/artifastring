@@ -19,6 +19,11 @@ names for objects and vertex groups.
     - "hair-frog"   (where the hair touches the frog)
     - "hair-point"  (at the "tip" of the bow)
     - "wrapping"    (the silvery part on the stick near the bow)
+- cameras:
+  - "Camera" - stick wherever you want
+  - "Camera.000" - best view for violin
+  - "Camera.001" - best view for viola (probably just zoomed violin)
+  - "Camera.002" - best view for cello
 
 
 GENERAL NOTES
