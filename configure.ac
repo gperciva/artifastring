@@ -17,7 +17,9 @@ AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_HEADER_STDC
-AC_CHECK_LIB(stdc++, main,,AC_MSG_ERROR(requires libstc++))
+AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstc++))
+AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
+AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING(--enable-debug,[Compile with debug support])],

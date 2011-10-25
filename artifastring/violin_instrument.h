@@ -23,15 +23,19 @@
 #include "artifastring/violin_string.h"
 #include "artifastring/violin_body_impulse.h"
 
-//#define NO_CONVOLUTION
-#ifdef NO_CONVOLUTION
-const float NO_CONVOLUTION_AMPLIFY = 20.0;
-#endif
+#include <complex.h>
+#include <fftw3.h>
 
 const int NUM_VIOLIN_STRINGS = 4;
+
 // size optimization: allows for AND-based ring buffers
-const int NORMAL_BUFFER_SIZE = PC_KERNEL_SIZE;
-const int BRIDGE_BUFFER_SIZE = 2*NORMAL_BUFFER_SIZE;
+const int NORMAL_BUFFER_SIZE = PC_KERNEL_SIZE/2; // is 1024
+const int CONVOLUTION_ACTUAL_DATA_SIZE = NORMAL_BUFFER_SIZE + PC_KERNEL_SIZE;
+
+// round (NORMAL_BUFFER_SIZE+PC_KERNEL_SIZE) to next power of 2
+// can't be bothered to write math for this; I'm only doing it once.
+const int CONVOLUTION_SIZE = 4096;
+const int F_HOLE_SIZE = 4096;
 
 /// \brief Main class for violin synthesis  (if in doubt, use this one)
 class ViolinInstrument {
@@ -126,19 +130,26 @@ private:
     float violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
 
     // only does up to NORMAL_BUFFER_SIZE !
-    void handle_buffer(short output[], int num_samples);
-    void handle_buffer_forces(short output[], short forces[], int num_samples);
+    void handle_buffer(short output[], short forces[], int num_samples);
 
-    float bridge_buffer[BRIDGE_BUFFER_SIZE];
-    int bridge_write_index;
-    int bridge_read_index;
-
-    float f_hole[NORMAL_BUFFER_SIZE];
-    void body_impulse(int num_samples);
-    const float *pc_kernel;
+    void body_impulse();
+    float *body_in;
+    float *body_out;
+    float f_hole[F_HOLE_SIZE];
+    int f_hole_read_index;
 
     float bow_string_forces[NORMAL_BUFFER_SIZE];
     int bow_string;
+
+    fftwf_complex *kernel_interim;
+    fftwf_complex *body_interim;
+    fftwf_plan kernel_plan_f;
+    fftwf_plan body_plan_f;
+    fftwf_plan body_plan_b;
+    int body_M;
+
+    float m_bridge_force_amplify;
+    float m_bow_force_amplify;
 };
 
 #endif

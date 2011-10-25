@@ -23,6 +23,8 @@
 #include <limits.h>
 #include <cstddef>
 
+#include <algorithm>
+
 ViolinInstrument::ViolinInstrument(int instrument_number) {
     InstrumentType distinct_instrument;
     switch (instrument_number) {
@@ -35,37 +37,68 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     default:
         distinct_instrument = Violin;
     }
-    for (int st; st < NUM_VIOLIN_STRINGS; st++) {
+    for (int st=0; st < NUM_VIOLIN_STRINGS; st++) {
         violinString[st] = new ViolinString(distinct_instrument, st);
     }
+    m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[distinct_instrument]
+                             * SHRT_MAX / CONVOLUTION_SIZE;
+    m_bow_force_amplify = BOW_FORCE_AMPLIFY[distinct_instrument]
+                          * SHRT_MAX;
 
-    pc_kernel = pc_kernels[instrument_number];
+    std::fill(f_hole, f_hole+F_HOLE_SIZE, 0.0);
+    f_hole_read_index = 0;
 
-    for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
-        bridge_buffer[i] = 0.0;
+    bow_string = 0;
+
+    // setup FFT(kernel)
+    float pc_kernel[CONVOLUTION_SIZE] = {0};
+    // copy good data
+    for (int i = 0; i<PC_KERNEL_SIZE; i++) {
+        pc_kernel[i] = pc_kernels[instrument_number][i];
     }
-    // before you doubt this, draw a ring buffer diagram
-    bridge_write_index = 0;
-#ifdef NO_CONVOLUTION
-    bridge_read_index = 0;
-#else
-    bridge_read_index = BRIDGE_BUFFER_SIZE-PC_KERNEL_SIZE+1;
-#endif
+    // FFT stuff
+    int kernel_M = (CONVOLUTION_SIZE / 2) + 1;
+    kernel_interim = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * kernel_M);
+    kernel_plan_f = fftwf_plan_dft_r2c_1d(
+                        CONVOLUTION_SIZE, pc_kernel, kernel_interim, FFTW_ESTIMATE);
+    fftwf_execute(kernel_plan_f);
+    fftwf_destroy_plan(kernel_plan_f);
+
+    // setup body convolution
+    body_M = (CONVOLUTION_SIZE / 2) + 1;
+    body_in = new float[CONVOLUTION_SIZE];
+    body_out = new float[CONVOLUTION_SIZE];
+    body_interim = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * body_M);
+
+
+    body_plan_f = fftwf_plan_dft_r2c_1d(
+                      CONVOLUTION_SIZE, body_in, body_interim, FFTW_ESTIMATE);
+    //body_N, body_in, body_interim, FFTW_MEASURE);
+    body_plan_b = fftwf_plan_dft_c2r_1d(
+                      CONVOLUTION_SIZE, body_interim, body_out, FFTW_ESTIMATE);
+    //body_N, body_interim, body_out, FFTW_MEASURE);
+    //fftwf_export_wisdom_to_filename("artifastring.wisdom");
 }
 
 ViolinInstrument::~ViolinInstrument() {
     for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         delete violinString[st];
     }
+    fftwf_destroy_plan(body_plan_f);
+    fftwf_destroy_plan(body_plan_b);
+
+    fftwf_free(kernel_interim);
+    fftwf_free(body_interim);
+    fftwf_cleanup();
+    delete [] body_in;
+    delete [] body_out;
 }
 
 void ViolinInstrument::reset() {
     for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         violinString[st]->reset();
     }
-    for (int i = 0; i<BRIDGE_BUFFER_SIZE; i++) {
-        bridge_buffer[i] = 0.0;
-    }
+    std::fill(f_hole, f_hole+F_HOLE_SIZE, 0.0);
 }
 
 void ViolinInstrument::finger(int which_string, float ratio_from_nut)
@@ -99,24 +132,24 @@ void ViolinInstrument::set_physical_constants(int which_string,
 }
 
 
-void ViolinInstrument::body_impulse(int num_samples)
+void ViolinInstrument::body_impulse()
 {
-    for (int i=0; i<num_samples; i++) {
-#ifdef NO_CONVOLUTION
-        f_hole[i] = NO_CONVOLUTION_AMPLIFY*bridge_buffer[bridge_read_index];
-#else
-        f_hole[i] = 0.0;
-        int bi=bridge_read_index;
-        for (int ki=0; ki < PC_KERNEL_SIZE; ki++) {
-            f_hole[i] += bridge_buffer[bi] * pc_kernel[ki];
-            // update read pointer
-            bi++;
-            bi &= BRIDGE_BUFFER_SIZE - 1;
-        }
-#endif
-        // update pointers
-        bridge_read_index++;
-        bridge_read_index &= BRIDGE_BUFFER_SIZE - 1;
+    fftwf_execute(body_plan_f);
+    // pointwise multiplication
+    for (int i=0; i<body_M; i++) {
+        body_interim[i] = body_interim[i] * kernel_interim[i];
+    }
+    fftwf_execute(body_plan_b);
+
+    // get output
+    int f_hole_write_index = f_hole_read_index;
+    for (int i=0; i<CONVOLUTION_ACTUAL_DATA_SIZE; i++) {
+        // body_out is un-normalized, but we take care of this
+        // with m_bow_force_amplify
+        f_hole[f_hole_write_index] += body_out[i];
+        // update pointer
+        f_hole_write_index++;
+        f_hole_write_index &= F_HOLE_SIZE - 1;
     }
 }
 
@@ -126,14 +159,16 @@ void ViolinInstrument::wait_samples(short *buffer, int num_samples)
     int position = 0;
     while (remaining > NORMAL_BUFFER_SIZE) {
         if (buffer == NULL) {
-            handle_buffer(NULL, NORMAL_BUFFER_SIZE);
+            handle_buffer(NULL, NULL, NORMAL_BUFFER_SIZE);
         } else {
-            handle_buffer(buffer+position, NORMAL_BUFFER_SIZE);
+            handle_buffer(buffer+position, NULL, NORMAL_BUFFER_SIZE);
         }
         remaining -= NORMAL_BUFFER_SIZE;
         position += NORMAL_BUFFER_SIZE;
     }
-    handle_buffer(buffer+position, remaining);
+    if (remaining > 0) {
+        handle_buffer(buffer+position, NULL, remaining);
+    }
 }
 
 void ViolinInstrument::wait_samples_forces(short *buffer, short *forces,
@@ -143,86 +178,60 @@ void ViolinInstrument::wait_samples_forces(short *buffer, short *forces,
     int position = 0;
     while (remaining > NORMAL_BUFFER_SIZE) {
         if (buffer == NULL) {
-            handle_buffer(NULL, NORMAL_BUFFER_SIZE); // special case
+            handle_buffer(NULL, NULL, NORMAL_BUFFER_SIZE); // special case
         } else {
-            handle_buffer_forces(buffer+position, forces+position,
-                                 NORMAL_BUFFER_SIZE);
+            handle_buffer(buffer+position, forces+position,
+                          NORMAL_BUFFER_SIZE);
         }
         remaining -= NORMAL_BUFFER_SIZE;
         position += NORMAL_BUFFER_SIZE;
     }
-    handle_buffer_forces(buffer+position, forces+position, remaining);
-}
-
-
-void ViolinInstrument::handle_buffer(short output[], int num_samples)
-{
-    // calculate string buffers
-    for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
-        violinString[st]->fill_buffer(violin_string_buffer[st], num_samples);
-    }
-
-    // calculate bridge buffer from strings
-    for (int i=0; i<num_samples; i++) {
-        bridge_buffer[bridge_write_index] = 0.0;
-        for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
-            bridge_buffer[bridge_write_index] += violin_string_buffer[st][i];
-        }
-        // update pointer
-        bridge_write_index++;
-        bridge_write_index &= BRIDGE_BUFFER_SIZE - 1;
-    }
-
-    // calculates f_hole
-    body_impulse(num_samples);
-
-    // bail if we don't want the output
-    if (output == NULL) {
-        return;
-    }
-
-    for (int i=0; i<num_samples; i++) {
-        output[i] = SHRT_MAX*f_hole[i];
+    if (remaining > 0) {
+        handle_buffer(buffer+position, forces+position, remaining);
     }
 }
 
-void ViolinInstrument::handle_buffer_forces(short output[], short forces[],
-        int num_samples)
+
+void ViolinInstrument::handle_buffer(short output[], short forces[],
+                                     int num_samples)
 {
     // calculate string buffers
     for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
-        if (st == bow_string) {
-            violinString[st]->fill_buffer_forces(violin_string_buffer[st],
-                                                 bow_string_forces,
-                                                 num_samples);
+        if ((st == bow_string) && (forces != NULL)) {
+            violinString[st]->fill_buffer_forces(
+                violin_string_buffer[st],
+                bow_string_forces,
+                num_samples);
         } else {
             violinString[st]->fill_buffer(violin_string_buffer[st],
                                           num_samples);
         }
     }
 
-    // calculate bridge buffer from strings
+    // calculate body input from strings
+    std::fill(body_in, body_in + CONVOLUTION_SIZE, 0.0);
     for (int i=0; i<num_samples; i++) {
-        bridge_buffer[bridge_write_index] = 0.0;
         for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
-            bridge_buffer[bridge_write_index] += violin_string_buffer[st][i];
+            body_in[i] += violin_string_buffer[st][i];
         }
-        // update pointer
-        bridge_write_index++;
-        bridge_write_index &= BRIDGE_BUFFER_SIZE - 1;
     }
 
-    // calculates f_hole
-    body_impulse(num_samples);
+    // calculates f_hole output
+    body_impulse();
 
-    // bail if we don't want the output
-    if (output == NULL) {
-        return;
+    // get output and forces
+    if (output != NULL) {
+        for (int i=0; i<num_samples; i++) {
+            output[i] = f_hole[f_hole_read_index] * m_bridge_force_amplify;
+            f_hole[f_hole_read_index] = 0;
+            f_hole_read_index++;
+            f_hole_read_index &= F_HOLE_SIZE - 1;
+        }
     }
-
-    for (int i=0; i<num_samples; i++) {
-        output[i] = SHRT_MAX * f_hole[i];
-        forces[i] = SHRT_MAX * bow_string_forces[i];
+    if (forces != NULL) {
+        for (int i=0; i<num_samples; i++) {
+            forces[i] = bow_string_forces[i] * m_bow_force_amplify;
+        }
     }
 }
 

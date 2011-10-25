@@ -185,6 +185,7 @@ protected:
     float mu_s;
     float mu_d;
     float m_bridge_force_amplify;
+    float m_bow_force_amplify;
     InstrumentType m_instrument_type;
 };
 #endif

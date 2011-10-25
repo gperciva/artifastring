@@ -20,9 +20,11 @@
 #include "artifastring/violin_string.h"
 #include <math.h>
 #include <stdlib.h> // for rand()
+#include <algorithm> // for std::fill
 
 //#define DEBUG_INIT
 
+#include <stdio.h>
 
 #ifdef DEBUG
 #include <stdio.h>
@@ -43,7 +45,6 @@ ViolinString::ViolinString(InstrumentType which_instrument, int string_number)
     reset();
 
     m_instrument_type = which_instrument;
-    m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[m_instrument_type];
     set_physical_constants( string_params[which_instrument][string_number] );
     set_bow_friction(inst_mu_s[which_instrument], inst_mu_d[which_instrument]);
 
@@ -140,6 +141,7 @@ void ViolinString::bow(const float bow_ratio_from_bridge,
         calculate_eigens(vpa_c_bow_eigens, vpa_bow_x0);
     }
 }
+
 String_Physical ViolinString::get_physical_constants()
 {
     String_Physical pc_copy = pc;
@@ -204,7 +206,8 @@ void ViolinString::cache_pc_c()
                                      + pc.E * I *
                                      n_pi_div_L*n_pi_div_L*n_pi_div_L);
         // we can avoid doing this later
-        pc_c_bridge_forces[n-1] *= m_bridge_force_amplify;
+        // FIXME: do this in instrument
+        //pc_c_bridge_forces[n-1] *= m_bridge_force_amplify;
 #ifdef DEBUG_INIT
         printf("# %i\t %g\t%g\t%g\t %g\t%g\t%g\t %g\n",
                n-1,
@@ -258,9 +261,6 @@ void ViolinString::cache_vpa_c()
 
 inline float ViolinString::tick()
 {
-    if (!m_active) {
-        return 0.0;
-    }
     if (recache_vpa_c) {
         cache_vpa_c();
     }
@@ -294,15 +294,12 @@ inline float ViolinString::tick()
     time_seconds += dt;
 #endif
 
-    if ((vpa_bow_force == 0) && (vpa_pluck_force == 0)) {
-        check_active(bridge_force);
-    }
     return bridge_force;
 }
 
 inline void ViolinString::check_active(float bridge_force)
 {
-    if (fabs(bridge_force) < SUM_BELOW) {
+    if (fabs(bridge_force) < MINIMUM_ABS_BRIDGE_FORCE) {
         bool should_stop = true;
         for (int n = 1; n <= MODES; ++n) {
             if (fabs(m_adot[n-1]) >= EACH_MODAL_VELOCITY_BELOW) {
@@ -316,25 +313,34 @@ inline void ViolinString::check_active(float bridge_force)
     }
 }
 
-void ViolinString::fill_buffer(float* buffer, const int num_samples)
+void ViolinString::fill_buffer(float *buffer, const int num_samples)
 {
-    for (int i=0; i<num_samples; i++) {
-        buffer[i] = tick();
-#ifdef DEBUG
-        if (fabs(buffer[i]) > 1.0) {
-            printf("ARTIFASTRING FATAL: clipped 1.0!");
-            exit(1);
+    if (m_active) {
+        for (int i=0; i<num_samples; i++) {
+            buffer[i] = tick();
         }
-#endif
+        if ((vpa_bow_force == 0) && (vpa_pluck_force == 0)) {
+            check_active(buffer[num_samples-1]);
+        }
+    } else {
+        std::fill(buffer, buffer+num_samples, 0.0);
     }
 }
 
-void ViolinString::fill_buffer_forces(float* buffer, float* forces,
+void ViolinString::fill_buffer_forces(float *buffer, float *forces,
                                       const int num_samples)
 {
-    for (int i=0; i<num_samples; i++) {
-        buffer[i] = tick();
-        forces[i] = 10*m_bridge_force_amplify * m_string_excitation;
+    if (m_active) {
+        for (int i=0; i<num_samples; i++) {
+            buffer[i] = tick();
+            forces[i] = m_string_excitation;
+        }
+        if ((vpa_bow_force == 0) && (vpa_pluck_force == 0)) {
+            check_active(buffer[num_samples-1]);
+        }
+    } else {
+        std::fill(buffer, buffer+num_samples, 0.0);
+        std::fill(forces, forces+num_samples, 0.0);
     }
 }
 
@@ -374,8 +380,6 @@ inline float ViolinString::compute_pluck( )
 
 inline float ViolinString::compute_bow()
 {
-    // vpa_bow_force is not 0.0
-
     // special case: stationary string.  Assume stick.
     if (m_y0dot_h == 0) {
         m_bow_slipping = false;

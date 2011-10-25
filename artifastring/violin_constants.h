@@ -35,12 +35,13 @@ enum InstrumentType {
 
 const float PLUCK_FORCE_SCALE = 1e0;
 const float BRIDGE_FORCE_AMPLIFY [] = {1e-2, 2e-3, 2e-3};
+const float BOW_FORCE_AMPLIFY [] = {4e-1, 1e-1, 1e-1};
 
 const int MODES = 60;
 
 // optimization for "turning off" a string which is barely vibrating.
-const float SUM_BELOW = 1e-6;
-const float EACH_MODAL_VELOCITY_BELOW = 1e-4;
+const float MINIMUM_ABS_BRIDGE_FORCE = 1e-3;
+const float EACH_MODAL_VELOCITY_BELOW = 1e-3;
 
 
 // friction constants

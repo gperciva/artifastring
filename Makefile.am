@@ -4,7 +4,7 @@ if HAS_DEBUG
 AM_CXXFLAGS = -fPIC -g -fbounds-check
 MORE_WARNINGS_CXXFLAGS = -Wall -Werror -Wextra
 else
-AM_CXXFLAGS = -fPIC -O3 -funroll-loops
+AM_CXXFLAGS = -fPIC -O3 -march=native
 MORE_WARNINGS_CXXFLAGS =
 endif
 
