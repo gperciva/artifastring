@@ -24,8 +24,6 @@
 
 //#define DEBUG_INIT
 
-#include <stdio.h>
-
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -205,9 +203,6 @@ void ViolinString::cache_pc_c()
                                   * (pc.T * n_pi_div_L
                                      + pc.E * I *
                                      n_pi_div_L*n_pi_div_L*n_pi_div_L);
-        // we can avoid doing this later
-        // FIXME: do this in instrument
-        //pc_c_bridge_forces[n-1] *= m_bridge_force_amplify;
 #ifdef DEBUG_INIT
         printf("# %i\t %g\t%g\t%g\t %g\t%g\t%g\t %g\n",
                n-1,

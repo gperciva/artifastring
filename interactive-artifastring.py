@@ -33,7 +33,7 @@ import scipy.io.wavfile
 import pyaudio
 import aubio.aubiowrapper
 
-HOPSIZE = 1024
+HOPSIZE = 256
 NUM_AUDIO_BUFFERS = 4
 
 TUNING_SETTLE_BUFFERS = 10
@@ -41,7 +41,7 @@ TUNING_SETTLE_BUFFERS = 10
 PRINT_EXTRA_DISPLAY = 1
 
 class Parameters():
-    def __init__(self, st=0, fp=0, bp=.08, f=1.0, v=0.4, T=1.0):
+    def __init__(self, st=0, fp=0, bp=.10, f=1.0, v=0.3, T=1.0):
         self.violin_string = st
         self.finger_position = fp
         self.bow_position = bp
@@ -91,8 +91,6 @@ class InteractiveViolin():
     stdscr = None
     row = 5
     instrument_number = 0
-
-    cats = [0]*7
 
     def __init__(self, instrument_number, stdscr, audio_stream):
         self.instrument_number = instrument_number
@@ -223,6 +221,12 @@ class InteractiveViolin():
 
         if c == ord('b'):
             self.params.force /= 1.1
+        if c == 'l':
+            if self.params.force > 0:
+                self.store_force = self.params.force
+                self.params.force = 0
+            else:
+                self.params.force = self.store_force
 
         self.params_queue.put(self.params)
         if not skip_violin_print:
@@ -241,20 +245,24 @@ class InteractiveViolin():
     def print_tension(self, tension):
         self.stdscr.addstr(23, 5, str("T=%.3f" % tension))
 
+    def inst_name(self, instrument_number):
+        if 0 <= instrument_number <= 3:
+            return "violin/violin%i" % instrument_number
+        if instrument_number == 4:
+            return "viola/viola4"
+        if instrument_number == 5:
+            return "cello/cello5"
+
     def snapshot(self, cat):
-        prev_num = self.cats[cat-1]
-        num = prev_num + 1
-        self.cats[cat-1] += 1
 
         finger_midi = 12.0*math.log(1.0 /
             (1.0 - self.params.finger_position)) / math.log(2.0)
-        filename = "audio_%i_%.3f_%.3f_%.3f_%.3f_%i.wav" % (
+        filename = "audio_%i_%.3f_%.3f_%.3f_%.3f.wav" % (
             self.params.violin_string,
             finger_midi,
             self.params.bow_position,
             self.params.force,
-            self.params.velocity,
-            num)
+            self.params.velocity)
         complete = None
         seconds = 0.2
         for j in xrange( int(math.ceil(seconds * 44100.0 / HOPSIZE)) ):

@@ -20,11 +20,10 @@
 #ifndef VIOLIN_INSTRUMENT
 #define VIOLIN_INSTRUMENT
 
-#include "artifastring/violin_string.h"
+#include "artifastring/violin_constants.h"
 #include "artifastring/violin_body_impulse.h"
 
-#include <complex.h>
-#include <fftw3.h>
+class ViolinString;
 
 const int NUM_VIOLIN_STRINGS = 4;
 
@@ -141,11 +140,12 @@ private:
     float bow_string_forces[NORMAL_BUFFER_SIZE];
     int bow_string;
 
-    fftwf_complex *kernel_interim;
-    fftwf_complex *body_interim;
-    fftwf_plan kernel_plan_f;
-    fftwf_plan body_plan_f;
-    fftwf_plan body_plan_b;
+    // fftwf_complex
+    void *kernel_interim;
+    void *body_interim;
+    // fftwf_plan
+    void *body_plan_f_p;
+    void *body_plan_b_p;
     int body_M;
 
     float m_bridge_force_amplify;

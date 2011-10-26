@@ -18,12 +18,19 @@
  *
  */
 
-#include "artifastring/violin_instrument.h"
-#include "artifastring/violin_constants.h"
 #include <limits.h>
 #include <cstddef>
 
 #include <algorithm>
+
+extern "C" {
+#include <complex.h>
+#include <fftw3.h>
+};
+
+#include "artifastring/violin_instrument.h"
+//#include "artifastring/violin_constants.h"
+#include "artifastring/violin_string.h"
 
 ViolinInstrument::ViolinInstrument(int instrument_number) {
     InstrumentType distinct_instrument;
@@ -58,9 +65,12 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     }
     // FFT stuff
     int kernel_M = (CONVOLUTION_SIZE / 2) + 1;
-    kernel_interim = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * kernel_M);
-    kernel_plan_f = fftwf_plan_dft_r2c_1d(
-                        CONVOLUTION_SIZE, pc_kernel, kernel_interim, FFTW_ESTIMATE);
+    kernel_interim = fftwf_malloc(sizeof(fftwf_complex) * kernel_M);
+    fftwf_plan kernel_plan_f = fftwf_plan_dft_r2c_1d(
+                                   CONVOLUTION_SIZE,
+                                   pc_kernel,
+                                   (fftwf_complex*) kernel_interim,
+                                   FFTW_ESTIMATE);
     fftwf_execute(kernel_plan_f);
     fftwf_destroy_plan(kernel_plan_f);
 
@@ -68,24 +78,31 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     body_M = (CONVOLUTION_SIZE / 2) + 1;
     body_in = new float[CONVOLUTION_SIZE];
     body_out = new float[CONVOLUTION_SIZE];
-    body_interim = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * body_M);
+    body_interim = fftwf_malloc(sizeof(fftwf_complex) * body_M);
 
 
-    body_plan_f = fftwf_plan_dft_r2c_1d(
-                      CONVOLUTION_SIZE, body_in, body_interim, FFTW_ESTIMATE);
-    //body_N, body_in, body_interim, FFTW_MEASURE);
-    body_plan_b = fftwf_plan_dft_c2r_1d(
-                      CONVOLUTION_SIZE, body_interim, body_out, FFTW_ESTIMATE);
-    //body_N, body_interim, body_out, FFTW_MEASURE);
+    fftwf_plan body_plan_f = fftwf_plan_dft_r2c_1d(
+                                 CONVOLUTION_SIZE,
+                                 body_in,
+                                 (fftwf_complex*)body_interim,
+                                 FFTW_ESTIMATE);
+    fftwf_plan body_plan_b = fftwf_plan_dft_c2r_1d(
+                                 CONVOLUTION_SIZE,
+                                 (fftwf_complex*) body_interim,
+                                 body_out,
+                                 FFTW_ESTIMATE);
     //fftwf_export_wisdom_to_filename("artifastring.wisdom");
+
+    body_plan_f_p = (fftwf_plan*) body_plan_f;
+    body_plan_b_p = (fftwf_plan*) body_plan_b;
 }
 
 ViolinInstrument::~ViolinInstrument() {
     for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         delete violinString[st];
     }
-    fftwf_destroy_plan(body_plan_f);
-    fftwf_destroy_plan(body_plan_b);
+    fftwf_destroy_plan((fftwf_plan)body_plan_f_p);
+    fftwf_destroy_plan((fftwf_plan)body_plan_b_p);
 
     fftwf_free(kernel_interim);
     fftwf_free(body_interim);
@@ -134,12 +151,14 @@ void ViolinInstrument::set_physical_constants(int which_string,
 
 void ViolinInstrument::body_impulse()
 {
-    fftwf_execute(body_plan_f);
+    fftwf_execute((fftwf_plan)body_plan_f_p);
     // pointwise multiplication
     for (int i=0; i<body_M; i++) {
-        body_interim[i] = body_interim[i] * kernel_interim[i];
+        ((fftwf_complex*)(body_interim))[i] =
+            ((fftwf_complex*) body_interim)[i]
+            * ((fftwf_complex*) kernel_interim)[i];
     }
-    fftwf_execute(body_plan_b);
+    fftwf_execute((fftwf_plan)body_plan_b_p);
 
     // get output
     int f_hole_write_index = f_hole_read_index;
