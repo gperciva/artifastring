@@ -65,6 +65,13 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     }
     // FFT stuff
     int kernel_M = (CONVOLUTION_SIZE / 2) + 1;
+    body_M = (CONVOLUTION_SIZE / 2) + 1;
+    body_in = new float[CONVOLUTION_SIZE];
+    body_out = new float[CONVOLUTION_SIZE];
+
+    // critical section --------------
+    fftwf_mutex.lock();
+    // kernel
     kernel_interim = fftwf_malloc(sizeof(fftwf_complex) * kernel_M);
     fftwf_plan kernel_plan_f = fftwf_plan_dft_r2c_1d(
                                    CONVOLUTION_SIZE,
@@ -75,9 +82,6 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
     fftwf_destroy_plan(kernel_plan_f);
 
     // setup body convolution
-    body_M = (CONVOLUTION_SIZE / 2) + 1;
-    body_in = new float[CONVOLUTION_SIZE];
-    body_out = new float[CONVOLUTION_SIZE];
     body_interim = fftwf_malloc(sizeof(fftwf_complex) * body_M);
 
 
@@ -95,18 +99,25 @@ ViolinInstrument::ViolinInstrument(int instrument_number) {
 
     body_plan_f_p = (fftwf_plan*) body_plan_f;
     body_plan_b_p = (fftwf_plan*) body_plan_b;
+
+    fftwf_mutex.unlock();
+    // ------------- critical section end
 }
 
 ViolinInstrument::~ViolinInstrument() {
     for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         delete violinString[st];
     }
+    // critical section --------------
+    fftwf_mutex.lock();
     fftwf_destroy_plan((fftwf_plan)body_plan_f_p);
     fftwf_destroy_plan((fftwf_plan)body_plan_b_p);
 
     fftwf_free(kernel_interim);
     fftwf_free(body_interim);
     fftwf_cleanup();
+    fftwf_mutex.unlock();
+    // ------------- critical section end
     delete [] body_in;
     delete [] body_out;
 }
