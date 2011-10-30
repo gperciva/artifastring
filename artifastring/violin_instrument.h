@@ -23,9 +23,6 @@
 #include "artifastring/violin_constants.h"
 #include "artifastring/violin_body_impulse.h"
 
-#include <boost/signals2/mutex.hpp>
-static boost::signals2::mutex fftwf_mutex;
-
 class ViolinString;
 
 const int NUM_VIOLIN_STRINGS = 4;

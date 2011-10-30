@@ -28,6 +28,9 @@ extern "C" {
 #include <fftw3.h>
 };
 
+#include <boost/signals2/mutex.hpp>
+static boost::signals2::mutex fftwf_mutex;
+
 #include "artifastring/violin_instrument.h"
 //#include "artifastring/violin_constants.h"
 #include "artifastring/violin_string.h"
