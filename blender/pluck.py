@@ -29,14 +29,14 @@ class Pluck(abstract_object.AbstractObject):
         return obj
 
 
-    def move(self, string_number, pluck_position, frame):
+    def move(self, string_number, pluck_position, frame, lift_frame):
         loc = self.violin.string_contact(string_number, pluck_position)
         loc += 1.5*self.base_size * self.violin.away_from_string
         # set properties and animation
         self.obj.location = loc
         self.obj.keyframe_insert("location", frame=frame)
         # extra
-        self.pluck_raise(frame)
+        self.pluck_raise(lift_frame)
 
     def pluck_raise(self, frame_start):
         off_target = 10*self.base_size

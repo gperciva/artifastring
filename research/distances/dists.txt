@@ -1,0 +1,53 @@
+#   Length, diameter
+violin-I-e .322 .30
+violin-II-e .319 .28
+violin-III-e .321 .26
+violin-IV-e .321 .29
+violin-V-e .324 .27
+
+violin-I-a .322 .67
+violin-II-a .320 .58
+violin-III-a .323 .68
+violin-IV-a .320 .57
+violin-V-a .324 .59
+
+violin-I-d .322 .80
+violin-II-d .321 .71
+violin-III-d .325 .67
+violin-IV-d .320 .69
+violin-V-d .324 .71
+
+violin-I-g .322 .93
+violin-II-g .321 .71
+violin-III-g .326 .69
+violin-IV-g .321 .89
+violin-V-g .323 .69
+
+viola-I-A .363 .33
+viola-II-A .369 .32
+
+viola-I-D .363 .48
+viola-II-D* .369 .32
+
+viola-I-G .364 .61
+viola-II-G .369 .62
+
+viola-I-C .365 .65
+viola-II-C .371 .82
+
+cello-I-A .665 .68
+cello-II-A .685 .70
+cello-III-A .687 .71
+
+cello-I-D .666 .80
+cello-II-D .684 .93
+cello-III-D .687 .83
+
+cello-I-G .669 1.1
+cello-II-G .684 1.0
+cello-III-G .687 .98
+
+cello-I-C .669 1.4
+cello-II-C .685 1.4
+cello-III-C .687 1.5
+

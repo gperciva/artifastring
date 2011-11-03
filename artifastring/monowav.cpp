@@ -38,7 +38,7 @@ struct wavhdr {
 // --------
 
 // from marsyas WavSink.cpp , slightly modified
-FILE* prep_wav_file(const char*filename) {
+FILE* prep_wav_file(const char*filename, int sample_rate=22050) {
     wavhdr hdr_;
     FILE* sfp_ = fopen(filename, "wb");
 
@@ -62,7 +62,7 @@ FILE* prep_wav_file(const char*filename) {
     hdr_.chunk_size = 16;
     hdr_.format_tag = 1;
     hdr_.num_chans = (signed short)1;
-    hdr_.sample_rate = 44100;
+    hdr_.sample_rate = sample_rate;
     hdr_.bytes_per_sec = hdr_.sample_rate * 2;
     hdr_.bytes_per_samp = 2;
     hdr_.bits_per_samp = 16;
@@ -79,7 +79,7 @@ FILE* prep_wav_file(const char*filename) {
 // --------
 
 
-MonoWav::MonoWav(const char *filename, int buffer_size)
+MonoWav::MonoWav(const char *filename, int buffer_size, int sample_rate)
 {
     size = buffer_size;
     data = new short[size];
@@ -88,7 +88,7 @@ MonoWav::MonoWav(const char *filename, int buffer_size)
     }
     index = 0;
     total_samples = 0;
-    outfile = prep_wav_file(filename);
+    outfile = prep_wav_file(filename, sample_rate);
 }
 
 MonoWav::~MonoWav()

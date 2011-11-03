@@ -1,0 +1,10 @@
+original_recordings
+*.pyc
+*.png
+*.pickle
+*_modes.h
+*.txt
+glasgow-wav
+vancouver-wav
+reference-wav
+out/

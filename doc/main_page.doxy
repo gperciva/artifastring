@@ -156,7 +156,7 @@ g++ simple.cpp -lartifastring
 Manual compile (with no installation):
 
 \code
-g++ violin_instrument.cpp violin_string.cpp monowav.cpp simple.cpp -o simple
+g++ violin_instrument.cpp artifastring_string.cpp monowav.cpp simple.cpp -o simple
 \endcode
 
 

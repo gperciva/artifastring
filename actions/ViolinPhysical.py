@@ -42,8 +42,9 @@ class ViolinPhysical:
     def finger(self, vln_string, finger_pos):
         """ Places finger on string. """
         vln_string_n = self.whichToNum(vln_string)
-        self.actions.write("f\t%g\t%i\t%g\n" %
-            (self.seconds_action, vln_string_n, finger_pos) )
+        Kf = 1e5
+        self.actions.write("f\t%g\t%i\t%g\t%f\n" %
+            (self.seconds_action, vln_string_n, finger_pos, Kf) )
 
     def bow(self, vln_string, bridge_distance, force,
             velocity, starting_bow_pos=-1):

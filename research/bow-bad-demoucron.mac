@@ -1,0 +1,30 @@
+/* eqn 2.32
+a : C01 * (dv + vb - v0h) + C02 * y1h;
+*/
+a : (vpa_c_C01 * (dv + vpa_bow_velocity - m_y0dot_h)
+  + vpa_c_C02 * m_y1_h);
+
+
+/* eqn 2.33, without substitution */
+/*
+b : -Fb * (ud + (us-ud)/(1+dv/v0));
+*/
+b : Fb * (ud + (us-ud)/(1-dv/v0));
+
+sample_data : [
+  mu_d=0.3, mu_s=0.8, v0=0.2,
+  ud=0.3, us=0.8, v0=0.2,
+  vpa_c_C01=0.385, vpa_c_C02=0, m_y1_h=0,
+  vpa_bow_force=1.0, vpa_bow_velocity=1.0,
+  Fb=1.0, v_b=1.0,
+  m_y0dot_h=100
+  ];
+
+c: ev(a-b, sample_data);
+
+d: solve(c, dv);
+
+float(d);
+
+
+

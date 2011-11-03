@@ -20,8 +20,12 @@ def load_keyframes(violin, filename, fps):
         if line[0] == '#':
             # comment line
             continue
+        if len(line) < 2:
+            # blank line
+            continue
         splitline = line.split()
         seconds = float(splitline[1])
+        seconds_end = seconds
         frame = int(seconds * fps)+1 # we start counting at 1
 
         # to allow lifting bow
@@ -49,7 +53,10 @@ def load_keyframes(violin, filename, fps):
             #print (splitline)
             string_number = int(splitline[2])
             pluck_position = float(splitline[3])
-            violin.pluck_action(string_number, pluck_position, frame)
+            # pluck lifts off the string 0.1 seconds later
+            begin_lift_frame = int((seconds+0.1) * fps)+1 # we start counting at 1
+            violin.pluck_action(string_number, pluck_position,
+                frame, begin_lift_frame)
             prev_frame = frame
         elif action_text == 'c':
             camera_number = int(splitline[2])
@@ -58,7 +65,6 @@ def load_keyframes(violin, filename, fps):
             pass
         else:
             print ("ERROR: unrecognized command: %s" % action_text)
-    seconds_end = float(lines[-1].split()[1])
     frame_end = int(seconds_end * fps)
     return frame_end
 

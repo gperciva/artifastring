@@ -20,15 +20,15 @@ def main():
 
     violin.wait(0.5)
     violin.comment(" open strings arco")
-    force = 0.6
+    force = 1.2
     violin.bow('vl_A', bp, force, 1.0, 0.1)
     violin.wait(0.5)
     violin.bow('vl_D', bp, force, -1.0)
     violin.wait(0.5)
-    force = 1.2
+    force = 2.2
     violin.bow('vl_G', bp, force, 1.0)
     violin.wait(0.5)
-    force = 0.3
+    force = 0.8
     violin.bow('vl_E', bp, force, -0.5)
     violin.wait(1.0)
     violin.bow('vl_E', bp, 0.0, 0.0)
@@ -47,7 +47,7 @@ def main():
     violin.wait(1.0);
 
     violin.comment(" scale arco")
-    force = 0.6
+    force = 1.0
     velocity = 1.0
     violin.finger('vl_D', 0.0);
     violin.bow('vl_D', bp, force, velocity, 0.1);
@@ -65,7 +65,7 @@ def main():
     violin.bow('vl_D', bp, force, velocity);
     violin.wait(0.25);
     # repeated note
-    force = 0.3
+    force = 0.8
     violin.finger('vl_A', semitones(0));
     violin.bow('vl_A', bp, force, -velocity);
     violin.wait(0.25);
@@ -112,6 +112,8 @@ def main():
 
 
     violin.comment(" arco chords")
+    force = 2.0
+
     violin.finger('vl_G', semitones(2));
     violin.bow('vl_G', bp, force, velocity, 0.1);
     violin.wait(0.08);
@@ -164,7 +166,7 @@ def main():
     violin.wait(0.2)
 
     violin.comment(" gliss bow")
-    force = 0.4
+    force = 0.8
     velocity = 0.2
     finger_pos = semitones(2)
     violin.finger('vl_D', finger_pos)

@@ -11,12 +11,17 @@ AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
+AM_PROG_AR
 
 
 ### libraries
 AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_HEADER_STDC
+
+#AC_LANG([C++])
+PKG_CHECK_MODULES([EIGEN3], [eigen3])
+
 AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
 AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))

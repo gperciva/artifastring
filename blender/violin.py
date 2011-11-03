@@ -70,8 +70,8 @@ class Violin():
                     st+"-bridge-mark")
                 nut    = utils.mean_of_vertex_group(string_object,vertex_groups,
                     st+"-nut-mark")
-            bridge *= string_object.matrix_local
-            nut    *= string_object.matrix_local
+            bridge = string_object.matrix_local * bridge
+            nut    = string_object.matrix_local * nut
             string_coords.append( StringEnds(bridge, nut) )
         return string_coords
 
@@ -112,22 +112,19 @@ class Violin():
         return contact
 
     def get_string_angles(self):
-        # TODO: iffy calculations
-        g_a = self.string_coords[2].bridge - self.string_coords[0].nut
-        d_ang = self.towards_frog.angle(g_a) - math.pi/2
+        g_a = self.string_coords[0].bridge - self.string_coords[2].bridge
+        d_ang = self.towards_frog.angle(g_a)
         d_ang = -1*d_ang
 
-        # TODO: ouch hard-coding!
-        g_ang = d_ang - 0.3
+        e_d = self.string_coords[1].bridge - self.string_coords[3].bridge
+        a_ang = self.towards_frog.angle(e_d)
 
-        #e_a = self.string_coords[3].bridge - self.string_coords[2].nut
-        e_d = self.string_coords[3].bridge - self.string_coords[1].nut
-        a_ang = self.towards_frog.angle(e_d) - math.pi/2
-        #a_ang = e_a.angle(e_d)
-        e_ang = a_ang + 0.3
+        diff = a_ang - d_ang
+
+        e_ang = a_ang + diff
+        g_ang = d_ang - diff
 
         angles = [g_ang, d_ang, a_ang, e_ang]
-#        print (angles)
         return angles
 
 
@@ -135,10 +132,10 @@ class Violin():
     def finger_action(self, string_number, finger_position, frame):
         self.fingers[string_number].move(finger_position, frame)
 
-    def pluck_action(self, string_number, pluck_position, frame):
+    def pluck_action(self, string_number, pluck_position, frame, lift_frame):
         self.pluck.set_visible(True, frame)
         self.bow.set_visible(False, frame)
-        self.pluck.move(string_number, pluck_position, frame)
+        self.pluck.move(string_number, pluck_position, frame, lift_frame)
 
     def bow_action(self, string_number, bow_bridge_distance,
             bow_force, bow_along, frame):

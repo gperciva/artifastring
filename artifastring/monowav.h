@@ -28,13 +28,13 @@ public:
      * @brief mundane constructor.
      * @param[in] filename Filename; \c ".wav" is recommended.
      * @param[in] buffer_size Writes data to disk in 1-second
-     * (44100 sample) increments.  This increases automatically if
+     * (22050 sample) increments.  This increases automatically if
      * necessary.
      * @warning MonoWav does not check whether it received the
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.
      */
-    MonoWav(const char *filename, int buffer_size=44100);
+    MonoWav(const char *filename, int buffer_size=22050, int sample_rate=22050);
 
     /// @brief writes data to disk before quitting
     ~MonoWav();

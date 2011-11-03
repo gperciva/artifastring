@@ -1,10 +1,13 @@
 ### general setup
 ACLOCAL_AMFLAGS = -I m4
 if HAS_DEBUG
-AM_CXXFLAGS = -fPIC -g -fbounds-check
+AM_CXXFLAGS = -Iotherlibs/ -I../otherlibs/ -fPIC -g -fbounds-check
 MORE_WARNINGS_CXXFLAGS = -Wall -Werror -Wextra
 else
-AM_CXXFLAGS = -fPIC -O3 -march=native
+# AVX instructions are disabled because valgrind 3.8.1 does not
+# recognize them, and thus cannot be used for memory-checking and
+# profiling.  I will enable AVX when valgrind catches up.
+AM_CXXFLAGS = -Iotherlibs/ -I../otherlibs/ -fPIC -O3 -march=native -DNDEBUG -mno-avx -g
 MORE_WARNINGS_CXXFLAGS =
 endif
 
@@ -12,8 +15,8 @@ EXTRA_DIST = autogen.sh
 
 clean-local:
 	rm -rf doc/html/
-	rm -f monowav.py violin_instrument.py
-	rm -f monowav_wrap.cxx violin_instrument_wrap.cxx
+	rm -f monowav.py artifastring_instrument.py
+	rm -f monowav_wrap.cxx artifastring_instrument_wrap.cxx
 
 # this is a hacky way to only remove doc/ if we're
 # in a build dir, but not if we're in the main source dir
@@ -22,29 +25,44 @@ distclean-local:
 
 
 ### libraries
-artifastring_h = artifastring/violin_constants.h \
-	artifastring/violin_e_modes.h \
-	artifastring/violin_a_modes.h \
-	artifastring/violin_d_modes.h \
-	artifastring/violin_g_modes.h \
-	artifastring/cello_a_modes.h \
-	artifastring/cello_d_modes.h \
-	artifastring/cello_g_modes.h \
-	artifastring/cello_c_modes.h \
-	artifastring/violin_body_impulse.h \
-	artifastring/violin_string.h \
-	artifastring/violin_instrument.h
+artifastring_h = artifastring/artifastring_constants.h \
+	artifastring/artifastring_defines.h \
+	artifastring/constants/strings_violin.h \
+	artifastring/constants/strings_viola.h \
+	artifastring/constants/strings_cello.h \
+	artifastring/constants/body_violin_2.h \
+	artifastring/constants/body_violin_3.h \
+	artifastring/constants/body_viola_1.h \
+	artifastring/constants/body_viola_2.h \
+	artifastring/constants/body_cello_1.h \
+	artifastring/constants/body_cello_2.h \
+	artifastring/constants/haptic_response_1.h \
+	artifastring/constants/haptic_response_2.h \
+	artifastring/constants/haptic_response_3.h \
+	artifastring/actions_file.h \
+	artifastring/midi_pos.h \
+	artifastring/decimate.h \
+	artifastring/fft_convolution.h \
+	artifastring/artifastring_string.h \
+	artifastring/artifastring_instrument.h
 monowav_h = artifastring/monowav.h
 
 lib_LIBRARIES = libartifastring.a libmonowav.a
 libartifastring_a_SOURCES = $(artifastring_h) \
-	artifastring/violin_string.cpp \
-	artifastring/violin_instrument.cpp
-libartifastring_a_CXXFLAGS = $(AM_CXXFLAGS) $(MORE_WARNINGS_CXXFLAGS)
+	artifastring/actions_file.cpp \
+	artifastring/midi_pos.cpp \
+	artifastring/decimate.cpp \
+	artifastring/fft_convolution.cpp \
+	artifastring/artifastring_string.cpp \
+	artifastring/artifastring_instrument.cpp
+libartifastring_a_CXXFLAGS = $(AM_CXXFLAGS) \
+	$(MORE_WARNINGS_CXXFLAGS) \
+	$(EIGEN3_CFLAGS)
 artifastring_includedir=$(includedir)/artifastring/
 libmonowav_a_SOURCES = $(monowav_h) \
 	artifastring/monowav.cpp 
-libmonowav_a_CXXFLAGS = $(AM_CXXFLAGS) $(MORE_WARNINGS_CXXFLAGS)
+libmonowav_a_CXXFLAGS = $(AM_CXXFLAGS) $(MORE_WARNINGS_CXXFLAGS) \
+	$(EIGEN3_CFLAGS)
 monowav_includedir=$(includedir)/artifastring/
 nobase_include_HEADERS = $(artifastring_h) $(monowav_h)
 
@@ -57,11 +75,14 @@ ARTIFASTRING_INCLUDE = -I$(srcdir)/artifastring/
 
 bin_PROGRAMS = actions2wav
 actions2wav_SOURCES = src/actions2wav.cpp
-actions2wav_CXXFLAGS = $(AM_CXXFLAGS) $(ARTIFASTRING_INCLUDE) $(MORE_WARNINGS_CXXFLAGS)
-actions2wav_LDADD = $(lib_LIBRARIES)
+actions2wav_CXXFLAGS = $(AM_CXXFLAGS) $(ARTIFASTRING_INCLUDE) \
+	$(MORE_WARNINGS_CXXFLAGS) \
+	$(EIGEN3_CFLAGS)
+actions2wav_LDADD = $(lib_LIBRARIES) \
+	$(EIGEN3_LIBS)
 
 ### swig
-EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/violin_instrument.i
+EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/artifastring_instrument.i
 
 if HAS_SWIG
 # unified definitions
@@ -69,22 +90,38 @@ SWIGCPP = $(PYTHON_CPPFLAGS) $(AX_SWIG_PYTHON_CPPFLAGS) $(ARTIFASTRING_INCLUDE)
 SWIGLD = $(PYTHON_LDFLAGS) -module
 swig/%_wrap.cxx swig/%.py: $(srcdir)/swig/%.i
 	mkdir -p swig
-	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
+	$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -builtin -o $@ $<
+#$(SWIG) $(AX_SWIG_PYTHON_OPT) $(ARTIFASTRING_INCLUDE) -o $@ $<
 
 # per-file definitions
-pyexec_LTLIBRARIES = _monowav.la _violin_instrument.la
-nodist_python_PYTHON = swig/monowav.py swig/violin_instrument.py
+pyexec_LTLIBRARIES = _monowav.la _artifastring_instrument.la \
+	_actions_file.la _midi_pos.la
+python_PYTHON = interactive/artifastring_interactive.py
+nodist_python_PYTHON = swig/monowav.py swig/artifastring_instrument.py \
+	swig/actions_file.py swig/midi_pos.py
 
 nodist__monowav_la_SOURCES = swig/monowav_wrap.cxx \
 	artifastring/monowav.cpp
-_monowav_la_CPPFLAGS = $(SWIGCPP)
-_monowav_la_LDFLAGS = $(SWIGLD)
+_monowav_la_CPPFLAGS = $(SWIGCPP) $(EIGEN3_CFLAGS)
+_monowav_la_LDFLAGS = $(SWIGLD) $(EIGEN3_LIBS)
 
-nodist__violin_instrument_la_SOURCES = swig/violin_instrument_wrap.cxx \
-	artifastring/violin_string.cpp \
-	artifastring/violin_instrument.cpp
-_violin_instrument_la_CPPFLAGS = $(SWIGCPP)
-_violin_instrument_la_LDFLAGS = $(SWIGLD)
+nodist__artifastring_instrument_la_SOURCES = swig/artifastring_instrument_wrap.cxx \
+	artifastring/artifastring_string.cpp \
+	artifastring/fft_convolution.cpp \
+	artifastring/artifastring_instrument.cpp
+_artifastring_instrument_la_CPPFLAGS = $(SWIGCPP) $(EIGEN3_CFLAGS)
+_artifastring_instrument_la_LDFLAGS = $(SWIGLD) $(EIGEN3_LIBS)
+
+nodist__actions_file_la_SOURCES = swig/actions_file_wrap.cxx \
+	artifastring/actions_file.cpp
+_actions_file_la_CPPFLAGS = $(SWIGCPP) $(EIGEN3_CFLAGS)
+_actions_file_la_LDFLAGS = $(SWIGLD) $(EIGEN3_LIBS)
+
+nodist__midi_pos_la_SOURCES = swig/midi_pos_wrap.cxx \
+	artifastring/midi_pos.cpp
+_midi_pos_la_CPPFLAGS = $(SWIGCPP) $(EIGEN3_CFLAGS)
+_midi_pos_la_LDFLAGS = $(SWIGLD) $(EIGEN3_LIBS)
+
 
 endif
 

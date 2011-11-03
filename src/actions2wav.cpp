@@ -17,7 +17,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "violin_instrument.h"
+#include "artifastring_instrument.h"
 #include "monowav.h"
 
 // This file is ugly and stupid, but it works.  And "if it's
@@ -49,38 +49,64 @@ vector<string> gulp_file(const char *filename) {
     return input;
 }
 
-inline void waitUntil(ViolinInstrument *violin, MonoWav *wavfile,
+inline void waitUntil(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, float until)
 {
-    int delta = until*44100.0 - total_samples;
+    int delta = until*ARTIFASTRING_INSTRUMENT_SAMPLE_RATE - total_samples;
     if (delta > 0) {
+        // make sure we can easily deal with forces
+        delta = HAPTIC_DOWNSAMPLE_FACTOR*(delta/HAPTIC_DOWNSAMPLE_FACTOR);
+        //cout<<"get audio space for: "<<delta<<endl;
         short *array = wavfile->request_fill(delta);
-        short *forces = forces_file->request_fill(delta);
-        violin->wait_samples_forces(array, forces, delta);
+        //cout<<"get force space for: "<<delta/4<<endl;
+        // FIXME: test with full force buffer
+        short *forces = forces_file->request_fill(delta/HAPTIC_DOWNSAMPLE_FACTOR);
+        //short *forces = forces_file->request_fill(delta);
+        int unsafe = violin->wait_samples_forces(array, forces, delta);
+        if (unsafe > 0) {
+            //printf("#Unsafe: friction skip over stable, num samples: %i\n",
+            //    unsafe);
+        }
         total_samples += delta;
     } else {
         if (delta < 0) {
             printf("ERROR: going back in time!\n");
             printf("  now: %f, requested: %f\n",
-                   total_samples/44100.0, until);
+                   double(total_samples)/ARTIFASTRING_INSTRUMENT_SAMPLE_RATE, until);
             exit(1);
         }
     }
 }
 
-void command_finger(ViolinInstrument *violin, MonoWav *wavfile,
+void command_finger(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, string command)
 {
+    int num_tabs = 0;
+    for (unsigned int i=0; i < command.length(); i++) {
+        if (command[i] == '\t') {
+            num_tabs++;
+        }
+    }
     float next_time;
     int which_string;
     float finger_position;
-    sscanf(command.c_str(), "f\t%f\t%i\t%f",
+    if (num_tabs == 3) {
+        sscanf(command.c_str(), "f\t%f\t%i\t%f",
            &next_time, &which_string, &finger_position);
-    waitUntil(violin, wavfile, forces_file, next_time);
-    violin->finger(which_string, finger_position);
+        waitUntil(violin, wavfile, forces_file, next_time);
+        violin->finger(which_string, finger_position);
+    } else if (num_tabs == 4) {
+        float spring_K;
+        sscanf(command.c_str(), "f\t%f\t%i\t%f\t%f",
+           &next_time, &which_string, &finger_position, &spring_K);
+        waitUntil(violin, wavfile, forces_file, next_time);
+        violin->finger(which_string, finger_position, spring_K);
+    } else {
+        printf("Badly formed finger line in .actions file\n");
+    }
 }
 
-void command_wait(ViolinInstrument *violin, MonoWav *wavfile,
+void command_wait(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, string command)
 {
     float next_time;
@@ -88,7 +114,7 @@ void command_wait(ViolinInstrument *violin, MonoWav *wavfile,
     waitUntil(violin, wavfile, forces_file, next_time);
 }
 
-void command_pluck(ViolinInstrument *violin, MonoWav *wavfile,
+void command_pluck(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, string command)
 {
     float next_time;
@@ -98,10 +124,11 @@ void command_pluck(ViolinInstrument *violin, MonoWav *wavfile,
     sscanf(command.c_str(), "p\t%f\t%i\t%f\t%f", &next_time,
            &which_string, &pluck_position, &pluck_force);
     waitUntil(violin, wavfile, forces_file, next_time);
+    //printf("actions2wav, pluck force: %g\n", pluck_force);
     violin->pluck(which_string, pluck_position, pluck_force);
 }
 
-void command_bow(ViolinInstrument *violin, MonoWav *wavfile,
+void command_bow(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, string command)
 {
     float next_time;
@@ -113,10 +140,41 @@ void command_bow(ViolinInstrument *violin, MonoWav *wavfile,
     violin->bow(which_string, bow_position, force, velocity);
 }
 
+void command_bow_accel(ArtifastringInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
+{
+    float next_time;
+    int which_string;
+    float bow_position, force, velocity, accel;
+    sscanf(command.c_str(), "a\t%f\t%i\t%f\t%f\t%f\t%f", &next_time,
+           &which_string, &bow_position, &force, &velocity, &accel);
+    waitUntil(violin, wavfile, forces_file, next_time);
+    violin->bow_accel(which_string, bow_position, force, velocity, accel);
+}
 
-void play_file(vector<string> input, MonoWav *wavfile, 
-        MonoWav *forces_file, int instrument_number) {
-    ViolinInstrument *violin = new ViolinInstrument(instrument_number);
+
+void play_file(vector<string> input, string wav_filename,
+        string forces_filename, string log_filename,
+        InstrumentType instrument_type, int instrument_number) {
+    ArtifastringInstrument *violin = new ArtifastringInstrument(instrument_type, instrument_number);
+        MonoWav *wavfile = new MonoWav(wav_filename.c_str(),
+            4096, ARTIFASTRING_INSTRUMENT_SAMPLE_RATE);
+        MonoWav *forces_file = new MonoWav(forces_filename.c_str(),
+            4096, ARTIFASTRING_INSTRUMENT_SAMPLE_RATE / HAPTIC_DOWNSAMPLE_FACTOR);
+
+
+#ifdef RESEARCH
+/*
+    for (int string_number=0; string_number<4; string_number++) {
+        char filename[1024];
+        sprintf(filename, log_filename.c_str(), string_number);
+        violin->set_string_logfile(string_number, filename);
+    }
+    */
+#else
+    (void) log_filename;
+#endif
+
     total_samples = 0;
 
     for (unsigned int i=0; i<input.size(); i++) {
@@ -133,28 +191,42 @@ void play_file(vector<string> input, MonoWav *wavfile,
         case 'b':
             command_bow(violin, wavfile, forces_file, input[i]);
             break;
+        case 'a':
+            command_bow_accel(violin, wavfile, forces_file, input[i]);
+            break;
         case 'p':
             command_pluck(violin, wavfile, forces_file, input[i]);
+            break;
+        case '\n':
+            break;
+        case 0:
             break;
         default:
             printf("Unrecognized command: ");
             cout<<input[i][0]<<endl;
-
+            //printf("%i\n", input[i][0]);
         }
     }
     delete violin;
+        delete wavfile;
+        delete forces_file;
 }
 
 
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        printf("Usage: ./action2wav FILENAME.action {{INSTRUMENT_NUMBER}}\n");
+        printf("Usage: ./action2wav FILENAME.action");
+        printf(" {{INSTRUMENT_TYPE}} {{INSTRUMENT_NUMBER}} {{SAFE}}\n");
     } else {
         string filename = argv[1];
+        int instrument_type = 0;
         int instrument_number = 0;
         if (argc > 2) {
-            instrument_number = atoi(argv[2]);
+            instrument_type = atoi(argv[2]);
+        }
+        if (argc > 3) {
+            instrument_number = atoi(argv[3]);
         }
 
         vector<string> input = gulp_file(filename.c_str());
@@ -166,14 +238,13 @@ int main(int argc, char **argv) {
         string wav_filename = filename;
         wav_filename.replace(suffix_position, 8, ".wav");
         string forces_filename = filename;
-        forces_filename.replace(suffix_position, 8, ".forces");
+        forces_filename.replace(suffix_position, 8, ".forces.wav");
+        string log_filename = filename;
+        log_filename.replace(suffix_position, 8, ".string-%i.log");
 
-        MonoWav *wavfile = new MonoWav(wav_filename.c_str(),4096);
-        MonoWav *forces_file = new MonoWav(forces_filename.c_str(),4096);
+        play_file(input, wav_filename, forces_filename,
+            log_filename,
+            (InstrumentType)instrument_type, instrument_number);
 
-        play_file(input, wavfile, forces_file, instrument_number);
-
-        delete wavfile;
-        delete forces_file;
     }
 }

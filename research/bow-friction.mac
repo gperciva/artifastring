@@ -1,0 +1,57 @@
+/* eqn 2.32
+a : C01 * (dv + vb - v0h) + C02 * y1h;
+*/
+a : (vpa_c_C01 * (dv + vpa_bow_velocity - m_y0dot_h)
+  + vpa_c_C02 * m_y1_h);
+
+
+/* eqn 2.33, without substitution
+b: Fb * (ud + (us-ud)/(1-dv/v0));
+*/
+/* negative side */
+bn:  vpa_bow_force * (mu_d + (mu_s-mu_d)*v0/(v0 - dv));
+bp: -vpa_bow_force * (mu_d + (mu_s-mu_d)*v0/(v0 + dv));
+c: bp;
+
+
+b(dv) := if dv < 0 then
+    vpa_bow_force  * (mu_d + (mu_s-mu_d)*v0/(v0 - dv))
+else
+  (-vpa_bow_force) * (mu_d + (mu_s-mu_d)*v0/(v0 + dv));
+
+
+sample_data : [mu_d=0.327, mu_s=0.758, v0=0.138,
+  vpa_c_C01=1.55375, vpa_c_C02=0,
+  m_y1_h=0, m_y0dot_h=0.0951215,
+  vpa_bow_force=0.01, vpa_bow_velocity=0.1
+  ];
+plot2d([
+  ev(a, sample_data),
+  ev(b(dv), sample_data)
+  /*ev(c, sample_data)*/
+  ],
+  [dv, -0.0002, 0.0002]
+/*
+  [y, -2,2]
+*/
+  );
+
+pause:read("pause, press 0; ENTER  to continue");
+/* positive side */
+/*
+b: vpa_bow_force * (mu_d + (mu_s-mu_d)/(1 + dv/v0));
+*/
+
+d: a-c;
+e: ratsimp(d, dv) * (dv+v0);
+
+e: ratexpand(e, dv);
+
+
+c2 = ratcoeff(e, dv, 2);
+c1 = ratcoeff(e, dv, 1);
+c0 = ratcoeff(e, dv, 0);
+/*
+ratcoeff(d, dv, 1);
+*/
+

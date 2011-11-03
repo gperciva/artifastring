@@ -1,0 +1,87 @@
+d(n) := (T + B*(n*pi/L)^2) / ( T*(nf+na/(2*pi*f0*n)) + B*nb*(n*pi/L)^2);
+
+diff(d(n), n);
+diff(%, n);
+
+/*
+solve ( [d(1) = 301, d(2) = 350, d(3) = 500 ], [nf, na, nb]);
+*/
+
+/*
+d(2) = 350;
+d(3) = 500;
+
+
+f(t) := p0 + p1*exp(-p2*t) + (1-p1-p0)*exp(-p3*t);
+
+p0 : 9.42e-05;
+p1 : 5.53e-01;
+p2 : 6.72e+03;
+p3 : 5.73e+00;
+
+a: exp(-alpha) + p0 = 0.0164233003096 - p0;
+
+solve( a, alpha);
+*/
+
+/*
+define( g(x), diff(f(x), x));
+p0 : -0.12;
+g(0);
+
+x0 : 0;
+g0 : exp(-2.83);
+
+a : g(x0) = g0;
+p1 : solve(a, p1);
+
+x1 : 0.909090973612;
+x2 : 4.4033467593;
+g1 : exp((-2.83 + -1.55) / 2);
+g2 : exp(-1.55);
+
+b : g(x1) = g1;
+*/
+
+/*
+ratexpand(b);
+solve(b, p2);
+c : g(x2) = g2;
+solve( [b, c], [p2, p3] );
+diff(f(t), p0);
+diff(f(t), p1);
+diff(f(t), p2);
+diff(f(t), p3);
+*/
+
+/*
+f(t) := fixed0 + p0*exp(-p1*t) + (1-p0-fixed0)*exp(-p2*t);
+
+solve( [f(0.175) = 0.00952,
+	f(0.490) = 0.000147,
+	g(0.175) = -2.112,
+	g(0.490) = -1.289
+	], [p0, p1, p2, p3]);
+*/
+/*
+solve( [f(0) = y0, f(x1) = y1, f(x2) = y2 ], [p1, p2, p3]);
+
+ev( a, [t=0, p0=1.42e-4, y=1.95] );
+g(t) := (1-p1)*exp(-p3*t);
+b : derivative( g(t), t);
+*/
+
+
+/*
+[a, b];
+solve( [a, b], [p1, p2, p3]);
+
+derivative(a, p0);
+derivative(a, p1);
+derivative(a, p2);
+*/
+/*
+derivative(a, p3);
+derivative(a, p4);
+*/
+
