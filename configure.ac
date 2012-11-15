@@ -20,7 +20,6 @@ AC_PROG_LIBTOOL
 AC_HEADER_STDC
 
 #AC_LANG([C++])
-PKG_CHECK_MODULES([EIGEN3], [eigen3])
 
 AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
