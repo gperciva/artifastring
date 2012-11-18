@@ -7,11 +7,3 @@ config.h.in
 config.h.in~
 configure
 libtool-aux/
-*.pyc
-#depcomp
-#install-sh
-#missing
-#ltmain.sh
-#config.guess
-#config.sub
-#py-compile

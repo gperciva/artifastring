@@ -1,4 +1,4 @@
-AC_INIT([Artifastring], [1.8], [graham@percival-music.ca], [artifastring],
+AC_INIT([Artifastring], [2.0], [graham@percival-music.ca], [artifastring],
   [http://percival-music.ca/artifastring/])
 # override flags from AC_INIT, but keeps any flags the user sets
 : ${CXXFLAGS=""}

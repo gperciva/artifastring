@@ -4,14 +4,33 @@ if HAS_DEBUG
 AM_CXXFLAGS = -Iotherlibs/ -I../otherlibs/ -fPIC -g -fbounds-check
 MORE_WARNINGS_CXXFLAGS = -Wall -Werror -Wextra
 else
-# AVX instructions are disabled because valgrind 3.8.1 does not
-# recognize them, and thus cannot be used for memory-checking and
-# profiling.  I will enable AVX when valgrind catches up.
-AM_CXXFLAGS = -Iotherlibs/ -I../otherlibs/ -fPIC -O3 -march=native -DNDEBUG -mno-avx -g
+AM_CXXFLAGS = -Iotherlibs/ -I../otherlibs/ -fPIC -O3 -march=native -DNDEBUG
 MORE_WARNINGS_CXXFLAGS =
 endif
 
-EXTRA_DIST = autogen.sh
+
+EXTRA_DIST = autogen.sh otherlibs \
+	research interactive actions \
+	doc/main_page.doxy doc/simple.cpp \
+	make-release.sh \
+	artifastring-logo.svg
+
+### this handy hook comes from:
+### https://github.com/gfxmonk/gnome-shell/blob/d62b4cf130abca975f16be987c51279037020a50/Makefile.am
+#distcheck-hook:
+#	@echo "Checking disted files against files in git"
+#	@failed=false; \
+#	#exclude=`(for p in $(DIST_EXCLUDE) ; do echo --exclude=$$p ; done)`;
+#	for f in `cd $(srcdir) && git ls-files --ignored --exclude-standard` ; do \
+#		if ! test -e $(distdir)/$$f ; then \
+#			echo File missing from distribution: $$f ; \
+#			failed=true ; \
+#		fi \
+#	done ; \
+#	if $$failed ; then \
+#		exit 1 ; \
+#	fi ;
+
 
 clean-local:
 	rm -rf doc/html/
@@ -30,15 +49,19 @@ artifastring_h = artifastring/artifastring_constants.h \
 	artifastring/constants/strings_violin.h \
 	artifastring/constants/strings_viola.h \
 	artifastring/constants/strings_cello.h \
+	artifastring/constants/body_violin_1.h \
 	artifastring/constants/body_violin_2.h \
 	artifastring/constants/body_violin_3.h \
+	artifastring/constants/body_violin_4.h \
 	artifastring/constants/body_viola_1.h \
 	artifastring/constants/body_viola_2.h \
+	artifastring/constants/body_viola_4.h \
 	artifastring/constants/body_cello_1.h \
 	artifastring/constants/body_cello_2.h \
 	artifastring/constants/haptic_response_1.h \
 	artifastring/constants/haptic_response_2.h \
 	artifastring/constants/haptic_response_3.h \
+	artifastring/constants/haptic_response_4.h \
 	artifastring/actions_file.h \
 	artifastring/midi_pos.h \
 	artifastring/decimate.h \
@@ -82,7 +105,13 @@ actions2wav_LDADD = $(lib_LIBRARIES) \
 	$(EIGEN3_LIBS)
 
 ### swig
-EXTRA_DIST += $(srcdir)/swig/monowav.i $(srcdir)/swig/artifastring_instrument.i
+EXTRA_DIST += \
+	$(srcdir)/swig/monowav.i \
+	$(srcdir)/swig/artifastring_instrument.i \
+	$(srcdir)/swig/actions_file.i \
+	$(srcdir)/swig/midi_pos.i \
+	$(srcdir)/swig/numpy.i \
+	$(srcdir)/swig/pyfragments.swg
 
 if HAS_SWIG
 # unified definitions
@@ -146,7 +175,8 @@ BLENDER_PYTHON_MODULES = blender/abstract_object.py \
 	blender/cameras.py \
 	blender/violin.py
 
-dist_pkgdata_DATA = blender/fast-violin.blend blender/violin-and-bow.blend
+dist_pkgdata_DATA = blender/fast-violin.blend blender/violin-and-bow.blend \
+	blender/MAKING-A-MODEL.txt blender/README
 dist_pkgdata_DATA += $(BLENDER_PYTHON_MODULES)
 # WTF?!  I started using autotools because I thought it would take
 # care of this garbage for me.  :/
@@ -159,4 +189,6 @@ bin_SCRIPTS = blender/actions2images.py \
 endif
 EXTRA_DIST += $(srcdir)/blender/actions2images.in.py
 EXTRA_DIST += $(srcdir)/blender/artifastring-movie.py
+
+
 
