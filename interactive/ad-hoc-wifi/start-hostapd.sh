@@ -1,0 +1,2 @@
+sudo hostapd hostapd.conf
+
