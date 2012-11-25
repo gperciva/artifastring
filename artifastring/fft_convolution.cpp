@@ -54,7 +54,7 @@ static int shared_reference_counter = 0;
 
 
 ArtifastringConvolution::ArtifastringConvolution(int fs_multiply_get,
-    const float *kernel, const int num_samples)
+        const float *kernel, const int num_samples)
 {
     fs_multiply = fs_multiply_get;
 

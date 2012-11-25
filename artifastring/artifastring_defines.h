@@ -20,9 +20,12 @@
 #ifndef ARTIFASTRING_DEFINES_H
 #define ARTIFASTRING_DEFINES_H
 
-// artifastring_defines.h is included in the swig .py files,
-// whereas artifastring_constants.h is not.
-
+/** @file
+ *
+ *
+ * artifastring_defines.h is included in the swig .py files,
+ * whereas artifastring_constants.h is not.
+ */
 
 //#define EIGEN_DONT_VECTORIZE
 
@@ -56,10 +59,21 @@ const int HAPTIC_SAMPLE_RATE = ARTIFASTRING_INSTRUMENT_SAMPLE_RATE / HAPTIC_DOWN
 const int NORMAL_BUFFER_SIZE = 512;
 
 /**
- * \brief enumeration type to select instrument.
+ * \enum InstrumentType
+ *
+ * Enumeration type to select instrument family.  After selecting
+ * the instrument family, the specific instrument within that
+ * family can be selected.  Each instrument family has a different
+ * number of available instruments.  Instrument numbers begin at
+ * 0.
  */
 enum InstrumentType {
-    Violin, Viola, Cello,
+    /// 5 instruments available
+    Violin,
+    /// 2 instruments available
+    Viola,
+    /// 3 instruments available
+    Cello,
 };
 
 /** \struct String_Physical

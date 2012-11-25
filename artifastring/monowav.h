@@ -30,6 +30,7 @@ public:
      * @param[in] buffer_size Writes data to disk in 1-second
      * (22050 sample) increments.  This increases automatically if
      * necessary.
+     * @param[in] sample_rate Sample rate of the \c wav file.
      * @warning MonoWav does not check whether it received the
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.

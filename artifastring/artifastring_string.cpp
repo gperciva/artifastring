@@ -201,7 +201,7 @@ void ArtifastringString::finger(const float ratio_from_nut,
         va.finger_position = pc.L * (1.0 - ratio_from_nut);
     }
 
-    va.Kf = Kf_get;
+    va.Kf = Kf_get * K_FINGER;
     /*
     if (ratio_from_nut == 0.0) {
         vc.x1 = 0; // yes, don't reverse this one; optimization
@@ -218,7 +218,7 @@ void ArtifastringString::finger(const float ratio_from_nut,
 }
 
 void ArtifastringString::pluck(const float ratio_from_bridge,
-                               const float pluck_force)
+                               const float pull_distance)
 {
     assert(ratio_from_bridge > 0.0f);
     assert(ratio_from_bridge < 1.0f);
@@ -227,7 +227,7 @@ void ArtifastringString::pluck(const float ratio_from_bridge,
     ss.actions = PLUCK;
     vc.pluck_samples_remaining = PLUCK_SECONDS*fs;
     vc.y_pluck = 0.0f;
-    vc.y_pluck_target = pluck_force * PLUCK_DISPLACEMENT;
+    vc.y_pluck_target = pull_distance * PLUCK_DISPLACEMENT;
     //printf("pluck target: %.5g\n", vc.y_pluck_target);
 
     //printf("starting initial deaden part of pluck\n");
@@ -631,7 +631,7 @@ inline float ArtifastringString::tick_pluck()
          -yv(1,0) * vc.R0 - (yv(0,0)-vc.y_pluck) * vc.K0,
          -yv(1,1) * vc.R1 - yv(0,1) * vc.K1,
          -yv(1,2) * vc.R2 - (yv(0,2)-vc.y_pluck) * vc.K2
-         ).finished();
+        ).finished();
 #endif
     // forces at those locations
 
@@ -748,7 +748,8 @@ void ArtifastringString::update_bow_accel() {
             ss.actions = BOW;
         }
     }
-    //printf("%g\t%g\n", time_seconds, pa_bow_velocity);
+    //printf("%g\t%g\n", time_seconds, va.vb);
+    //printf("%g\n", va.vb);
 }
 
 void ArtifastringString::update_pluck_actions() {

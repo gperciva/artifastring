@@ -65,25 +65,22 @@
 #include "constants/haptic_response_4.h"
 
 ArtifastringInstrument::ArtifastringInstrument(
-    InstrumentType instrument_type_get,
+    InstrumentType instrument_type,
     int instrument_number) {
-    instrument_type = instrument_type_get;
+    m_instrument_type = m_instrument_type_get;
     for (int st=0; st < NUM_VIOLIN_STRINGS; st++) {
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
         const int fs_multiply = 1;
 #else
-        const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][st];
+        const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
-        // FIXME: debug impulses only!
-        artifastringString[st] = new ArtifastringString(instrument_type,
-                0, st, fs_multiply);
-        //artifastringString[st] = new ArtifastringString(instrument_type,
-        //        instrument_number, st, fs_multiply);
+        artifastringString[st] = new ArtifastringString(m_instrument_type,
+                instrument_number, st, fs_multiply);
     }
     /*
-    m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[(int)instrument_type]
+    m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[(int)m_instrument_type]
                              * SHRT_MAX / CONVOLUTION_SIZE;
-    m_bow_force_amplify = BOW_FORCE_AMPLIFY[(int)instrument_type]
+    m_bow_force_amplify = BOW_FORCE_AMPLIFY[(int)m_instrument_type]
                           * SHRT_MAX;
     */
 
@@ -103,14 +100,14 @@ ArtifastringInstrument::ArtifastringInstrument(
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
         const int fs_multiply = 1;
 #else
-        const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][st];
+        const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
         const int fs_index = fs_multiply - 1;
         if (audio_convolution[fs_index] == NULL) {
             const float *time_data;
             int num_taps;
 
-            switch (instrument_type) {
+            switch (m_instrument_type) {
             case Violin: {
                 if (fs_multiply == 1) {
                     const int body_number = ((int) instrument_number) % BODY_VIOLIN_NUMBER_1;
@@ -216,9 +213,9 @@ void ArtifastringInstrument::reset() {
 }
 
 void ArtifastringInstrument::finger(int which_string, float ratio_from_nut,
-                                    float finger_K)
+                                    float Kf)
 {
-    artifastringString[which_string]->finger(ratio_from_nut, finger_K);
+    artifastringString[which_string]->finger(ratio_from_nut, Kf);
 }
 
 void ArtifastringInstrument::pluck(int which_string, float ratio_from_bridge,
@@ -350,7 +347,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
             const int fs_multiply = 1;
 #else
-            const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][st];
+            const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
             const int fs_index = fs_multiply - 1;
             artifastringString[st]->fill_buffer_forces(
@@ -375,7 +372,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
         const int fs_multiply = 1;
 #else
-        const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][st];
+        const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
         const int fs_index = fs_multiply - 1;
         if (string_audio_output[fs_index] != NULL) {
@@ -443,7 +440,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
             const int fs_multiply = 1;
 #else
-            const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][bow_string];
+            const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][bow_string];
 #endif
             const int fs_index = fs_multiply - 1;
 #ifdef NO_HAPTIC_FILTERING
@@ -490,7 +487,7 @@ int ArtifastringInstrument::get_num_skips(int which_string) {
 int ArtifastringInstrument::get_string_buffer(int which_string,
         float *buffer, int num_samples
                                              ) {
-    const int fs_multiply = FS_MULTIPLICATION_FACTOR[instrument_type][bow_string];
+    const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][bow_string];
     const int string_samples = NORMAL_BUFFER_SIZE*fs_multiply;
     for (int i=0; i < string_samples; i++) {
         buffer[i] = 0;

@@ -105,10 +105,16 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /**
      * \brief Constructor
-     * @param[in] which_instrument The member of the violin family to simulate.
+     * @param[in] which_instrument The member of the violin family to
+     * simulate.  See \ref InstrumentType
+     * @param[in] instrument_number The instrument number within the family.
+     * See \ref InstrumentType
      * @param[in] string_number The string (higher numbers are
      * higher strings).  This values is also used to initializes
      * the randomness (for added noise in the model).
+     * @param[in] fs_multiplication_factor This sets the sampling
+     * rate of the string by multiplying the base instrument
+     * sampling rate.
      */
     ArtifastringString(InstrumentType which_instrument,
                        int instrument_number, int string_number,
@@ -124,8 +130,12 @@ public:
      * Finger remains in place until moved.
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
+     * @param[in] Kf_get This sets how firmly the finger is
+     * pressed against the string.  1,0 indicates normal finger
+     * strength, while 0.0001 indicates a very light finger
+     * suitable for playing harmonic notes.
      */
-    void finger(const float ratio_from_nut, const float Kf_get=K_FINGER);
+    void finger(const float ratio_from_nut, const float Kf_get=1.0);
 
     /** \brief Plucks a string.
      *
@@ -134,10 +144,11 @@ public:
      * predict when the pluck has finished "starting".
      * @param[in] ratio_from_bridge Measured as a fraction of
      * string length.
-     * @param[in] pluck_force Measured in 0.0 to 1.0 (ARBITRARY).
-     * @todo Re-think the pluck force paramater + constants
+     * @param[in] pull_distance Measured in units of 5mm.  This
+     * number was chosen so that a normal pluck on the violin uses
+     * a pull distance of 1.0.  0.0 produces no pluck at all.
      */
-    void pluck(const float ratio_from_bridge, const float pluck_force=1.0);
+    void pluck(const float ratio_from_bridge, const float pull_distance=1.0);
 
     /** \brief Sets the bow's action.
      *

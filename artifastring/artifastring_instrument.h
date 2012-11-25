@@ -35,13 +35,12 @@ class ArtifastringInstrument {
 public:
     /**
      * \brief Constructor
-     * @param[in] instrument_number Selects instrument (see
-     * documentation); values above the maximum instrument are
-     * reduced with modulus (to select the instrument) but will
-     * still initialize the randomness (for added noise in the
-     * string model).
+     * @param[in] instrument_type The member of the violin family to
+     * simulate.  See \ref InstrumentType
+     * @param[in] instrument_number The instrument number within the family.
+     * See \ref InstrumentType
      */
-    ArtifastringInstrument(InstrumentType instrument_type_get=Violin,
+    ArtifastringInstrument(InstrumentType instrument_type=Violin,
                            int instrument_number=0);
     /// \brief Destructor; nothing special
     ~ArtifastringInstrument();
@@ -55,9 +54,12 @@ public:
      * string numbers are higher in pitch.  0 is the G string).
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
+     * @param[in] Kf This sets how firmly the finger is
+     * pressed against the string.  1,0 indicates normal finger
+     * strength, while 0.0001 indicates a very light finger
+     * suitable for playing harmonic notes.
      */
-    void finger(int which_string, float ratio_from_nut,
-                float spring_K=K_FINGER);
+    void finger(int which_string, float ratio_from_nut, float Kf=1.0);
 
     /** \brief Plucks a string.
      *
@@ -149,7 +151,7 @@ private:
     float *string_audio_output[NUM_MULTIPLIERS];
     float *string_haptic_output[NUM_MULTIPLIERS];
 
-    InstrumentType instrument_type;
+    InstrumentType m_instrument_type;
 
     // only does up to NORMAL_BUFFER_SIZE !
     void handle_buffer(short output[], short forces[], int num_samples);
