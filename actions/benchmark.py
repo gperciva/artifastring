@@ -7,7 +7,7 @@ def pluckWait(vln, st, finger, pos, seconds, force = 1.0):
     vln.wait(seconds)
 
 def main():
-    violin = ViolinPhysical.ViolinPhysical('unit')
+    violin = ViolinPhysical.ViolinPhysical('benchmark')
     violin.comment("")
     violin.comment(" This will produce bad sound output")
     violin.comment("   it's just a simple test; the main Vivi")
