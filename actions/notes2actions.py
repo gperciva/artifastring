@@ -17,8 +17,8 @@ import sys
 import ViolinPhysical
 from ViolinPhysical import semitones
 violin = ''
-bp = 0.08
-dtc = 1.0/1000.0
+bp = 0.12
+dtc = 1.0/100.0
 
 sixteenth = 0.15544 # 30 seconds / 193 16th notes.
 #sixteenth = 0.20
@@ -27,18 +27,20 @@ sixteenth = 0.15544 # 30 seconds / 193 16th notes.
 tempo = 30.0/12.0
 
 def suzuki(which_string, factor, direction):
-    force = 1.5
-    force_target = 0.5
+    force = 0.15
+    force_target = 0.1
     velocity = 0.0
-    accel = 20.0 * direction
-    target_velocity = 0.5
+    accel = 30.0 * direction
+    target_velocity = 0.4
     duration = sixteenth * factor
     current_time = 0.0
     while ((velocity*direction < target_velocity) and
             (current_time < duration/2.0)):
         force -= (force-force_target)/50.0
         velocity += accel * dtc
-        violin.bow(which_string, bp, force, velocity, 0.6-direction*0.2)
+        #violin.bow(which_string, bp, force, velocity, 0.6-direction*0.2)
+        violin.accel(which_string, bp, force, velocity,
+            accel, 0.6-direction*0.2)
         violin.wait(dtc)
         current_time += dtc
     flat = duration - 2.0*current_time

@@ -35,14 +35,14 @@ class ViolinPhysical:
 
     def end(self):
         """ Write file and stop. """
-        self.wait(0)
+        self.wait(0.2)
         self.actions.close()
         self.actions = None
 
     def finger(self, vln_string, finger_pos):
         """ Places finger on string. """
         vln_string_n = self.whichToNum(vln_string)
-        Kf = 1e5
+        Kf = 1.0
         self.actions.write("f\t%g\t%i\t%g\t%f\n" %
             (self.seconds_action, vln_string_n, finger_pos, Kf) )
 
@@ -57,6 +57,7 @@ class ViolinPhysical:
         self.bow_bridge_distance = bridge_distance
         self.bow_force = force
         self.bow_velocity = velocity
+        self.bow_acccel = 0
         if starting_bow_pos >= 0:
             self.bow_pos_along = starting_bow_pos
         self.actions.write(
@@ -66,6 +67,31 @@ class ViolinPhysical:
             self.bow_bridge_distance,
             self.bow_force,
             self.bow_velocity,
+            self.bow_pos_along
+            ) )
+
+    def accel(self, vln_string, bridge_distance, force,
+            velocity, accel, starting_bow_pos=-1):
+        """ Moves bow; velocity is assumed to be constant
+            until changed. """
+        which_string_num = self.whichToNum(vln_string)
+        if (which_string_num != self.bow_string):
+            self.bowStop()
+        self.bow_string = self.whichToNum(vln_string)
+        self.bow_bridge_distance = bridge_distance
+        self.bow_force = force
+        self.bow_velocity = velocity
+        self.bow_accel = accel
+        if starting_bow_pos >= 0:
+            self.bow_pos_along = starting_bow_pos
+        self.actions.write(
+            'a\t%g\t%i\t%g\t%g\t%g\t%g\t%g\n' %(
+            self.seconds_action,
+            self.bow_string,
+            self.bow_bridge_distance,
+            self.bow_force,
+            self.bow_velocity,
+            self.bow_accel,
             self.bow_pos_along
             ) )
 
@@ -122,7 +148,7 @@ class ViolinPhysical:
             # bow not moving
             self.seconds_target += seconds
             self.actions.write('w\t%g\n' %(
-                self.seconds_action))
+                self.seconds_target))
             self.seconds_action += seconds
         else:
             # bow moving, split up into frames
@@ -136,7 +162,8 @@ class ViolinPhysical:
                 if ((self.bow_pos_along > 1.0) or
                     (self.bow_pos_along < 0.0)):
                     print "ERROR: run out of bow, %g seconds!" % self.seconds_action
-                self.actions.write(
+                if self.bow_accel == 0:
+                    self.actions.write(
                     'b\t%g\t%i\t%g\t%g\t%g\t%g\n' %(
                     self.seconds_action,
                     self.bow_string,
@@ -145,17 +172,40 @@ class ViolinPhysical:
                     self.bow_velocity,
                     self.bow_pos_along
                     ) )
+                else:
+                    self.actions.write(
+                    'a\t%g\t%i\t%g\t%g\t%g\t%g\t%g\n' %(
+                    self.seconds_action,
+                    self.bow_string,
+                    self.bow_bridge_distance,
+                    self.bow_force,
+                    self.bow_velocity,
+                    self.bow_accel,
+                    self.bow_pos_along
+                    ) )
             remaining_time = seconds - float(delta_frames) / VIDEO_FPS
             self.bow_pos_along += self.bow_velocity / BOW_LENGTH * remaining_time
 
             self.seconds_action += remaining_time
-            self.actions.write(
+            if self.bow_accel == 0:
+                self.actions.write(
                 'b\t%g\t%i\t%g\t%g\t%g\t%g\n' %(
                 self.seconds_action,
                 self.bow_string,
                 self.bow_bridge_distance,
                 self.bow_force,
                 self.bow_velocity,
+                self.bow_pos_along
+                ) )
+            else:
+                self.actions.write(
+                'a\t%g\t%i\t%g\t%g\t%g\t%g\t%g\n' %(
+                self.seconds_action,
+                self.bow_string,
+                self.bow_bridge_distance,
+                self.bow_force,
+                self.bow_velocity,
+                self.bow_accel,
                 self.bow_pos_along
                 ) )
 #            self.actions.write('w\t%g\n' %(
