@@ -71,7 +71,6 @@ public:
      * @param[in] ratio_from_bridge Measured as a fraction of
      * string length.
      * @param[in] pluck_force Measured in 0.0 to 1.0 (ARBITRARY).
-     * @todo Re-think the pluck force paramater + constants
      */
     void pluck(int which_string, float ratio_from_bridge,
                float pluck_force);

@@ -67,7 +67,7 @@
 ArtifastringInstrument::ArtifastringInstrument(
     InstrumentType instrument_type,
     int instrument_number) {
-    m_instrument_type = m_instrument_type_get;
+    m_instrument_type = instrument_type;
     for (int st=0; st < NUM_VIOLIN_STRINGS; st++) {
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
         const int fs_multiply = 1;
