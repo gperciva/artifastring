@@ -1,10 +1,10 @@
 // simple.cpp
-#include "artifastring/violin_instrument.h"
+#include "artifastring/artifastring_instrument.h"
 #include "artifastring/monowav.h"
 int main () {
     // make objects
     MonoWav *wavfile = new MonoWav("output.wav");
-    ViolinInstrument *violin = new ViolinInstrument();
+    ArtifastringInstrument *violin = new ArtifastringInstrument(Violin, 0);
 
     // get output buffer
     short *output = wavfile->request_fill(44100);

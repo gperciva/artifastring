@@ -18,16 +18,19 @@ https://github.com/gperciva/artifastring
 
 \subsection compile 1.2 Compile
 
-Requires a typical development environment including \c g++ with
-the \c scons build system being recommended.
+Requires a typical development environment including \c g++, with
+the additional \c libfftwf library.
 
 \code
-scons -h
+mkdir build/
+cd build/
+../configure
+make
 \endcode
 
-If you do not have \c scons then you can still compile with the \c
-.c and \c .h files directly.  This is demonstrated in
-\ref use_in_code.
+If you do not want to use the autotools build system, you can
+still compile with the \c .c and \c .h files directly.  This is
+demonstrated in \ref use_in_code.
 
 
 \subsection generate_audio 1.3 Generate audio
@@ -48,6 +51,21 @@ You may also use it in C++ code directly; this is described in
 Video can be produced with \c blender.  At the moment, this is not
 integerated into the \c scons build system; instead, go to
 \c blender/ and follow the instructions in the README there.
+
+
+\subsection generate_audio 1.5 Benchmarks
+
+I recommend generating a 30-second test file:
+
+\code
+cd build/
+../actions/benchmark.py
+./actions2wav benchmark.actions
+\endcode
+
+This tests many aspects of the physical modelling.  Be aware that
+the bowing parameters (notably bow velocity and bow force) are not
+tweaked, so the violin control will be fairly poor.
 
 
 \section background 2. Background
@@ -79,19 +97,13 @@ This model was not chosen for accuracy; rather for being simple
 yet still "good enough" for our desires.  Don't criticize it for
 being "not sufficiently accurate" for whatever you want to do.
 
-In addition, the modal dampening factors used here were determined
-experimentally for the D string (in Demoucron's thesis) -- we have
-not (yet) reproduced those experiments for the other strings.
-This may produce unrealistic behaviour, especially from the E
-string.
-
 
 \subsection ack 2.3 Acknowledgements
 
 This project would not have been possible without initial work by
 my supervisor, Dr. Nick Bailey, in understanding and explaining
 the model (in language, diagrams, and code).  Many thanks also to
-Dr.  John Williamson and Dr. Martin Macauley for clarifying some
+Dr. John Williamson and Dr. Martin Macauley for clarifying some
 more abstract parts of the model.
 
 Many thanks also to Matthias Demoucron for clarifying some
@@ -137,7 +149,13 @@ command.
   b       3.0       3       0.12       0.6       0.4
   \endcode
 
-See files in the \c music/ directory for examples.
+- accelerate bow: 5 extra parameters: string number, bow position, bow force,
+  target bow velocity, and bow acceleration
+  \code
+  b       3.0       3       0.12       0.6       0.4    10.0
+  \endcode
+
+See files in the \c actions/ directory for examples.
 
 
 
@@ -150,13 +168,16 @@ Input code:
 To compile (after installing):
 
 \code
-g++ simple.cpp -lartifastring
+g++ simple.cpp -lartifastring -lfftwf
 \endcode
 
 Manual compile (with no installation):
 
 \code
-g++ violin_instrument.cpp artifastring_string.cpp monowav.cpp simple.cpp -o simple
+g++ artifastring_defines.h artifastring_constants \
+    fft_convolution monowav.cpp \
+    artifastring_instrument.cpp artifastring_string.cpp \
+    simple.cpp -o simple
 \endcode
 
 
@@ -196,24 +217,17 @@ License along with Artifastring.  If not, see
 
 \section future_work 7. Future work
 
-Development of Artifastring is (temporarily) stalled; now that the
-basic model is working, we want to actually \em use it to make
-music, demonstrate bowing patterns, and all sorts of related
-things.  Those efforts take place in a separate code base, though.
+It would be nice to extend the physical modelling algorithm to use
+(at least) two bow positions (to accommodate bow width), and two
+finger forces during bowing.
 
-As mentioned in \ref known_limits, some of the physical constants
-(especially the modal dampening factors) are incorrect for strings
-other than the D string.  Measuring these values for the other
-strings should only take a few hours once all the relevant
-hardware and software has been accumulated.
+More instruments would be fantastic, especially double bass.  If I
+feel inspired then I might try renting a double bass for a week so
+I can take the required measurements.
 
-At some point, it would be nice to add support for other stringed
-instruments -- this should simply be a matter of measuring their
-physical constants, or perhaps simply finding such
-already-measured values in the literature.  But that is a task we
-will consider after the current round of conference paper
-deadlines.  :)
-
+In general, though, my attention is on virtual musicians to
+control the physical model.  This takes place in a separate
+software project: http://percival-music.ca/vivi.html
 
 */
 

@@ -219,9 +219,9 @@ void ArtifastringInstrument::finger(int which_string, float ratio_from_nut,
 }
 
 void ArtifastringInstrument::pluck(int which_string, float ratio_from_bridge,
-                                   float pluck_force)
+                                   float pull_distance)
 {
-    artifastringString[which_string]->pluck(ratio_from_bridge, pluck_force);
+    artifastringString[which_string]->pluck(ratio_from_bridge, pull_distance);
 }
 
 void ArtifastringInstrument::bow(int which_string, float bow_ratio_from_bridge,

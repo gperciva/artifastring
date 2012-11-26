@@ -131,7 +131,7 @@ public:
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
      * @param[in] Kf_get This sets how firmly the finger is
-     * pressed against the string.  1,0 indicates normal finger
+     * pressed against the string.  1.0 indicates normal finger
      * strength, while 0.0001 indicates a very light finger
      * suitable for playing harmonic notes.
      */

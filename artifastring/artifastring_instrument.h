@@ -55,7 +55,7 @@ public:
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
      * @param[in] Kf This sets how firmly the finger is
-     * pressed against the string.  1,0 indicates normal finger
+     * pressed against the string.  1.0 indicates normal finger
      * strength, while 0.0001 indicates a very light finger
      * suitable for playing harmonic notes.
      */
@@ -70,10 +70,12 @@ public:
      * string numbers are higher in pitch.  0 is the G string).
      * @param[in] ratio_from_bridge Measured as a fraction of
      * string length.
-     * @param[in] pluck_force Measured in 0.0 to 1.0 (ARBITRARY).
+     * @param[in] pull_distance Measured in units of 5mm.  This
+     * number was chosen so that a normal pluck on the violin uses
+     * a pull distance of 1.0.  0.0 produces no pluck at all.
      */
     void pluck(int which_string, float ratio_from_bridge,
-               float pluck_force);
+               float pull_distance);
 
     /** \brief Sets the bow's action.
      *
@@ -88,6 +90,17 @@ public:
     void bow(int which_string, float bow_ratio_from_bridge,
              float bow_force, float bow_velocity);
 
+    /** \brief Sets the bow to accelerate to a target velocity.
+     *
+     * Bow actions are assumed to continue until changed.
+     * @param[in] which_string Instrument string (0,1,2,3); higher
+     * string numbers are higher in pitch.  0 is the G string).
+     * @param[in] bow_ratio_from_bridge Measured as a fraction of
+     * string length.
+     * @param[in] bow_force Measured in Newtons.
+     * @param[in] bow_velocity_target Measured in meters / second.
+     * @param[in] bow_accel Measured in meters / second^2.
+     */
     void bow_accel(int which_string, float bow_ratio_from_bridge,
                    float bow_force, float bow_velocity_target,
                    float bow_accel);
