@@ -2,13 +2,13 @@
 
 INSTRUMENTS = {
     'violin': (['I', 'II', 'III', 'IV', 'V'],
-        ['g', 'd', 'a', 'e']
+        ['G', 'D', 'A', 'E']
         ),
     'viola': (['I', 'II'],
-        ['c', 'g', 'd', 'a']
+        ['C', 'G', 'D', 'A']
         ),
     'cello': (['I', 'II', 'III'],
-        ['c', 'g', 'd', 'a']
+        ['C', 'G', 'A', 'A']
         )
 }
 

@@ -224,6 +224,9 @@ class Inst():
         pc.T = 4* f_target**2 * pc.pl * pc.L**2
         #print "new %.1f N" % (pc.T)
 
+        # under-estimate
+        pc.T *= 0.9
+
         ## estimate maximum frequency
         #n = 30
         #pi_div_l = math.pi / pc.L
@@ -401,10 +404,14 @@ class Inst():
                 return False
             self.vln.set_physical_constants(st, pc)
         #exit(1)
+        for i in range(4):
+            stabletrue = self.hop_pitch()
+            pitches_wav_array = numpy.append(
+                pitches_wav_array, self.audio_out_buf)
         scipy.io.wavfile.write("pc-consts/test-pitches-%i.wav" % st,
             artifastring_instrument.ARTIFASTRING_INSTRUMENT_SAMPLE_RATE,
             pitches_wav_array)
-        #print "written to test-pitches-%i.wav" % st
+        print "written to test-pitches-%i.wav" % st
         pc = self.vln.get_physical_constants(st)
         #try:
         #    print "final tuning:\t%.1f N" % pc.T
