@@ -125,7 +125,11 @@ swig/%_wrap.cxx swig/%.py: $(srcdir)/swig/%.i
 # per-file definitions
 pyexec_LTLIBRARIES = _monowav.la _artifastring_instrument.la \
 	_actions_file.la _midi_pos.la
-python_PYTHON = interactive/artifastring_interactive.py
+python_PYTHON = interactive/artifastring_interactive.py \
+	interactive/artifastring_process.py \
+	interactive/quality_judgements.py \
+	interactive/tuning_pitch.py \
+	interactive/enum.py
 nodist_python_PYTHON = swig/monowav.py swig/artifastring_instrument.py \
 	swig/actions_file.py swig/midi_pos.py
 
