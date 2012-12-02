@@ -5,7 +5,7 @@ import midi_pos
 
 TRAIN_DIR = "train"
 
-SUBDIRS = False
+SUBDIRS = True
 
 CATEGORIES_CENTER_OFFSET = 3
 CATEGORY_POSITIVE_OFFSET = 100

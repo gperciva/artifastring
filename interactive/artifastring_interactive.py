@@ -471,6 +471,7 @@ def main(stdscr):
 
     time.sleep(0.5)
     vln.main_loop()
+    curses.endwin()
 
 
 if __name__ == "__main__":
