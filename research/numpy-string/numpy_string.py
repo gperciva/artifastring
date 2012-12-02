@@ -169,9 +169,9 @@ class Violin():
     def finger(self, x_finger, K, R):
         if x_finger == 1.0: 
             x_finger = 0.0
-        if 0 < x_finger < 0.5:
-            print "WARNING!  bad finger position.  re-think?"
-            exit(1)
+        #if 0 < x_finger < 0.5:
+        #    print "WARNING!  bad finger position.  re-think?"
+        #    exit(1)
         #print "finger at x_finger", x_finger
         self.x_finger = x_finger*L
         self.K_finger = K
@@ -225,12 +225,12 @@ class Violin():
         self.phix2 = phi(self.x2)
         self.calc_coefficients()
 
-        dv_low = mu_v0 - (
-            numpy.sqrt(self.Fb * mu_v0 * self.D1 * (mu_s - mu_d))
-            / self.D1)
-        dv_high = -mu_v0 + (
-            numpy.sqrt(self.Fb * mu_v0 * self.D1 * (mu_s - mu_d))
-            / self.D1)
+        #dv_low = mu_v0 - (
+        #    numpy.sqrt(self.Fb * mu_v0 * self.D1 * (mu_s - mu_d))
+        #    / self.D1)
+        #dv_high = -mu_v0 + (
+        #    numpy.sqrt(self.Fb * mu_v0 * self.D1 * (mu_s - mu_d))
+        #    / self.D1)
         #print "zzzz min bow skipping"
         #print "dv_low, dv_high:\t%.3f\t%.3f" % (dv_low, dv_high)
         #print "dv_high - dv_low:\t%.3f" % (dv_high - dv_low)
