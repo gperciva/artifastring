@@ -30,6 +30,7 @@ import tuning_pitch
 import curses
 import numpy
 import math
+import random
 
 import multiprocessing
 import time
@@ -50,6 +51,9 @@ NUM_AUDIO_BUFFERS = 2
 TUNING_SETTLE_BUFFERS = 10
 # for pitch and buffers
 PRINT_EXTRA_DISPLAY = 1
+
+GAUSSIAN_FORCE = 0
+GAUSSIAN_VELOCITY = 0
 
 class Parameters():
     def __init__(self, st=0, fp=0, bp=.12, f=1.0, v=0.24, T=1.0):
@@ -203,7 +207,7 @@ class InteractiveViolin():
             skip_violin_print = True
 
         ### TODO: icky hard-coding categories
-        if c >= '1' and c <= '7':
+        if c >= '1' and c <= '5':
             skip_violin_print = True
             self.snapshot(c)
             self.stdscr.addstr(self.row, 0, str("file written"))
@@ -283,13 +287,20 @@ class InteractiveViolin():
             self.audio_pipe_master.send( (arr, forces) )
             seconds = float(j)*HOPSIZE/ARTIFASTRING_SAMPLE_RATE
 
+            myparm = self.copy_params()
+            myparm.force = random.gauss(self.params.force,
+                GAUSSIAN_FORCE*self.params.force)
+            myparm.velocity = random.gauss(self.params.velocity,
+                GAUSSIAN_VELOCITY*self.params.velocity)
+            self.commands_pipe_master.send( (COMMANDS.BOW, myparm) )
             actions_out.bow(seconds, self.params.violin_string,
                 self.params.bow_position,
-                self.params.force,
-                self.params.velocity,
+                #self.params.force,
+                #self.params.velocity,
+                myparm.force, myparm.velocity,
                 bow_pos_along,
                 )
-            bow_pos_along += self.params.velocity/float(
+            bow_pos_along += myparm.velocity/float(
                 ARTIFASTRING_SAMPLE_RATE)
         # do one more action for "good luck"
         seconds = (j+1)*HOPSIZE/float(
@@ -310,7 +321,7 @@ class InteractiveViolin():
         actions_out.close()
 
         quality_judgements.append_to_mf(self.train_info, self.params,
-            basename, cat_key)
+            basename+".wav", cat_key)
         #self.stdscr.addstr(22, 10, str("wrote to %s" % mf_filename))
         self.snapshot_post(basename)
 
