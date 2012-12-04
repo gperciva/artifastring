@@ -123,8 +123,12 @@ ArtifastringConvolution::~ArtifastringConvolution()
 
     shared_reference_counter--;
     if (shared_reference_counter == 0) {
+#if FFTW_CLEANUP_ELSEWHERE
+        // do nothing
+#else
         // must be done after ALL fftw stuff is finished
         fftwf_cleanup();
+#endif
     }
     pthread_mutex_unlock(&fftwf_mutex);
     // ------------- critical section end

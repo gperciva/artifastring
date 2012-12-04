@@ -48,6 +48,16 @@ AS_IF([test "x$with_swig" != xno],
   ], [])
 
 
+### play nice with other fftw users
+AC_ARG_ENABLE([fftw-cleanup-elsewhere],
+  [AS_HELP_STRING(--enable-fftw-cleanup-elsewhere,
+    [Other code will call fftw_cleanup()])],
+  [AC_DEFINE(FFTW_CLEANUP_ELSEWHERE, 1,
+    [Other code will call fftw_cleanup((])],
+  [AC_DEFINE(FFTW_CLEANUP_ELSEWHERE, 0,
+    [Other code will call fftw_cleanup((])]
+  )
+
 ### doc stuff
 DX_INIT_DOXYGEN(artifastring, doc/doxygen, [out-www/])
 AM_CONDITIONAL([HAS_DOXYGEN], [test "x$DX_DOXYGEN" != 'x'])
