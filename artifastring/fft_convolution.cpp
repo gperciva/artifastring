@@ -20,6 +20,7 @@
 
 #include <iostream>
 
+#include "config.h"
 #include "fft_convolution.h"
 #include "artifastring/artifastring_constants.h"
 
