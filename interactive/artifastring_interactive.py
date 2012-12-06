@@ -23,6 +23,8 @@ import sys
 
 import artifastring_process
 ARTIFASTRING_SAMPLE_RATE = artifastring_process.ARTIFASTRING_SAMPLE_RATE
+HAPTIC_SAMPLE_RATE = artifastring_process.artifastring_instrument.HAPTIC_SAMPLE_RATE
+import monowav
 
 import quality_judgements
 import tuning_pitch
@@ -34,7 +36,6 @@ import random
 
 import multiprocessing
 import time
-import scipy.io.wavfile
 
 import aubio.aubiowrapper
 
@@ -311,14 +312,21 @@ class InteractiveViolin():
             self.params.velocity,
             bow_pos_along
             )
-
-
-
-        scipy.io.wavfile.write(basename+".wav",
-            ARTIFASTRING_SAMPLE_RATE, complete)
-        scipy.io.wavfile.write(basename+".forces.wav",
-            ARTIFASTRING_SAMPLE_RATE/4, complete_forces)
         actions_out.close()
+
+
+        wavfile = monowav.MonoWav(basename+".wav",
+            ARTIFASTRING_SAMPLE_RATE)
+        ### very awkward abuse of SWIG.  There has to be a better way!
+        buf = wavfile.request_fill(len(complete))
+        for i in xrange(len(complete)):
+            monowav.buffer_set(buf, i, int(complete[i]))
+
+        wavfile = monowav.MonoWav(basename+".forces.wav",
+            HAPTIC_SAMPLE_RATE)
+        buf = wavfile.request_fill(len(complete))
+        for i in xrange(len(complete)):
+            monowav.buffer_set(buf, i, int(complete[i]))
 
         quality_judgements.append_to_mf(self.train_info, self.params,
             basename+".wav", cat_key)
