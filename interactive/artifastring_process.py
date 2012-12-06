@@ -36,8 +36,8 @@ def make_audio_stream():
         format = pyaudio.paInt16,
         input=False,
         output = True,
-        output_device_index = 0,
-        frames_per_buffer=1024,
+        #output_device_index = 0,
+        frames_per_buffer=HOPSIZE,
         )
     return pyaudio_obj, audio_stream
 
