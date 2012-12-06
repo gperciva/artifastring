@@ -37,8 +37,6 @@ import random
 import multiprocessing
 import time
 
-import aubio.aubiowrapper
-
 # for Vivi?
 import actions_file
 #import vivi_defines
@@ -51,7 +49,10 @@ NUM_AUDIO_BUFFERS = 2
 
 TUNING_SETTLE_BUFFERS = 10
 # for pitch and buffers
-PRINT_EXTRA_DISPLAY = 1
+PRINT_EXTRA_DISPLAY = 0
+
+if PRINT_EXTRA_DISPLAY:
+    import aubio.aubiowrapper
 
 GAUSSIAN_FORCE = 0
 GAUSSIAN_VELOCITY = 0
@@ -355,13 +356,14 @@ class InteractiveViolin():
 
         self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
 
-        pitch_obj = aubio.aubiowrapper.new_aubio_pitchdetection(
-            windowsize, HOPSIZE, 1,
-            ARTIFASTRING_SAMPLE_RATE,
-            aubio.aubiowrapper.aubio_pitch_yinfft,
-            aubio.aubiowrapper.aubio_pitchm_freq,
-            )
-        fvec = aubio.aubiowrapper.new_fvec(HOPSIZE, 1)
+        if PRINT_EXTRA_DISPLAY:
+            pitch_obj = aubio.aubiowrapper.new_aubio_pitchdetection(
+                windowsize, HOPSIZE, 1,
+                ARTIFASTRING_SAMPLE_RATE,
+                aubio.aubiowrapper.aubio_pitch_yinfft,
+                aubio.aubiowrapper.aubio_pitchm_freq,
+                )
+            fvec = aubio.aubiowrapper.new_fvec(HOPSIZE, 1)
         show_pitch = 0
         time_unit = 0.5*HOPSIZE/float(
             ARTIFASTRING_SAMPLE_RATE)
