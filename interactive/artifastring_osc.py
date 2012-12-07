@@ -4,7 +4,6 @@ DEBUG_OSC = False
 #DEBUG_OSC = True
 
 import time
-import os
 import sys
 sys.path.append('build/swig')
 import curses
@@ -16,6 +15,9 @@ from artifastring_process import COMMANDS
 
 import liblo
 
+#OLD_BEHAVIOUR = True
+OLD_BEHAVIOUR = False
+
 
 class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
     def __init__(self, *args):
@@ -26,7 +28,10 @@ class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
         except liblo.ServerError, err:
             print str(err)
             sys.exit()
-        self.server.add_method(None, None, self.callback)
+        if OLD_BEHAVIOUR:
+            self.server.add_method(None, None, self.old_callback)
+        else:
+            self.server.add_method(None, None, self.callback)
 
     def keypress_extra(self, c):
         if c == 'b':
@@ -36,6 +41,23 @@ class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
         self.server.recv(0)
 
     def callback(self, path, args):
+        if DEBUG_OSC:
+            print "received:", path, args
+        if path.startswith("/bow"):
+            st, xb, Fb, vb = args
+            self.violin_string = st
+            self.params.bow_position = xb
+            self.params.force = Fb
+            self.params.velocity = vb
+            self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
+        elif path.startswith("/finger"):
+            st, fp = args
+            self.violin_string = st
+            self.params.finger_position = xb
+            self.commands_pipe_master.send( (COMMANDS.FINGER, self.params) )
+
+
+    def old_callback(self, path, args):
         if DEBUG_OSC:
             print "received:", path, args
 
