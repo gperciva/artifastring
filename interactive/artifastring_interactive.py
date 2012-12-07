@@ -323,11 +323,11 @@ class InteractiveViolin():
         for i in xrange(len(complete)):
             monowav.buffer_set(buf, i, int(complete[i]))
 
-        wavfile = monowav.MonoWav(basename+".forces.wav",
-            HAPTIC_SAMPLE_RATE)
-        buf = wavfile.request_fill(len(complete))
-        for i in xrange(len(complete)):
-            monowav.buffer_set(buf, i, int(complete[i]))
+        wavfile2 = monowav.MonoWav(basename+".forces.wav",
+            HAPTIC_SAMPLE_RATE, HAPTIC_SAMPLE_RATE)
+        buf2 = wavfile2.request_fill(len(complete_forces))
+        for i in xrange(len(complete_forces)):
+            monowav.buffer_set(buf2, i, int(complete_forces[i]))
 
         quality_judgements.append_to_mf(self.train_info, self.params,
             basename+".wav", cat_key)
