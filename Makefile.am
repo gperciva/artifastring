@@ -104,6 +104,11 @@ actions2wav_CXXFLAGS = $(AM_CXXFLAGS) $(ARTIFASTRING_INCLUDE) \
 actions2wav_LDADD = $(lib_LIBRARIES) \
 	$(EIGEN3_LIBS)
 
+
+### setup for += later
+bin_SCRIPTS =
+
+
 ### swig
 EXTRA_DIST += \
 	$(srcdir)/swig/monowav.i \
@@ -132,6 +137,7 @@ python_PYTHON = interactive/artifastring_interactive.py \
 	interactive/enum.py
 nodist_python_PYTHON = swig/monowav.py swig/artifastring_instrument.py \
 	swig/actions_file.py swig/midi_pos.py
+bin_SCRIPTS += interactive/artifastring_osc.py
 
 nodist__monowav_la_SOURCES = swig/monowav_wrap.cxx \
 	artifastring/monowav.cpp
@@ -169,7 +175,7 @@ endif
 
 if HAS_BLENDER
 BLENDER_PYTHON_MODULES = blender/abstract_object.py \
-	blender/artifastring-blender.py \
+	blender/artifastring_blender.py \
 	blender/bow.py \
 	blender/finger.py \
 	blender/parse_actions.py \
@@ -187,12 +193,12 @@ dist_pkgdata_DATA += $(BLENDER_PYTHON_MODULES)
 blender/actions2images.py: $(srcdir)/blender/actions2images.in.py
 	mkdir -p blender/
 	sed -e 's,$${datarootdir},${datarootdir},g' < $< > $@
-bin_SCRIPTS = blender/actions2images.py \
-	blender/artifastring-movie.py
+bin_SCRIPTS += blender/actions2images.py \
+	blender/artifastring_movie.py
 
 endif
 EXTRA_DIST += $(srcdir)/blender/actions2images.in.py
-EXTRA_DIST += $(srcdir)/blender/artifastring-movie.py
+EXTRA_DIST += $(srcdir)/blender/artifastring_movie.py
 
 
 
