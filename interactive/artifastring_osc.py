@@ -15,8 +15,8 @@ from artifastring_process import COMMANDS
 
 import liblo
 
-#OLD_BEHAVIOUR = True
-OLD_BEHAVIOUR = False
+OLD_BEHAVIOUR = True
+#OLD_BEHAVIOUR = False
 
 
 class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
@@ -81,9 +81,13 @@ class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
                 self.params.violin_string = st
                 self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
             #print "finger\t%.2f\t%.2f" %( x, y)
-            fp = scale(args[0], 0.0, 1.0, 0.0, 0.4) - 0.05
-            if fp < 0:
-                fp = 0
+            #fp = scale(args[0], 0.0, 1.0, 0.0, 0.4) - 0.05
+            fm = scale(args[0], 0.0, 1.0, 0.0, 8.0) - 0.5
+            if fm < 0:
+                fm = 0
+            fp = midi_pos.midi2pos(fm)
+            #if fp < 0:
+            #    fp = 0
             #print "f\t%.2f\t%.2f" %( x, y)
             text = "fp: %.2f" %( fp)
             if DEBUG_OSC:
@@ -99,8 +103,9 @@ class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
             #print "bow\t%.2f\t%.2f" %( x, y)
             #print "\t%.2f\t%.2f" %( scale(x, 0.0, 0.25, 0.05, 0.20), y)
             #print "\t%.2f\t%.2f" %( scale(y, 0.0, 0.25, 0.05, 0.20), y)
-            vb = scale(x, 0.0, 1.0, 0.0, 4.0) - 2.0
-            Fb = 2.0-scale(y, 0.0, 1.0, 0.0, 2.0)
+            #vb = scale(x, 0.0, 1.0, 0.0, 4.0) - 2.0
+            vb = x - 0.5
+            Fb = 4.0-scale(y, 0.0, 1.0, 0.0, 4.0)
             text = "vb: %.2f\tFb: %.2f" %( vb, Fb)
             if DEBUG_OSC:
                 print text

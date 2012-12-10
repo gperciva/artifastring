@@ -131,13 +131,15 @@ swig/%_wrap.cxx swig/%.py: $(srcdir)/swig/%.i
 pyexec_LTLIBRARIES = _monowav.la _artifastring_instrument.la \
 	_actions_file.la _midi_pos.la
 python_PYTHON = interactive/artifastring_interactive.py \
+	interactive/artifastring_osc.py \
 	interactive/artifastring_process.py \
 	interactive/quality_judgements.py \
 	interactive/tuning_pitch.py \
 	interactive/enum.py
 nodist_python_PYTHON = swig/monowav.py swig/artifastring_instrument.py \
 	swig/actions_file.py swig/midi_pos.py
-bin_SCRIPTS += interactive/artifastring_osc.py
+bin_SCRIPTS += interactive/artifastring_play_osc.py \
+	interactive/artifastring_play_interactive.py
 
 nodist__monowav_la_SOURCES = swig/monowav_wrap.cxx \
 	artifastring/monowav.cpp
