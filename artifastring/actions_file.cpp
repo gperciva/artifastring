@@ -122,6 +122,26 @@ void ActionsFile::bow(float seconds, int string_number,
     index++;
 }
 
+void ActionsFile::accel(float seconds, int string_number,
+                      float position, float force, float velocity,
+                      float bow_pos_along, float accel)
+{
+    if ((index + 1) >= size) {
+        writeBuffer();
+    }
+    ActionData action;
+    action.type = ACTION_ACCEL;
+    action.seconds = seconds;
+    action.string_number = string_number;
+    action.position = position;
+    action.force = force;
+    action.velocity = velocity;
+    action.position_along = bow_pos_along;
+    action.accel = accel;
+    data[index] = action;
+    index++;
+}
+
 void ActionsFile::comment(const char *text)
 {
     writeBuffer();
@@ -165,6 +185,14 @@ void ActionsFile::writeBuffer()
                     actions.seconds,
                     actions.string_number, actions.position,
                     actions.force, actions.velocity,
+                    actions.position_along);
+            break;
+        case ACTION_ACCEL:
+            sprintf(textline, "a\t%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
+                    actions.seconds,
+                    actions.string_number, actions.position,
+                    actions.force, actions.velocity,
+                    actions.accel,
                     actions.position_along);
             break;
         case ACTION_CATEGORY:

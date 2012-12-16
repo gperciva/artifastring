@@ -736,7 +736,7 @@ inline float ArtifastringString::tick_free()
 
 void ArtifastringString::update_bow_accel() {
     // accelerate bow
-    va.vb += dt;
+    va.vb += va.va;
     if (va.va > 0) {
         if (va.vb > va.vb_target) {
             va.vb = va.vb_target;

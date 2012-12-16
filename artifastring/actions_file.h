@@ -32,6 +32,9 @@ public:
     void bow(float seconds, int string_number,
              float position, float force, float velocity,
              float bow_pos_along);
+    void accel(float seconds, int string_number,
+             float position, float force, float velocity,
+             float bow_pos_along, float bow_accel);
 
     void category(float seconds, float category);
     // writes buffer to file immediately
@@ -51,6 +54,7 @@ private:
         ACTION_FINGER,
         ACTION_PLUCK,
         ACTION_BOW,
+        ACTION_ACCEL,
         ACTION_CATEGORY
     };
 
@@ -62,6 +66,7 @@ private:
         float force;
         float velocity;
         float position_along;
+        float accel;
     } ActionData;
 
     ActionData *data;
