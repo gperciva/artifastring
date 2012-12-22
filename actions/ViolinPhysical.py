@@ -26,6 +26,7 @@ class ViolinPhysical:
         self.bow_velocity = 0.0
         self.bow_pos_along = 0.0
         self.bow_string = 1
+        self.bow_accel = 0.0
 
 
     def __del__(self):

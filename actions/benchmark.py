@@ -240,7 +240,7 @@ def main():
 
     violin.comment('vibrato and gliss done')
     violin.wait(0.5)
-    violin.wait(0.3731)
+    violin.wait(0.1731)
 
     # Bach
 #    semiquaver = 0.3;
