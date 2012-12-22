@@ -185,9 +185,13 @@ class InteractiveViolin():
         if c == 'g':
             self.params.bow_position /= 1.01
         if c == 'y':
-            self.params.force *= 1.1
+            amount = self.params.force * 0.05
+            amount = random.gauss(amount, 0.01*amount)
+            self.params.force += amount
         if c == 'h':
-            self.params.force /= 1.1
+            amount = self.params.force * 0.05
+            amount = random.gauss(amount, 0.01*amount)
+            self.params.force -= amount
         if c == 'u':
             self.params.velocity *= 1.1
         if c == 'j':
