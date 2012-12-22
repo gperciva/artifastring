@@ -56,10 +56,6 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
     // set SSE denormals
     _mm_setcsr( _mm_getcsr() | 0x8040 );
 
-    // do NOT make this time(NULL); we want repeated
-    // runs of the program to be identical!
-    srand( string_number );
-
     switch (which_instrument) {
     case Violin: {
         int number = instrument_number % CONSTANTS_VIOLIN_NUM;
@@ -88,6 +84,10 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
 #endif
     debug_string_num = string_number;
 
+    srand( time(NULL) );
+    //srand( string_number );
+    //srand( 0 );
+
     // must happen after opening logfile!
     reset();
     //cache_pc_c();
@@ -106,6 +106,7 @@ void ArtifastringString::reset()
     time_seconds = 0.0;
     num_skips = 0;
 #endif
+
     // init everything, just to be safe
     cache_pc_c();
 
