@@ -200,6 +200,9 @@ class InteractiveViolin():
         if c == 'm':
             self.tuning = TUNING_SETTLE_BUFFERS
 
+        if c == 'p':
+            self.commands_pipe_master.send( (COMMANDS.RESET, None) )
+
         skip_violin_print = False
         if c == 'z' or c == 'x' or c == 'c' or c == 'v':
             if c == 'z':

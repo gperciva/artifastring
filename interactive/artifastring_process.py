@@ -13,7 +13,7 @@ import actions_file
 import collections
 
 import enum
-COMMANDS = enum.enum('BOW', 'FINGER', 'TENSION', 'UNSAFE')
+COMMANDS = enum.enum('BOW', 'FINGER', 'TENSION', 'UNSAFE', 'RESET')
 
 ArtifastringInit = collections.namedtuple('ArtifastringInit', """
     instrument_type,
@@ -66,6 +66,8 @@ def handle_command(violin, commands_pipe, logfile, samples):
             pc.T *= params.tension_relative
             commands_pipe.send( (COMMANDS.TENSION, pc.T) )
             violin.set_physical_constants(params.violin_string, pc)
+    elif command[0] == COMMANDS.RESET:
+        violin.reset()
 
 
 def violin_process(artifastring_init, commands_pipe, audio_pipe):
