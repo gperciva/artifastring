@@ -32,7 +32,7 @@ BINS = 2049
 #NUM_TAPS = 850
 NUM_TAPS = 512
 #NUM_TAPS = 256
-GAIN = 4.0
+GAIN = 1.0
 
 def freq2bin(freq, mult):
     SAMPLE_RATE = mult*SAMPLE_RATE_MAIN
