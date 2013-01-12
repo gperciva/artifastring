@@ -63,7 +63,7 @@ def prepare_dir(options):
 
 BLENDER_COMMAND = """blender -noaudio \
   -b %(blender_model)s \
-  -P ${datarootdir}/artifastring/artifastring-blender.py \
+  -P ${datarootdir}/artifastring/artifastring_blender.py \
   -o %(output_dir)s/#### \
   -s %(start)s %(end_flag)s -a \
   -- \

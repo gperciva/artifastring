@@ -15,7 +15,7 @@ def get_options():
 
     import argparse
     parser = argparse.ArgumentParser(
-        prog = "artifastring-blender.py",
+        prog = "artifastring_blender.py",
         description = """Generate a video from an .actions file.
         Options come after -- on the blender command-line.""",
         )

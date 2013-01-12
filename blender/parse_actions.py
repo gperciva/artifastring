@@ -1,10 +1,11 @@
 
-def process_bow(violin, splitline, frame):
+def process_bow_or_accel(violin, splitline, frame):
     string_number = int(splitline[2])
     bow_bridge_distance = float(splitline[3])
     bow_force = float(splitline[4])
     bow_velocity = float(splitline[5])
-    bow_along = float(splitline[6])
+    bow_along = float(splitline[-1])  # 'b' is 6, 'a' is 7
+    print ("%i\t%.3f" % (string_number, bow_along))
     violin.bow_action(string_number, bow_bridge_distance,
         bow_force, bow_along, frame)
 
@@ -31,17 +32,17 @@ def load_keyframes(violin, filename, fps):
         # to allow lifting bow
         if frame != prev_frame:
             if prev_bow != None:
-                process_bow(violin, prev_bow, prev_frame)
+                process_bow_or_accel(violin, prev_bow, prev_frame)
                 prev_bow = None
 
         action_text = splitline[0]
-        if action_text == 'b':
+        if action_text == 'b' or action_text == 'a':
             # skip over the tons of bowing
             # TODO: take average of them instead of skipping?
             if frame == prev_frame:
                 prev_bow = splitline
             else:
-                process_bow(violin, splitline, frame)
+                process_bow_or_accel(violin, splitline, frame)
                 prev_frame = frame
         elif action_text == 'f':
            # print ("FINGER:", splitline)
