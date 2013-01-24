@@ -15,7 +15,7 @@ NORMALIZED = True
 NORMALIZED = False
 
 ONLY_END = None
-ONLY_END = 8192
+#ONLY_END = 8192
 
 def zero_pad_to_next_power_two(x):
     len_power_two = int(pow(2, math.ceil(math.log(len(x),2))))

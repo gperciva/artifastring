@@ -33,8 +33,8 @@ public:
              float position, float force, float velocity,
              float bow_pos_along);
     void accel(float seconds, int string_number,
-             float position, float force, float velocity,
-             float bow_pos_along, float bow_accel);
+               float position, float force, float velocity,
+               float bow_pos_along, float bow_accel);
 
     void category(float seconds, float category);
     // writes buffer to file immediately

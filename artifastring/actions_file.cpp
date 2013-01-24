@@ -123,8 +123,8 @@ void ActionsFile::bow(float seconds, int string_number,
 }
 
 void ActionsFile::accel(float seconds, int string_number,
-                      float position, float force, float velocity,
-                      float bow_pos_along, float accel)
+                        float position, float force, float velocity,
+                        float bow_pos_along, float accel)
 {
     if ((index + 1) >= size) {
         writeBuffer();

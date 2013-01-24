@@ -109,36 +109,37 @@ ArtifastringInstrument::ArtifastringInstrument(
 
             switch (m_instrument_type) {
             case Violin: {
+                const int body_number = (instrument_number +
+                                         (instrument_number / BODY_VIOLIN_NUMBER_1)
+                                        ) % BODY_VIOLIN_NUMBER_1;
+
                 if (fs_multiply == 1) {
-                    const int body_number = ((int) instrument_number) % BODY_VIOLIN_NUMBER_1;
                     time_data = BODY_VIOLIN_S_1[body_number],
                     num_taps = NUM_TAPS_VIOLIN_1;
                 } else if (fs_multiply == 2) {
-                    const int body_number = ((int) instrument_number) % BODY_VIOLIN_NUMBER_2;
                     time_data = BODY_VIOLIN_S_2[body_number];
                     num_taps = NUM_TAPS_VIOLIN_2;
                 } else if (fs_multiply == 3) {
-                    const int body_number = ((int) instrument_number) % BODY_VIOLIN_NUMBER_3;
                     time_data = BODY_VIOLIN_S_3[body_number];
                     num_taps = NUM_TAPS_VIOLIN_3;
                 } else {
-                    const int body_number = ((int) instrument_number) % BODY_VIOLIN_NUMBER_4;
                     time_data = BODY_VIOLIN_S_4[body_number];
                     num_taps = NUM_TAPS_VIOLIN_4;
                 }
                 break;
             }
             case Viola: {
+                const int body_number = (instrument_number +
+                                         (instrument_number / BODY_VIOLA_NUMBER_1)
+                                        ) % BODY_VIOLA_NUMBER_1;
+
                 if (fs_multiply == 1) {
-                    int body_number = ((int) instrument_number) % BODY_VIOLA_NUMBER_1;
                     time_data = BODY_VIOLA_S_1[body_number],
                     num_taps = NUM_TAPS_VIOLA_1;
                 } else if (fs_multiply == 2) {
-                    int body_number = ((int) instrument_number) % BODY_VIOLA_NUMBER_2;
                     time_data = BODY_VIOLA_S_2[body_number],
                     num_taps = NUM_TAPS_VIOLA_2;
                 } else if (fs_multiply == 4) {
-                    int body_number = ((int) instrument_number) % BODY_VIOLA_NUMBER_4;
                     time_data = BODY_VIOLA_S_4[body_number],
                     num_taps = NUM_TAPS_VIOLA_4;
                 } else {
@@ -147,12 +148,14 @@ ArtifastringInstrument::ArtifastringInstrument(
                 break;
             }
             case Cello: {
+                const int body_number = (instrument_number +
+                                         (instrument_number / BODY_CELLO_NUMBER_1)
+                                        ) % BODY_CELLO_NUMBER_1;
+
                 if (fs_multiply == 1) {
-                    int body_number = ((int) instrument_number) % BODY_CELLO_NUMBER_1;
                     time_data = BODY_CELLO_S_1[body_number];
                     num_taps = NUM_TAPS_CELLO_1;
                 } else if (fs_multiply == 2) {
-                    int body_number = ((int) instrument_number) % BODY_CELLO_NUMBER_2;
                     time_data = BODY_CELLO_S_2[body_number];
                     num_taps = NUM_TAPS_CELLO_2;
                 } else {
