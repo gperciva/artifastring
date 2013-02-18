@@ -23,7 +23,7 @@ def process(dirname, basename, recalc=False, plot=False):
     st = basename.split('-')[1]
     pc = published_constants.PHYSICAL_CONSTANT_RANGES[inst]
     # find average tension, length
-    T = ( pc[st]['T'][0] + pc[st]['T'][1] ) / 2
+    T = ( pc[st.upper()]['T'][0] + pc[st.upper()]['T'][1] ) / 2
     L = ( pc['L'][0] + pc['L'][1] ) / 2
     #print T, L
 

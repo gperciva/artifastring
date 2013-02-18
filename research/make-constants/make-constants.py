@@ -37,9 +37,10 @@ if not os.path.exists("pc-consts/"):
 #import arff
 PAUSES = False
 
-SHORT_DECAYS = 40
+ORIG_N = 40
+SHORT_DECAYS = 128
 
-WINDOWSIZE = 1024
+WINDOWSIZE = 2048*2
 HOPSIZE = 512
 TEST_SECONDS = 1.0
 SAVE_DIRNAME = "pc-consts"
@@ -64,11 +65,7 @@ PC_CONSTS_FORMAT = """            %(T).1f, // T
             %(mu_d).3f, // dynamic friction
             %(v0).3f, // friction curve steepness
             %(cutoff).4g, // insignificant string vibrations
-"""
-# not used any more
-EXTRA_IFDEF_N = """#ifdef RESEARCH
-            %i, // number of modes N
-#endif
+            %(N)i, // number of modes N
 """
 
 TABLE_ROW_OVERALL_FORMAT = "%s-%s-%s&%s"
@@ -82,6 +79,13 @@ def props(obj):
         if not name.startswith('__') and not inspect.ismethod(value):
             pr[name] = value
     return pr
+
+def decay_power(decays, n):
+    r_total = 1.0 / decays
+    s_total = sum(r_total)
+    r_n = 1.0 / decays[:n]
+    r_total = sum(r_n)
+    return r_total / s_total
 
 class Inst():
     def __init__(self, inst_num, inst_text, inst_num_text):
@@ -140,6 +144,7 @@ class Inst():
         p = props(pc)
         text += " {   // %s %s %s\n" % (
             self.inst_text, st_text, self.inst_num_text)
+        #print p
         text += str(PC_CONSTS_FORMAT % p)
 
         text += "            // decays\n"
@@ -170,6 +175,7 @@ class Inst():
     def pick_new_constants(self, st, st_text, f0, B, L, d):
         decays = self.get_modes(st, st_text)
 
+        print st, st_text
         pc_ideal = dict(published_constants.PHYSICAL_CONSTANT_RANGES[self.inst_text][st_text])
         #print pc_ideal
         #exit(1)
@@ -212,11 +218,13 @@ class Inst():
         pc.L = L
         pc.d = d
         f0nat = numpy.sqrt(f0**2 + decays[0]**2)
+        #print f0nat, B
         #print f0, f0nat
         pc, self.calc_f0, self.calc_B = match_actual(pc, f0nat, B, pc_ideal)
         #print "%.10f" % (B - calc_B)
         #pc = match_actual(pc, f0, B, pc_ideal)
         if pc is False:
+            print "failed to match_actual"
             return False
         f_target = expected_frequencies.FREQS[self.inst_text][st_text]
         #print "tension correction for %.1f: old %.1f N\t" % (
@@ -227,17 +235,43 @@ class Inst():
         # under-estimate
         pc.T *= 0.9
 
+        n = ORIG_N
         ## estimate maximum frequency
-        #n = 30
-        #pi_div_l = math.pi / pc.L
-        #I = math.pi * pc.d*pc.d*pc.d*pc.d / 64.0
-        #n_pi_div_L = n*pi_div_l
-        #div_pc_pl = 1.0 / pc.pl
-        #w0n = math.sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
-        #          + ((pc.E * I * div_pc_pl)
-        #          * n_pi_div_L*n_pi_div_L
-        #          * n_pi_div_L*n_pi_div_L
-        #          ))
+        def max_freq_from_n(n):
+            pi_div_l = math.pi / pc.L
+            I = math.pi * pc.d*pc.d*pc.d*pc.d / 64.0
+            n_pi_div_L = n*pi_div_l
+            div_pc_pl = 1.0 / pc.pl
+            w0n = math.sqrt( (pc.T * div_pc_pl) * n_pi_div_L*n_pi_div_L
+                  + ((pc.E * I * div_pc_pl)
+                  * n_pi_div_L*n_pi_div_L
+                  * n_pi_div_L*n_pi_div_L
+                  ))
+            return w0n / (2*numpy.pi)
+        max_freq = max_freq_from_n(1)
+        print "orig freq:", max_freq
+        max_freq = max_freq_from_n(n)
+        dp = decay_power(decays, n)
+        print "N=%i\tmax freq: %.1f\tpower: %.3f" %( n, max_freq, dp)
+        while max_freq < 15000 or dp < 0.99:
+            n += 4
+            max_freq = max_freq_from_n(n)
+            dp = decay_power(decays, n)
+            print "N=%i\tmax freq: %.1f\tpower: %.3f" %( n, max_freq, dp)
+        #n = ORIG_N
+        tension_tuning_extra_room = 1.05
+        mult = int(math.ceil(
+                max_freq/(44100/2) * tension_tuning_extra_room
+            ))
+        while mult > 4:
+            n -= 4
+            max_freq = max_freq_from_n(n)
+            dp = decay_power(decays, n)
+            mult = int(math.ceil(
+                max_freq/(44100/2) * tension_tuning_extra_room
+                ))
+        print "N=%i\tmax freq: %.1f\tpower: %.3f\tmult: %i\t%s" %(
+            n, max_freq, dp, mult, st_text)
         #if w0n > artifastring_instrument.ARTIFASTRING_INSTRUMENT_SAMPLE_RATE * math.pi/2:
         #    return False
 
@@ -253,6 +287,7 @@ class Inst():
 
 
         pc.cutoff = CUTOFF_ORIG
+        pc.N = n
 
         self.vln.set_physical_constants(st, pc)
         return True
@@ -288,6 +323,7 @@ class Inst():
 
         while not stable:
             #self.vln.set_string_logfile(st, 'string.log')
+            print "new constants", st, st_text
             while True:
                 ret = self.pick_new_constants(st, st_text,
                     f0, B, L, d)
@@ -295,8 +331,8 @@ class Inst():
                     break
             #Lrange = published_constants.PHYSICAL_CONSTANT_RANGES[self.inst_text]['L']
             #L = (Lrange[0] + Lrange[1]) / 2.0
-            beta = 0.12
-            vb = 0.3
+            beta = 0.125
+            vb = 0.4
             bow_force = self.schelleng_max(st, beta=beta, vb=vb)
             bow_force *= 0.2
             #print "bow force:", bow_force
@@ -310,11 +346,12 @@ class Inst():
                 #print "before tuning", st, f_target, T_bounds
                 if PAUSES:
                     raw_input()
-                print self.vln.get_physical_constants(st).T
+                #print self.vln.get_physical_constants(st).T
                 stable = self.tune(st, f_target,
-                    T_bounds[0]*0.8, T_bounds[1]*1.2,
+                    T_bounds[0]*0.75, T_bounds[1]*1.25,
                     beta=beta, bow_force=bow_force, vb=vb)
-                print self.vln.get_physical_constants(st).T
+
+                #print self.vln.get_physical_constants(st).T
                 #print stable
             #self.add_arff(stable)
 
@@ -339,7 +376,7 @@ class Inst():
         self.pitches = numpy.zeros(NUM_PITCH_AVERAGE)
         self.pi = 0
 
-        bow_accel = 0.2
+        bow_accel = 7.5
         K_p = 0.1
         INITIAL_SECONDS = 1.0
         self.vln.reset()
@@ -390,8 +427,8 @@ class Inst():
             #alt_mul = 1.0 + K_p * delta_pitch
             pc.T += K_p * delta_pitch
             #print self.pitches
-            #print "%.1f\t%.1f\t%.3f\t%.1f" % (
-            #    pitch, delta_pitch, 0, pc.T)
+            #print "%.1f\t%.1f\t%.1f" % (
+            #    pitch, delta_pitch, pc.T)
             scipy.io.wavfile.write("pc-consts/test-pitches-%i.wav" % st,
                 artifastring_instrument.ARTIFASTRING_INSTRUMENT_SAMPLE_RATE,
                 pitches_wav_array)
@@ -629,9 +666,9 @@ def check_bounds(xs, pc_ideal):
     bad = 0
     def line(txt, var):
         if not (pc_ideal[txt][0] <= var <= pc_ideal[txt][1]):
-            #print '-------- exceeds bounds:'
-            #print "%s\t%.2e\t%.2e\t%.2e" % (txt,
-            #    pc_ideal[txt][0], var, pc_ideal[txt][1])
+            print '-------- exceeds bounds:'
+            print "%s\t%.2e\t%.2e\t%.2e" % (txt,
+                pc_ideal[txt][0], var, pc_ideal[txt][1])
             return 1
         #print "%s\t%.2e\t%.2e\t%.2e" % (txt,
         #   pc_ideal[txt][0], var, pc_ideal[txt][1])
@@ -653,7 +690,6 @@ def match_actual(pc, f0nat, B, pc_ideal):
         pc_ideal['L'][0], pc_ideal['L'][1],
         pc_ideal['d'][0], pc_ideal['d'][1],
         ])
-
     fit, cov, infodict, mesg, ier = scipy.optimize.leastsq(
         eval_pcs_two, initial_guess,
         args=(ys, pc), full_output = 1)
@@ -662,6 +698,7 @@ def match_actual(pc, f0nat, B, pc_ideal):
     pred = predicted_f0_B(pc, fit)
     bad = check_bounds(fit, pc_ideal)
     if bad > 0:
+        print "outside bounds 1"
         #print "%.1f\t%.1f\t\t%.3g\t%.3g" % (f0nat, pred[0], B, pred[1])
         #exit(1)
         return False, False, False
@@ -683,6 +720,7 @@ def match_actual(pc, f0nat, B, pc_ideal):
     #res = eval_pcs_all(fit, ys, pc)
     bad = check_bounds(fit, pc_ideal)
     if bad > 0:
+        print "outside bounds 2"
         #print "bail with:"
         #print "%.1f\t%.1f\t\t%.3g\t%.3g" % (f0nat, pred[0], B, pred[1])
         #global global_count
@@ -771,6 +809,7 @@ def do_inst_num(inst_num, inst_text, inst_within_num, inst_num_text, st_texts):
         f0, B = get_f0_B(inst_num, inst_within_num, st)
         inst.new_constants(st, st_text, f0, B, L, d)
         cutoff_value = cutoff.do_string(inst.vln, inst_num, st)
+        #cutoff_value = 1e-3
         pc = inst.vln.get_physical_constants(st)
         pc.cutoff = cutoff_value
         inst.vln.set_physical_constants(st, pc)
@@ -778,6 +817,7 @@ def do_inst_num(inst_num, inst_text, inst_within_num, inst_num_text, st_texts):
         rows.append(row)
         inst_const_text += st_const_text
     inst_const_text += "\n    },\n"
+    #exit(1) ### FIXME debug only
     return inst_const_text, rows
 
 
@@ -818,6 +858,7 @@ def get_split_filename(dirname):
 
 def sort_inst_names(a):
     at = get_split_filename(a.split('&')[0])
+    at[1] = at[1].lower()
     value = 0
     ### instrument type
     if at[0] == 'violin':

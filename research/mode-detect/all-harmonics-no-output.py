@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-NUM_PROCESSES = 1
+NUM_PROCESSES = 4
 DEBUG_CMD = 0
 
 import multiprocessing

@@ -450,6 +450,9 @@ elif THESIS.startswith("bow"):
         #PLOT_TIME_SAMPLE_MIN = int(FS*1.0)
         #PLOT_TIME_SAMPLE_MAX = int(FS*1.18576)
 
+    elif "mundane" in THESIS:
+        SECONDS = 1.0
+
 elif THESIS.startswith("ns "):
     xf = 1.0 - 0.109
     if "bow" in THESIS:
@@ -804,8 +807,9 @@ else:
     print "Selecting null THESIS type"
     #xf = 0.333
     #SECONDS = 1.6 # 0.1 for pluck, plus over 65536 samples
-    SECONDS = 0.01
+    SECONDS = 1.0
     #N = 16
+    #FS = 441100
     FS = 88200
     #FS = 96000
     #FS = 22050
@@ -813,7 +817,7 @@ else:
     PLOTS = False
     #PLOTS_SHOW = True
     #xf = 1.0 - 0.109
-    WRITE_X3N_Y3N = True
+    #WRITE_X3N_Y3N = True
 
     INFINITE_SPRING = False
     SINGLE_FINGER_FORCE = False

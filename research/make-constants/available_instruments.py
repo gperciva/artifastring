@@ -8,7 +8,7 @@ INSTRUMENTS = {
         ['C', 'G', 'D', 'A']
         ),
     'cello': (['I', 'II', 'III'],
-        ['C', 'G', 'A', 'A']
+        ['C', 'G', 'D', 'A']
         )
 }
 
