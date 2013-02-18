@@ -10,10 +10,16 @@ import scipy.signal
 import scipy.fftpack
 import pylab
 #MAX_SHRT = 32768.0
-GAIN = 0.03
+GAIN = 50.0
 
 PLOT = True
 PLOT = False
+
+IMPULSES = True
+#IMPULSES = False
+
+if not IMPULSES:
+    GAIN = 400.0
 
 HEADER_BEGIN = """/* This file was automatically generated */
 #ifndef BODY_%(name_upper)s_H_%(mult)i
@@ -59,9 +65,16 @@ def write_impulses(name, mult):
         #    continue
         outfile.write("        /* %s */\n" % filename)
         #wav_samples = read_wave(filename)
-        sample_rate, wav_samples = scipy.io.wavfile.read(filename)
-        wav_samples = numpy.array(wav_samples,
-            dtype=numpy.float64) / float(numpy.iinfo(wav_samples.dtype).max)
+        if IMPULSES:
+            sample_rate, wav_samples = scipy.io.wavfile.read(filename)
+            wav_samples = numpy.array(wav_samples,
+                dtype=numpy.float64) / float(numpy.iinfo(wav_samples.dtype).max)
+        else:
+            sample_rate = 44100.0
+            wav_samples = numpy.zeros(2048)
+            wav_samples[0] = 1.0
+
+
         wav_samples = wav_samples[:base_taps]
 
         #pylab.plot(wav_samples)
@@ -73,8 +86,8 @@ def write_impulses(name, mult):
         #pylab.show()
         #exit(1)
 
-        n = 101
-        cutoff_freq = 10000.0
+        n = 253
+        cutoff_freq = 18000.0
         low_b = scipy.signal.firwin(n, cutoff=cutoff_freq/(mult*sample_rate/2))
 
 
@@ -113,7 +126,7 @@ def write_impulses(name, mult):
 
         print len(wav_samples)
         for sample in wav_samples:
-            value = sample * GAIN * 8192.0 / len(wav_samples)
+            value = sample * GAIN / len(wav_samples)
             outfile.write("        %.20gf,\n" % value)
         for j in range(len(wav_samples), num_taps):
             outfile.write("        %.20gf,\n" % 0.0)
@@ -131,6 +144,7 @@ write_impulses('violin', 3)
 write_impulses('violin', 2)
 write_impulses('violin', 1)
 write_impulses('viola', 4)
+write_impulses('viola', 3)
 write_impulses('viola', 2)
 write_impulses('viola', 1)
 write_impulses('cello', 2)

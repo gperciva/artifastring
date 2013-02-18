@@ -20,20 +20,21 @@ except:
     sys.exit(1)
 
 def process(filename):
-    sample_rate, data = scipy.io.wavfile.read(filename)
-    data = numpy.array(data, dtype=numpy.float64)
-    data = scipy.signal.decimate(data, 2)
-    sample_rate /= 2.0
+    sample_rate, data_unnormalized = scipy.io.wavfile.read(filename)
+    data = numpy.array(data_unnormalized, dtype=numpy.float64)
+    data = data_unnormalized / float(numpy.iinfo(data_unnormalized.dtype).max)
+    #data = scipy.signal.decimate(data, 2)
+    #sample_rate /= 2.0
 
     cutoff = 20.0 / (sample_rate/2.0)
-    #print cutoff
-    #pylab.plot(data)
+    pylab.plot(data)
     b, a = scipy.signal.butter(4, cutoff, btype='highpass')
     data = scipy.signal.lfilter(b, a, data)
     #pylab.plot(data)
+    #pylab.ylim([-1,1])
     #pylab.show()
 
-    data = numpy.array(data, dtype=numpy.int32)
+    #data = numpy.array(data, dtype=numpy.int32)
 
     data_abs = abs(data)
 
@@ -59,10 +60,12 @@ def process(filename):
 
     out_filename = os.path.join(split_dir,
             os.path.basename(filename))
-    scipy.io.wavfile.write(out_filename, sample_rate, save)
+    saveints = numpy.array( save * float((2**16)-1), dtype=numpy.int16)
+    scipy.io.wavfile.write(out_filename, sample_rate, saveints)
 
 
-    fft = scipy.fftpack.fft(save / float(numpy.iinfo(save.dtype).max))
+    #fft = scipy.fftpack.fft(save / float(numpy.iinfo(save.dtype).max))
+    fft = scipy.fftpack.fft(save)
     fftabs = abs(fft[:len(fft)/2]) / len(save)
     freqs = numpy.array([
         float(i) * sample_rate / len(fft)
@@ -73,7 +76,7 @@ def process(filename):
     numpy.savetxt(out_filename[:-4] + ".freqs.txt", data)
 
     data = numpy.vstack( (
-        numpy.arange(0, len(save))/22050.0, save / float(2**31-1) ) ).transpose()
+        numpy.arange(0, len(save))/44100.0, save * float(2**31-1) ) ).transpose()
     numpy.savetxt(out_filename[:-4] + ".time.txt", data)
     #pylab.plot(freqs, fftdb)
     #pylab.show()
