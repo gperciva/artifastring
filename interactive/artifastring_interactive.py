@@ -325,7 +325,7 @@ class InteractiveViolin():
 
 
         wavfile = monowav.MonoWav(basename+".wav",
-            ARTIFASTRING_SAMPLE_RATE)
+            ARTIFASTRING_SAMPLE_RATE, ARTIFASTRING_SAMPLE_RATE)
         ### very awkward abuse of SWIG.  There has to be a better way!
         buf = wavfile.request_fill(len(complete))
         for i in xrange(len(complete)):

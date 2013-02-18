@@ -27,11 +27,14 @@
 //using namespace std;
 #include <stdio.h>
 
+#if NDEBUG
 #include <emmintrin.h> // for _mm_setcsr
+#endif
 
 //#define WARN_SKIP
 
 //#define DEBUG_ONLY_SINE_OUTPUT
+//#define DEBUG_ONLY_WHITE_NOISE
 
 
 #define EIGEN_NO_MALLOC
@@ -44,6 +47,8 @@ const int MAX_LINE_LENGTH = 2048;
 const float FLOAT_EQUALITY_ABSOLUTE_ERROR = 1e-10f;
 const float PI = 3.14159265358979f;
 
+using namespace std;
+
 
 ArtifastringString::ArtifastringString(InstrumentType which_instrument,
                                        int instrument_number, int string_number,
@@ -54,7 +59,13 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
     //_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 
     // set SSE denormals
+#if NDEBUG
     _mm_setcsr( _mm_getcsr() | 0x8040 );
+#endif
+    fs_multiplier = fs_multiplication_factor;
+    fs = fs_multiplier * ARTIFASTRING_INSTRUMENT_SAMPLE_RATE;
+    dt = 1.0f / fs;
+    //printf("fs: %i\tmult: %i\n", fs, fs_multiplier);
 
     switch (which_instrument) {
     case Violin: {
@@ -73,11 +84,6 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
         break;
     }
     }
-    fs_multiplier = fs_multiplication_factor;
-
-    fs = fs_multiplier * ARTIFASTRING_INSTRUMENT_SAMPLE_RATE;
-    dt = 1.0f / fs;
-    //printf("fs: %i\tmult: %i\n", fs, fs_multiplier);
 
 #ifdef RESEARCH
     logfile = NULL;
@@ -90,7 +96,6 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
 
     // must happen after opening logfile!
     reset();
-    //cache_pc_c();
 }
 
 ArtifastringString::~ArtifastringString()
@@ -98,6 +103,35 @@ ArtifastringString::~ArtifastringString()
 #ifdef RESEARCH
     logfile_close();
 #endif
+}
+
+void ArtifastringString::set_N(unsigned int N_next)
+{
+#ifdef FIXEDSIZE
+#else
+    N = N_next;
+    sc.X1.resize(N);
+    sc.X2.resize(N);
+    sc.X3.resize(N);
+    sc.Y1.resize(N);
+    sc.Y2.resize(N);
+    sc.Y3.resize(N);
+    sc.G.resize(N);
+
+    vc.phix0.resize(N);
+    vc.phix1.resize(N);
+    vc.phix2.resize(N);
+
+    ss.a.resize(N);
+    ss.ad.resize(N);
+    ah.resize(N);
+    adh.resize(N);
+    fn.resize(N);
+
+    n.resize(N);
+    inside_phi.resize(N);
+#endif
+    n = AA::LinSpaced(Eigen::Sequential, N, 1, N);
 }
 
 void ArtifastringString::reset()
@@ -297,6 +331,11 @@ String_Physical ArtifastringString::get_physical_constants()
 void ArtifastringString::set_physical_constants(String_Physical pc_new)
 {
     pc = pc_new;
+#ifdef FIXEDSIZE
+    set_N(MODES);
+#else
+    set_N(pc.N);
+#endif
     cache_pc_c();
     vc.recache = true;
 }
@@ -306,29 +345,46 @@ void ArtifastringString::cache_pc_c()
     sc.div_pc_L = 1.0f / pc.L;
     sc.sqrt_two_div_L = sqrt( 2.0f / pc.L);
     const float I = PI * pc.d*pc.d*pc.d*pc.d / 64.0f;
-    const AA n = AA::LinSpaced(Eigen::Sequential, MODES, 1, MODES);
+
+#ifdef FIXEDSIZE
+    const AA ones = AA::Ones();
+    AA rn;
+#else
+    AA ones(N);
+    ones.resize(N);
+    ones.setOnes();
+
+    AA rn(N);
+    rn.resize(N);
+#endif
+    for (int i = 0; i < N; ++i) {
+        rn(i) = pc.rn[i];
+    }
+
     const AA w0 = ( (pc.T/pc.pl) * ((n*PI*sc.div_pc_L).square())
                     + (pc.E*I/pc.pl) * ((n*PI*sc.div_pc_L).square().square()) ).sqrt();
-    AA r;
-    for (int i = 0; i < MODES; ++i) {
-        r(i) = pc.rn[i];
+    const float highest_freq = w0[N-1] / (2*PI);
+    if (highest_freq > fs/2.0) {
+        cout<<"BAD FREQ!  highest freq: "<<highest_freq;
+        cout<<"           Nyquist freq: "<<fs/2.0<<endl;
     }
-    const AA w = (w0.square() - r.square()).sqrt();
+    const AA w = (w0.square() - rn.square()).sqrt();
 
-    sc.X1 = ((w*dt).cos() + (r/w)*((w*dt).sin())) * ((-r*dt).exp());
-    sc.X2 = ((AA::Ones() / w) * (w*dt).sin()) * ((-r*dt).exp());
-    sc.X3 = (AA::Ones() - sc.X1) / (pc.pl * w0.square());
+    sc.X1 = ((w*dt).cos() + (rn/w)*((w*dt).sin())) * ((-rn*dt).exp());
+    sc.X2 = ((ones / w) * (w*dt).sin()) * ((-rn*dt).exp());
+    sc.X3 = (ones - sc.X1) / (pc.pl * w0.square());
     //std::cout<<"X1"<<std::endl<<sc.X1<<std::endl;
     //std::cout<<"X3"<<std::endl<<sc.X3<<std::endl;
 
-    sc.Y1 = -(w + r.square()/w) * (w*dt).sin() * (-r*dt).exp();
-    sc.Y2 = ((w*dt).cos() - (r/w)*((w*dt).sin())) * (-r*dt).exp();
+    sc.Y1 = -(w + rn.square()/w) * (w*dt).sin() * (-rn*dt).exp();
+    sc.Y2 = ((w*dt).cos() - (rn/w)*((w*dt).sin())) * (-rn*dt).exp();
     sc.Y3 = -sc.Y1 / (pc.pl * w0.square());
 
     //std::cout<<"Y3"<<std::endl<<sc.Y3<<std::endl;
 
     sc.G = sc.sqrt_two_div_L * (pc.T*(n*PI*sc.div_pc_L) + pc.E*I*(n*PI*sc.div_pc_L).cube());
 
+    inside_phi = n*PI*sc.div_pc_L;
     vc.recache = true;
 }
 
@@ -395,8 +451,7 @@ void ArtifastringString::cache_pa_c()
     //    vc.K0, vc.K1, vc.K2, vc.R0, vc.R1, vc.R2
     //    );
 
-    const AA n = AA::LinSpaced(Eigen::Sequential, MODES, 1, MODES);
-    const AA inside_phi = n*PI*sc.div_pc_L;
+    //n = AA::LinSpaced(Eigen::Sequential, MODES, 1, MODES);
     vc.phix0 = sc.sqrt_two_div_L * ( vc.x0*inside_phi ).sin();
     vc.phix1 = sc.sqrt_two_div_L * ( vc.x1*inside_phi ).sin();
 
@@ -553,8 +608,8 @@ void ArtifastringString::cache_pa_c()
 inline float ArtifastringString::tick_bow()
 {
     // "hands-free" modes
-    const AA ah  = sc.X1*ss.a + sc.X2*ss.ad;
-    const AA adh = sc.Y1*ss.a + sc.Y2*ss.ad;
+    ah  = sc.X1*ss.a + sc.X2*ss.ad;
+    adh = sc.Y1*ss.a + sc.Y2*ss.ad;
 
     const float y1h = (vc.x1 > 0) ? (vc.phix1 * ah).sum() : 0;
     const float v1h = (vc.x1 > 0) ? (vc.phix1 * adh).sum() : 0;
@@ -574,7 +629,7 @@ inline float ArtifastringString::tick_bow()
     */
 
     {   // apply forces
-        const AA fn = vc.phix0*F0 + vc.phix1*F1;
+        fn = vc.phix0*F0 + vc.phix1*F1;
         //std::cout<<fn<<std::endl;
         ss.a  = ah  + sc.X3*fn;
         ss.ad = adh + sc.Y3*fn;
@@ -591,8 +646,8 @@ inline float ArtifastringString::tick_bow()
 inline float ArtifastringString::tick_pluck()
 {
     // "hands-free" modes
-    const AA ah  = sc.X1*ss.a + sc.X2*ss.ad;
-    const AA adh = sc.Y1*ss.a + sc.Y2*ss.ad;
+    ah  = sc.X1*ss.a + sc.X2*ss.ad;
+    adh = sc.Y1*ss.a + sc.Y2*ss.ad;
 
     // "hands-free" string displacement under force locations
 #if 1
@@ -639,7 +694,7 @@ inline float ArtifastringString::tick_pluck()
     const Eigen::Vector3f Fs = inv_A * matrix_b;
 
     // apply forces
-    const AA fn = vc.phix0*Fs(0) + vc.phix1*Fs(1) + vc.phix2*Fs(2);
+    fn = vc.phix0*Fs(0) + vc.phix1*Fs(1) + vc.phix2*Fs(2);
     ss.a  = ah  + sc.X3*fn;
     ss.ad = adh + sc.Y3*fn;
     return compute_bridge_force();
@@ -648,8 +703,8 @@ inline float ArtifastringString::tick_pluck()
 inline float ArtifastringString::tick_release()
 {
     // "hands-free" modes
-    const AA ah  = sc.X1*ss.a + sc.X2*ss.ad;
-    const AA adh = sc.Y1*ss.a + sc.Y2*ss.ad;
+    ah  = sc.X1*ss.a + sc.X2*ss.ad;
+    adh = sc.Y1*ss.a + sc.Y2*ss.ad;
 
     // "hands-free" string displacement under force locations
     const float y0h = (vc.phix0 * ah).sum();
@@ -714,10 +769,7 @@ inline float ArtifastringString::tick_release()
 
     // apply forces
     {
-        //const AA fn = vc.phix0*Fs(0) + vc.phix1*Fs(1);
-        //const AA fn = vc.phix0*Fs(0) + vc.phix1*Fs(1) + vc.phix2*Fs(2);
-        const AA fn = vc.phix0*F0 + vc.phix1*F1;
-        //std::cout<<fn<<std::endl;
+        fn = vc.phix0*F0 + vc.phix1*F1;
         ss.a  = ah  + sc.X3*fn;
         ss.ad = adh + sc.Y3*fn;
     }
@@ -727,8 +779,8 @@ inline float ArtifastringString::tick_release()
 inline float ArtifastringString::tick_free()
 {
     // necessary to avoid aliasing
-    const AA ah  = sc.X1*ss.a + sc.X2*ss.ad;
-    const AA adh = sc.Y1*ss.a + sc.Y2*ss.ad;
+    ah  = sc.X1*ss.a + sc.X2*ss.ad;
+    adh = sc.Y1*ss.a + sc.Y2*ss.ad;
     ss.a  = ah;
     ss.ad = adh;
     return compute_bridge_force();
@@ -785,6 +837,18 @@ void ArtifastringString::fill_buffer_forces(float *buffer, float *forces,
     int num_samples = fs_multiplier * num_samples_instrument;
     //printf("# fill_buffer_forces()  string_num, ss.actions, ticks, num_samples_instrument, num_samples\n: %i %i %i %i %i\n",
     //    debug_string_num, ss.actions, debug_ticks, num_samples_instrument, num_samples);
+
+#ifdef DEBUG_ONLY_WHITE_NOISE
+    for (int i=0; i<num_samples; i++) {
+        buffer[i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
+    }
+    if (forces != NULL) {
+        for (int i=0; i<num_samples; i++) {
+            forces[i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
+        }
+    }
+    return;
+#endif
 
 #ifdef DEBUG_ONLY_SINE_OUTPUT
     if (va.Fb == 0) {

@@ -53,6 +53,7 @@
 #include "constants/body_violin_2.h"
 #include "constants/body_violin_1.h"
 #include "constants/body_viola_4.h"
+#include "constants/body_viola_3.h"
 #include "constants/body_viola_2.h"
 #include "constants/body_viola_1.h"
 #include "constants/body_cello_2.h"
@@ -139,6 +140,9 @@ ArtifastringInstrument::ArtifastringInstrument(
                 } else if (fs_multiply == 2) {
                     time_data = BODY_VIOLA_S_2[body_number],
                     num_taps = NUM_TAPS_VIOLA_2;
+                } else if (fs_multiply == 3) {
+                    time_data = BODY_VIOLA_S_3[body_number],
+                    num_taps = NUM_TAPS_VIOLA_3;
                 } else if (fs_multiply == 4) {
                     time_data = BODY_VIOLA_S_4[body_number],
                     num_taps = NUM_TAPS_VIOLA_4;

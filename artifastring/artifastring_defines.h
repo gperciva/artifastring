@@ -38,14 +38,14 @@
 //#define BODY_ONLY_LOWPASS 0.1
 
 
-const int MODAL_DECAY_MODES = 40;
+const int MAX_MODAL_DECAY_MODES = 128;
 
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
 const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 22050*4;
 //
 const int HAPTIC_DOWNSAMPLE_FACTOR = 1;
 #else
-const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 22050;
+const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 44100;
 const int HAPTIC_DOWNSAMPLE_FACTOR = 2;
 #endif
 
@@ -92,7 +92,8 @@ typedef struct {
     float mu_d;
     float v0;
     float cutoff;
-    float rn[MODAL_DECAY_MODES];
+    unsigned int N;
+    float rn[MAX_MODAL_DECAY_MODES];
 } String_Physical;
 
 

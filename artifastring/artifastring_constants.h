@@ -32,15 +32,10 @@
 //const float dt = 1.0f / ARTIFASTRING_SAMPLE_RATE;
 
 
-const float BRIDGE_FORCE_AMPLIFY [] = {1e-2f, 1e-1f, 1e-2f};
-//const float BRIDGE_FORCE_AMPLIFY [] = {1e-3f, 1e-2f, 3e-3f};
-const float BOW_FORCE_AMPLIFY [] = {1e-1f, 1e-1f, 1e-1f};
-
-
 const int FS_MULTIPLICATION_FACTOR[3][4] = {
     {2,2,4,4},
-    {2,2,2,4},
-    {1,2,2,2},
+    {1,1,3,3},
+    {1,1,1,2},
 };
 
 
@@ -68,7 +63,7 @@ const float A_noise = 0.02f; // estimated from listening
 //#else
 //#endif
 //const int MODES = 32; // keep this a multiple of four for SIMD!
-const int MODES = 40; // keep this a multiple of four for SIMD!
+//const int MODES = 64; // keep this a multiple of four for SIMD!
 
 
 // string physical constants

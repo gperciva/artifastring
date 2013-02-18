@@ -32,9 +32,15 @@
 #include <stdio.h>
 #endif
 
+
+//#define FIXEDSIZE
+
 // Artifastring Array
+#ifdef FIXEDSIZE
 typedef Eigen::Array<float, MODES, 1> AA;
-//typedef Eigen::Matrix<float, MODES, 1> AA;
+#else
+typedef Eigen::Array<float, Eigen::Dynamic, 1> AA;
+#endif
 
 enum ExternalActionsType {
     OFF, RELEASE, PLUCK, BOW, BOW_ACCEL
@@ -206,6 +212,9 @@ protected:
     // physical constants
     String_Physical pc;
 
+    void set_N(unsigned int N_next);
+    unsigned int N;
+
     // calculated from physical constants
     void cache_pc_c();
 
@@ -279,6 +288,13 @@ protected:
     //Eigen::Array<float, NORMAL_BUFFER_SIZE*3, 1> force_samples;
     float audio_samples[NORMAL_BUFFER_SIZE*3];
     float force_samples[NORMAL_BUFFER_SIZE*3];
+
+    // to handle the memory alignment once
+    AA ah;
+    AA adh;
+    AA fn;
+    AA n;
+    AA inside_phi;
 };
 #endif
 
