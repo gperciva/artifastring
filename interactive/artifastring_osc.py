@@ -18,17 +18,32 @@ import liblo
 OLD_BEHAVIOUR = True
 #OLD_BEHAVIOUR = False
 
+SOUNDPLANE = False
+SOUNDPLANE = True
+
 
 class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
     def __init__(self, *args):
         artifastring_interactive.InteractiveViolin.__init__(self, *args)
 
+        #self.active = [False, False, False, False]
+
         try:
-            self.server = liblo.Server(8888)
+            if SOUNDPLANE:
+                self.server = liblo.Server(3123)
+            else:
+                self.server = liblo.Server(8888)
         except liblo.ServerError, err:
             print str(err)
             sys.exit()
-        if OLD_BEHAVIOUR:
+
+    def start_server(self):
+        if SOUNDPLANE:
+            self.server.add_method("/t3d/tch", "iffff",
+                self.soundplane_callback_tch)
+            self.server.add_method("/t3d/alv", None,
+                self.soundplane_callback_alv)
+        elif OLD_BEHAVIOUR:
             self.server.add_method(None, None, self.old_callback)
         else:
             self.server.add_method(None, None, self.callback)
@@ -37,8 +52,62 @@ class ArtifastringOsc(artifastring_interactive.InteractiveViolin):
         if c == 'b':
             pass
 
+    def extra_main_init(self):
+        self.start_server()
+
     def extra_main_loop(self):
-        self.server.recv(0)
+        #for st in range(4):
+        #    if self.active[st]:
+        #        self.params.force = 0.0
+        #        self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
+        #        self.active[st] = False
+        while self.server.recv(0):
+            pass
+
+    def soundplane_callback_alv(self, path, args):
+        if len(args) > 0:
+            return
+        self.params.force = 0.0
+        self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
+
+    def inst_force(self, z):
+        if self.artifastring_init.instrument_type == 0:
+            return 4*z
+        elif self.artifastring_init.instrument_type == 1:
+            return 8*z
+        elif self.artifastring_init.instrument_type == 2:
+            return 12*z
+
+    def soundplane_callback_tch(self, path, args):
+        i, x, y, z, m = args
+        #print "%i\t%.3f\t%.3f\t%.3f" % (i, x, y, z)
+        #Fb = self.inst_force(z)
+
+        def scale(val, minin, maxin, minout, maxout):
+            relval = (val - minin) / (maxin-minin)
+            return relval*maxout + minout
+        #self.active[st] = True
+        if x > 0.25:
+            st = int(5*y)
+            if st > 3:
+                return
+            fp = 0.9 - scale(x, 0.25, 1.0, 0.0, 1.0)
+            if fp < 0:
+                fp = 0
+            #Fb = scale(z, 0.0, 1.0, 0.0, 5.0)
+            Fb = self.inst_force(z)
+            self.params.violin_string = st
+            self.params.force = Fb
+            self.params.finger_position = fp
+        else:
+            xb = x
+            vb = 1.0 - 2*y
+            self.params.bow_position = xb
+            self.params.velocity = vb
+
+        self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
+        self.commands_pipe_master.send( (COMMANDS.FINGER, self.params) )
+
 
     def callback(self, path, args):
         if DEBUG_OSC:

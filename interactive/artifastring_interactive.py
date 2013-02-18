@@ -49,7 +49,7 @@ NUM_AUDIO_BUFFERS = 2
 
 TUNING_SETTLE_BUFFERS = 10
 # for pitch and buffers
-PRINT_EXTRA_DISPLAY = 1
+PRINT_EXTRA_DISPLAY = 0
 if PRINT_EXTRA_DISPLAY:
     import aubio.aubiowrapper
 
@@ -352,6 +352,9 @@ class InteractiveViolin():
     def extra_main_loop(self):
         pass
 
+    def extra_main_init(self):
+        pass
+
     def main_loop(self):
         windowsize = 2048
 
@@ -386,6 +389,8 @@ class InteractiveViolin():
         #            self.output_audio_queue.qsize()))
         #    time.sleep(time_unit)
 
+
+        self.extra_main_init()
         while True:
             self.extra_main_loop()
         #    if PRINT_EXTRA_DISPLAY:
