@@ -106,6 +106,16 @@ void command_finger(ArtifastringInstrument *violin, MonoWav *wavfile,
     }
 }
 
+void command_reset(ArtifastringInstrument *violin, MonoWav *wavfile,
+    MonoWav *forces_file, string command)
+{
+    float next_time;
+    sscanf(command.c_str(), "r\t%f", &next_time);
+    waitUntil(violin, wavfile, forces_file, next_time);
+    violin->reset();
+}
+
+
 void command_wait(ArtifastringInstrument *violin, MonoWav *wavfile,
     MonoWav *forces_file, string command)
 {
@@ -181,6 +191,9 @@ void play_file(vector<string> input, string wav_filename,
         switch (input[i][0]) {
         case '#':
             // comment line; do nothing
+            break;
+        case 'r':
+            command_reset(violin, wavfile, forces_file, input[i]);
             break;
         case 'w':
             command_wait(violin, wavfile, forces_file, input[i]);
