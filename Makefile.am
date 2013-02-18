@@ -55,6 +55,7 @@ artifastring_h = artifastring/artifastring_constants.h \
 	artifastring/constants/body_violin_4.h \
 	artifastring/constants/body_viola_1.h \
 	artifastring/constants/body_viola_2.h \
+	artifastring/constants/body_viola_3.h \
 	artifastring/constants/body_viola_4.h \
 	artifastring/constants/body_cello_1.h \
 	artifastring/constants/body_cello_2.h \
