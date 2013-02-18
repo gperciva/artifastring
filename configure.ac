@@ -76,4 +76,16 @@ AS_IF([test "x$enable_blender" != xno],
   ], [])
 
 
+AC_CANONICAL_HOST
+case "$host_os" in 
+  darwin* )
+    DARWIN=yes
+    ;;
+  *)
+    DARWIN=no
+    ;;
+esac
+AM_CONDITIONAL([IS_DARWIN], [test "x$DARWIN" != xno])
+
+
 AC_OUTPUT
