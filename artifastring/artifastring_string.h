@@ -37,6 +37,7 @@
 
 // Artifastring Array
 #ifdef FIXEDSIZE
+const unsigned int MODES=32;
 typedef Eigen::Array<float, MODES, 1> AA;
 #else
 typedef Eigen::Array<float, Eigen::Dynamic, 1> AA;

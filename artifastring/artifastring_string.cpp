@@ -108,6 +108,8 @@ ArtifastringString::~ArtifastringString()
 void ArtifastringString::set_N(unsigned int N_next)
 {
 #ifdef FIXEDSIZE
+    (void) N_next;
+    n = AA::LinSpaced(Eigen::Sequential, MODES, 1, MODES);
 #else
     N = N_next;
     sc.X1.resize(N);
@@ -130,8 +132,8 @@ void ArtifastringString::set_N(unsigned int N_next)
 
     n.resize(N);
     inside_phi.resize(N);
-#endif
     n = AA::LinSpaced(Eigen::Sequential, N, 1, N);
+#endif
 }
 
 void ArtifastringString::reset()
@@ -349,6 +351,9 @@ void ArtifastringString::cache_pc_c()
 #ifdef FIXEDSIZE
     const AA ones = AA::Ones();
     AA rn;
+    for (unsigned int i = 0; i < MODES; ++i) {
+        rn(i) = pc.rn[i];
+    }
 #else
     AA ones(N);
     ones.resize(N);
@@ -356,14 +361,18 @@ void ArtifastringString::cache_pc_c()
 
     AA rn(N);
     rn.resize(N);
-#endif
-    for (int i = 0; i < N; ++i) {
+    for (unsigned int i = 0; i < N; ++i) {
         rn(i) = pc.rn[i];
     }
+#endif
 
     const AA w0 = ( (pc.T/pc.pl) * ((n*PI*sc.div_pc_L).square())
                     + (pc.E*I/pc.pl) * ((n*PI*sc.div_pc_L).square().square()) ).sqrt();
+#ifdef FIXEDSIZE
+    const float highest_freq = w0[MODES-1] / (2*PI);
+#else
     const float highest_freq = w0[N-1] / (2*PI);
+#endif
     if (highest_freq > fs/2.0) {
         cout<<"BAD FREQ!  highest freq: "<<highest_freq;
         cout<<"           Nyquist freq: "<<fs/2.0<<endl;
