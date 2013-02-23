@@ -22,11 +22,11 @@ IMPULSES = False
 #    GAIN = 400.0
 
 HEADER_BEGIN = """/* This file was automatically generated */
-#ifndef BODY_%(name_upper)s_H_%(mult)i
-#define BODY_%(name_upper)s_H_%(mult)i
+#ifndef LOWPASS_H_%(mult)i
+#define LOWPASS_H_%(mult)i
 
 const int NUM_TAPS_%(name_upper)s_%(mult)i = %(num_taps)i;
-const float BODY_%(name_upper)s_S_%(mult)i[%(num_taps)i] = {
+const float LOWPASS_%(mult)i[%(num_taps)i] = {
 """
 HEADER_MIDDLE = """    }, {
 """
@@ -53,7 +53,7 @@ def write_impulses(name, mult):
     # these are used in locals()
     name_upper = name.upper()
     #num_instruments = len(filenames)
-    base_taps = 511
+    base_taps = 71
     num_taps = base_taps * mult
 
 
@@ -80,9 +80,9 @@ def write_impulses(name, mult):
         #pylab.show()
         #exit(1)
 
-        n = 511
+        n = base_taps*mult
         #n = 63
-        cutoff_freq = 18000.0
+        cutoff_freq = 20000.0
         low_b = scipy.signal.firwin(n, cutoff=cutoff_freq/(sample_rate/2))
 
 

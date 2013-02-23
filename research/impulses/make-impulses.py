@@ -10,7 +10,7 @@ import scipy.signal
 import scipy.fftpack
 import pylab
 #MAX_SHRT = 32768.0
-GAIN = 50.0
+GAIN = 10.0
 
 PLOT = True
 PLOT = False
@@ -55,7 +55,7 @@ def write_impulses(name, mult):
     # these are used in locals()
     name_upper = name.upper()
     num_instruments = len(filenames)
-    base_taps = 1535
+    base_taps = 1607
     num_taps = base_taps * mult
 
 
@@ -76,22 +76,21 @@ def write_impulses(name, mult):
 
 
         wav_samples = wav_samples[:base_taps]
+        resampled = wav_samples
 
         #pylab.plot(wav_samples)
         #mult = 2
-        resampled = scipy.signal.resample(wav_samples, mult*len(wav_samples))
+        #resampled = scipy.signal.resample(wav_samples, mult*len(wav_samples))
         #pylab.plot(resampled)
         #pylab.plot( abs(scipy.fftpack.fft(wav_samples))/
         #    len(wav_samples) )
         #pylab.show()
         #exit(1)
 
-        n = 253
-        cutoff_freq = 18000.0
-        low_b = scipy.signal.firwin(n, cutoff=cutoff_freq/(mult*sample_rate/2))
-
-
-        wav_samples = scipy.signal.lfilter(low_b, 1.0, resampled)
+        #n = 253
+        #cutoff_freq = 18000.0
+        #low_b = scipy.signal.firwin(n, cutoff=cutoff_freq/(mult*sample_rate/2))
+        #wav_samples = scipy.signal.lfilter(low_b, 1.0, resampled)
 
         if PLOT:
             wav_db = abs(scipy.fftpack.fft(wav_samples))/len(wav_samples)
@@ -113,22 +112,26 @@ def write_impulses(name, mult):
         #    for x, y in enumerate(fft[:len(fft)/2+1])])
 
 
-        if PLOT:
-            w, h = scipy.signal.freqz(low_b)
-
-            pylab.plot(w / numpy.pi * (sample_rate/2), 20*numpy.log(numpy.abs(h)))
+        #if PLOT:
+        #    w, h = scipy.signal.freqz(low_b)
+#
+ #           pylab.plot(w / numpy.pi * (sample_rate/2), 20*numpy.log(numpy.abs(h)))
         #pylab.figure()
         #pylab.plot( freqs_half,
         #    20*numpy.log(numpy.abs(fft[:len(fft)/2+1]) ))
 
-            pylab.show()
+        #    pylab.show()
 
 
         print len(wav_samples)
         for sample in wav_samples:
-            value = sample * GAIN / len(wav_samples)
-            outfile.write("        %.20gf,\n" % value)
+            value = sample * GAIN / float(len(wav_samples))
+            if value == 0.0:
+                outfile.write("        %0.0f,\n" % float(value))
+            else:
+                outfile.write("        %.20gf,\n" % float(value))
         for j in range(len(wav_samples), num_taps):
+            print "why here?"
             outfile.write("        %.20gf,\n" % 0.0)
         if i < len(filenames)-1:
             outfile.write(HEADER_MIDDLE)
@@ -139,15 +142,8 @@ def write_impulses(name, mult):
 #    for mult in [1, 2, 3]:
 #        write_impulses(name, mult)
 
-write_impulses('violin', 4)
-write_impulses('violin', 3)
-write_impulses('violin', 2)
 write_impulses('violin', 1)
-write_impulses('viola', 4)
-write_impulses('viola', 3)
-write_impulses('viola', 2)
 write_impulses('viola', 1)
-write_impulses('cello', 2)
 write_impulses('cello', 1)
 
 
