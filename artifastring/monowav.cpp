@@ -38,7 +38,9 @@ struct wavhdr {
 // --------
 
 // from marsyas WavSink.cpp , slightly modified
-FILE* prep_wav_file(const char*filename, int sample_rate=22050) {
+FILE* prep_wav_file(const char *filename,
+        int sample_rate=44100, bool is_int=false)
+{
     wavhdr hdr_;
     FILE* sfp_ = fopen(filename, "wb");
 
@@ -59,14 +61,20 @@ FILE* prep_wav_file(const char*filename, int sample_rate=22050) {
     hdr_.fmt[2] = 't';
     hdr_.fmt[3] = ' ';
 
-    hdr_.chunk_size = 16;
     hdr_.format_tag = 1;
+    hdr_.chunk_size = 16;
     hdr_.num_chans = (signed short)1;
     hdr_.sample_rate = sample_rate;
-    hdr_.bytes_per_sec = hdr_.sample_rate * 2;
-    hdr_.bytes_per_samp = 2;
-    hdr_.bits_per_samp = 16;
     hdr_.data_length = 0;
+    if (is_int) {
+        hdr_.bytes_per_samp = 4;
+        hdr_.bytes_per_sec = hdr_.sample_rate * 4;
+        hdr_.bits_per_samp = 32;
+    } else {
+        hdr_.bytes_per_samp = 2;
+        hdr_.bytes_per_sec = hdr_.sample_rate * 2;
+        hdr_.bits_per_samp = 16;
+    }
 
     hdr_.data[0] = 'd';
     hdr_.data[1] = 'a';
@@ -79,16 +87,29 @@ FILE* prep_wav_file(const char*filename, int sample_rate=22050) {
 // --------
 
 
-MonoWav::MonoWav(const char *filename, int buffer_size, int sample_rate)
+MonoWav::MonoWav(const char *filename, int buffer_size, int sample_rate,
+                 bool set_is_int)
 {
+    is_int = set_is_int;
+
     size = buffer_size;
-    data = new short[size];
-    for (int i=0; i<buffer_size; i++) {
-        data[i] = 0;
+
+    data_s = NULL;
+    data_i = NULL;
+    if (is_int) {
+        data_i = new int[size];
+        for (int i=0; i<buffer_size; i++) {
+            data_i[i] = 0;
+        }
+    } else {
+        data_s = new short[size];
+        for (int i=0; i<buffer_size; i++) {
+            data_s[i] = 0;
+        }
     }
     index = 0;
     total_samples = 0;
-    outfile = prep_wav_file(filename, sample_rate);
+    outfile = prep_wav_file(filename, sample_rate, is_int);
 }
 
 MonoWav::~MonoWav()
@@ -96,11 +117,20 @@ MonoWav::~MonoWav()
     writeBuffer();
     // write size to file
     fseek(outfile, 40, SEEK_SET);
-    size_t filesize = 2*total_samples;
-    fwrite(&filesize, 4, 1, outfile);
+    if (is_int) {
+        size_t filesize = 4*total_samples;
+        fwrite(&filesize, 4, 1, outfile);
+    } else {
+        size_t filesize = 2*total_samples;
+        fwrite(&filesize, 4, 1, outfile);
+    }
     // clean up
     fclose(outfile);
-    delete [] data;
+    if (is_int) {
+        delete [] data_i;
+    } else {
+        delete [] data_s;
+    }
 }
 
 void MonoWav::increase_size(int new_buffer_size)
@@ -108,9 +138,15 @@ void MonoWav::increase_size(int new_buffer_size)
     if (index > 0) {
         writeBuffer();
     }
-    delete [] data;
-    size = new_buffer_size;
-    data = new short[size];
+    if (is_int) {
+        delete [] data_i;
+        size = new_buffer_size;
+        data_i = new int[size];
+    } else {
+        delete [] data_s;
+        size = new_buffer_size;
+        data_s = new short[size];
+    }
 }
 
 short* MonoWav::request_fill(int num_samples)
@@ -122,7 +158,21 @@ short* MonoWav::request_fill(int num_samples)
         writeBuffer();
     }
     // yay, pointer math!
-    short *start_fill = data+index;
+    short *start_fill = data_s+index;
+    index += num_samples;
+    return start_fill;
+}
+
+int* MonoWav::request_fill_int(int num_samples)
+{
+    if (num_samples >= size) {
+        increase_size(2*num_samples);
+    }
+    if ((index + num_samples) >= size) {
+        writeBuffer();
+    }
+    // yay, pointer math!
+    int *start_fill = data_i+index;
     index += num_samples;
     return start_fill;
 }
@@ -130,7 +180,11 @@ short* MonoWav::request_fill(int num_samples)
 void MonoWav::writeBuffer()
 {
     total_samples += index;
-    fwrite(data, sizeof(short), index, outfile);
+    if (is_int) {
+        fwrite(data_i, sizeof(int), index, outfile);
+    } else {
+        fwrite(data_s, sizeof(short), index, outfile);
+    }
     index = 0;
 }
 

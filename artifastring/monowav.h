@@ -28,14 +28,16 @@ public:
      * @brief mundane constructor.
      * @param[in] filename Filename; \c ".wav" is recommended.
      * @param[in] buffer_size Writes data to disk in 1-second
-     * (22050 sample) increments.  This increases automatically if
+     * (44100 sample) increments.  This increases automatically if
      * necessary.
      * @param[in] sample_rate Sample rate of the \c wav file.
+     * @param[in] set_is_int Use 32-bit data instead of 16-bit.
      * @warning MonoWav does not check whether it received the
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.
      */
-    MonoWav(const char *filename, int buffer_size=22050, int sample_rate=22050);
+    MonoWav(const char *filename, int buffer_size=44100, int sample_rate=44100,
+            bool set_is_int=false);
 
     /// @brief writes data to disk before quitting
     ~MonoWav();
@@ -51,13 +53,26 @@ public:
      */
     short *request_fill(int num_samples);
 
+    /**
+     * @brief returns an address which can hold the request data.
+     * @param[in] num_samples Number of samples you wish to write.
+     * If this value requires a larger buffer size, more memory
+     * will be allocated for you.
+     * @warning MonoWav does not check whether it received the
+     * memory it attempted to allocate; if this occurs, it will
+     * probably result in an unchecked exception crash.
+     */
+    int *request_fill_int(int num_samples);
+
 private:
     void writeBuffer();
     void increase_size(int new_buffer_size);
 
     int size;
     int index;
-    short *data;
+    bool is_int;
+    short *data_s;
+    int *data_i;
 
     int total_samples;
     FILE *outfile;
