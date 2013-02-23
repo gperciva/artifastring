@@ -60,7 +60,8 @@ ArtifastringConvolution::ArtifastringConvolution(int fs_multiply_get,
     fs_multiply = fs_multiply_get;
 
     // **MUST** be a power of two!
-    int v = 512*fs_multiply + num_samples;
+    int v = NORMAL_BUFFER_SIZE*fs_multiply + num_samples;
+    //printf("orig: %i\t", v);
     // http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
     v--;
     v |= v >> 1;
@@ -69,7 +70,7 @@ ArtifastringConvolution::ArtifastringConvolution(int fs_multiply_get,
     v |= v >> 8;
     v |= v >> 16;
     v++;
-    //printf("f: %i\tc: %i\n", fs_multiply, v);
+    //printf("f: %i\tc: %i\tn: %i\n", fs_multiply, v, num_samples);
     convolution_size = v;
     interim_m = (convolution_size / 2) + 1;
 
@@ -239,7 +240,7 @@ float* ArtifastringConvolution::get_input_buffer()
     return fft_input;
 }
 
-void ArtifastringConvolution::process(short *output_buffer, const int num_samples)
+void ArtifastringConvolution::process(float *output_buffer, const int num_samples)
 {
     fftwf_execute((fftwf_plan)plan_f_p);
 

@@ -48,6 +48,11 @@
 #include <stdio.h>
 
 
+#include "constants/lowpass_4.h"
+#include "constants/lowpass_3.h"
+#include "constants/lowpass_2.h"
+#include "constants/lowpass_1.h"
+
 #include "constants/body_violin_4.h"
 #include "constants/body_violin_3.h"
 #include "constants/body_violin_2.h"
@@ -89,13 +94,18 @@ ArtifastringInstrument::ArtifastringInstrument(
 
 
     // FFT stuff
-    for (int i=0; i<NUM_MULTIPLIERS; i++) {
-        // init as unused
-        audio_convolution[i] = NULL;
-        haptic_convolution[i] = NULL;
-        string_audio_output[i] = NULL;
-        string_haptic_output[i] = NULL;
+
+    // lowpass
+    for (int i=0; i<NUM_VIOLIN_STRINGS; i++) {
+        string_audio_lowpass_convolution[i] = NULL;
+        string_force_lowpass_convolution[i] = NULL;
+        string_audio_lowpass_input[i] = NULL;
+        string_force_lowpass_input[i] = NULL;
     }
+
+    body_audio_convolution = NULL;
+    //body_force_convolution = NULL;
+
     for (int st=0; st < NUM_VIOLIN_STRINGS; st++) {
         // enable as necessary
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
@@ -103,7 +113,36 @@ ArtifastringInstrument::ArtifastringInstrument(
 #else
         const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
-        const int fs_index = fs_multiply - 1;
+        //const int fs_index = fs_multiply - 1;
+
+        {   // lowpass setup
+            const float *lowpass_time_data;
+            int lowpass_num_taps;
+            if (fs_multiply == 1) {
+                lowpass_time_data = LOWPASS_1,
+                lowpass_num_taps = NUM_TAPS_LOWPASS_1;
+            } else if (fs_multiply == 2) {
+                lowpass_time_data = LOWPASS_2,
+                lowpass_num_taps = NUM_TAPS_LOWPASS_2;
+            } else if (fs_multiply == 3) {
+                lowpass_time_data = LOWPASS_3,
+                lowpass_num_taps = NUM_TAPS_LOWPASS_3;
+            } else if (fs_multiply == 4) {
+                lowpass_time_data = LOWPASS_4,
+                lowpass_num_taps = NUM_TAPS_LOWPASS_4;
+            }
+            string_audio_lowpass_convolution[st] = new ArtifastringConvolution(
+                fs_multiply, lowpass_time_data, lowpass_num_taps);
+            string_force_lowpass_convolution[st] = new ArtifastringConvolution(
+                fs_multiply, lowpass_time_data, lowpass_num_taps);
+
+            string_audio_lowpass_input[st] = string_audio_lowpass_convolution[st]->get_input_buffer();
+            string_force_lowpass_input[st] = string_force_lowpass_convolution[st]->get_input_buffer();
+
+        }
+
+
+#if 0
         if (audio_convolution[fs_index] == NULL) {
             const float *time_data;
             int num_taps;
@@ -173,8 +212,6 @@ ArtifastringInstrument::ArtifastringInstrument(
             audio_convolution[fs_index] = new ArtifastringConvolution(
                 fs_multiply, time_data, num_taps);
 
-            string_audio_output[fs_index] = audio_convolution[fs_index]->get_input_buffer();
-
             if (fs_multiply == 1) {
                 time_data = HAPTIC_RESPONSE_1;
                 num_taps = NUM_TAPS_1;
@@ -192,24 +229,60 @@ ArtifastringInstrument::ArtifastringInstrument(
             //printf("haptic: %i\n", num_taps);
             haptic_convolution[fs_index] = new ArtifastringConvolution(
                 fs_multiply, time_data, num_taps);
-            string_haptic_output[fs_index] = haptic_convolution[fs_index]->get_input_buffer();
         }
+#endif
     }
 
+    {   // body
+        const float *body_time_data;
+        int body_num_taps;
+        switch (m_instrument_type) {
+        case Violin: {
+            const int body_number = (instrument_number +
+                                     (instrument_number / BODY_VIOLIN_NUMBER_1)
+                                    ) % BODY_VIOLIN_NUMBER_1;
+
+            body_time_data = BODY_VIOLIN_S_1[body_number];
+            body_num_taps = NUM_TAPS_VIOLIN_1;
+            break;
+        }
+        case Viola: {
+            const int body_number = (instrument_number +
+                                     (instrument_number / BODY_VIOLA_NUMBER_1)
+                                    ) % BODY_VIOLA_NUMBER_1;
+
+            body_time_data = BODY_VIOLA_S_1[body_number];
+            body_num_taps = NUM_TAPS_VIOLA_1;
+            break;
+        }
+        case Cello: {
+            const int body_number = (instrument_number +
+                                     (instrument_number / BODY_CELLO_NUMBER_1)
+                                    ) % BODY_CELLO_NUMBER_1;
+
+            body_time_data = BODY_CELLO_S_1[body_number];
+            body_num_taps = NUM_TAPS_CELLO_1;
+            break;
+        }
+        }
+        body_audio_convolution = new ArtifastringConvolution(
+            1, body_time_data, body_num_taps);
+        body_audio_input = body_audio_convolution->get_input_buffer();
+    }
 }
 
 ArtifastringInstrument::~ArtifastringInstrument() {
     for (int st = 0; st<NUM_VIOLIN_STRINGS; st++) {
         delete artifastringString[st];
+        delete string_audio_lowpass_convolution[st];
+        delete string_force_lowpass_convolution[st];
     }
 
-    for (int i=0; i<NUM_MULTIPLIERS; i++) {
-        if (audio_convolution[i] != NULL) {
-            delete audio_convolution[i];
-            audio_convolution[i] = NULL;
-            delete haptic_convolution[i];
-            haptic_convolution[i] = NULL;
-        }
+    if (body_audio_convolution != NULL) {
+        delete body_audio_convolution;
+        body_audio_convolution = NULL;
+        //delete haptic_convolution[i];
+        //haptic_convolution[i] = NULL;
     }
 }
 
@@ -337,41 +410,87 @@ int ArtifastringInstrument::wait_samples_forces_python(
 void ArtifastringInstrument::handle_buffer(short output[], short forces[],
         int num_samples)
 {
-    for (int fs_index=0; fs_index<NUM_MULTIPLIERS; fs_index++) {
-        if (string_haptic_output[fs_index] != NULL) {
-            haptic_convolution[fs_index]->clear_input_buffer();
-        }
-    }
-    // FIXME: maybe not necessary?
+    // FIXME: maybe not necessary?  especially force?
     for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
-        memset(violin_string_buffer[st], 0, sizeof(float)*(NUM_MULTIPLIERS*NORMAL_BUFFER_SIZE));
+        string_audio_lowpass_convolution[st]->clear_input_buffer();
+        string_force_lowpass_convolution[st]->clear_input_buffer();
     }
 
     // calculate string buffers
     for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
         if ((st == bow_string) && (forces != NULL)) {
-            //printf("force\t%i %i\n", st, bow_string);
-#ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
-            const int fs_multiply = 1;
-#else
-            const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
-#endif
-            const int fs_index = fs_multiply - 1;
             artifastringString[st]->fill_buffer_forces(
-                violin_string_buffer[st],
-                string_haptic_output[fs_index],
+                string_audio_lowpass_input[st],
+                string_force_lowpass_input[st],
                 num_samples);
         } else {
             //printf("no force\t%i %i\n", st, bow_string);
-            artifastringString[st]->fill_buffer_forces(violin_string_buffer[st],
-                    NULL,
-                    num_samples);
+            artifastringString[st]->fill_buffer_forces(
+                string_audio_lowpass_input[st],
+                NULL,
+                num_samples);
         }
     }
 
+    // decimate string buffers
+    for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+#ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
+        const int fs_multiply = 1;
+#else
+        const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
+#endif
+        //const int fs_index = fs_multiply - 1;
+
+        float prep[NORMAL_BUFFER_SIZE*fs_multiply];
+        string_audio_lowpass_convolution[st]->process(prep, fs_multiply*num_samples);
+        for (int i=0; i<num_samples; i++) {
+            string_audio_output[st][i] = prep[fs_multiply*i];
+        }
+
+        string_force_lowpass_convolution[st]->process(prep, fs_multiply*num_samples);
+        for (int i=0; i<num_samples; i++) {
+            string_force_output[st][i] = prep[fs_multiply*i];
+        }
+    }
+
+    // FIXME
+#if 0
+    for (int i=0; i<num_samples; i++) {
+        std::cout<< string_audio_output[0][i] <<std::endl;
+    }
+#endif
+
+
+    // FIXME
+    if (output != NULL) {
+        memset(output, 0, sizeof(short) * num_samples);
+
+        body_audio_convolution->clear_input_buffer();
+        for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+            for (int i=0; i<num_samples; i++) {
+                body_audio_input[i] += string_audio_output[st][i];
+            }
+        }
+        float prep[NORMAL_BUFFER_SIZE];
+        body_audio_convolution->process(prep, num_samples);
+        for (int i=0; i<num_samples; i++) {
+            output[i] = prep[i];
+        }
+    }
+
+#if 0
+    for (int st=0; st<NUM_VIOLIN_STRINGS; st++) {
+        for (int i=0; i<num_samples; i++) {
+            output[i] += 1e2*string_audio_output[st][i];
+            forces[i] += 1e2*string_force_output[st][i];
+        }
+    }
+#endif
+
+#if 0
     // calculate body input from strings
     for (int fs_index=0; fs_index<NUM_MULTIPLIERS; fs_index++) {
-        if (string_audio_output[fs_index] != NULL) {
+        if (string_audio_lowpass_input[fs_index] != NULL) {
             audio_convolution[fs_index]->clear_input_buffer();
         }
     }
@@ -382,9 +501,9 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
         const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
         const int fs_index = fs_multiply - 1;
-        if (string_audio_output[fs_index] != NULL) {
+        if (string_audio_lowpass_input[fs_index] != NULL) {
             for (int i=0; i<fs_multiply*num_samples; i++) {
-                string_audio_output[fs_index][i] += violin_string_buffer[st][i];
+                string_audio_lowpass_input[fs_index][i] += violin_string_buffer[st][i];
             }
         }
     }
@@ -392,15 +511,15 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
 #ifdef DEBUG_WITH_WHITE_NOISE
     // FIXME: temp white noise
     for (int fs_index=0; fs_index<NUM_MULTIPLIERS; fs_index++) {
-        if (string_audio_output[fs_index] != NULL) {
+        if (string_audio_lowpass_input[fs_index] != NULL) {
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
             const int fs_multiply = 1;
 #else
             const int fs_multiply = fs_index + 1;
 #endif
             for (int i=0; i<num_samples*fs_multiply; i++) {
-                string_audio_output[fs_index][i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
-                string_haptic_output[fs_index][i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
+                string_audio_lowpass_input[fs_index][i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
+                string_force_lowpass_input[fs_index][i] = 2.0*(double(rand()) / RAND_MAX) - 1.0;
             }
         }
     }
@@ -411,7 +530,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
         }
 #ifndef NO_AUDIO_FILTERING
         for (int fs_index=0; fs_index<NUM_MULTIPLIERS; fs_index++) {
-            if (string_audio_output[fs_index] != NULL) {
+            if (string_audio_lowpass_input[fs_index] != NULL) {
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
                 const int fs_multiply = 1;
 #else
@@ -429,14 +548,14 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
         //printf("num_samples %i\n", num_samples);
         // yes, this doesn't remove the aliasing!
         for (int fs_index=0; fs_index<NUM_MULTIPLIERS; fs_index++) {
-            if (string_audio_output[fs_index] != NULL) {
+            if (string_audio_lowpass_input[fs_index] != NULL) {
 #ifdef HIGH_FREQUENCY_NO_DOWNSAMPLING
                 const int fs_multiply = 1;
 #else
                 const int fs_multiply = fs_index + 1;
 #endif
                 for (int i=0; i<num_samples; i++) {
-                    output[i] += 1e3*string_audio_output[fs_index][fs_multiply*i];
+                    output[i] += 1e3*string_audio_lowpass_input[fs_index][fs_multiply*i];
                 }
             }
         }
@@ -454,10 +573,10 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
             // no filtering
             const float haptic_gain = 1e4;
             for (int i=0; i<num_samples/HAPTIC_DOWNSAMPLE_FACTOR; i++) {
-                forces[i] = haptic_gain * string_haptic_output[fs_index][HAPTIC_DOWNSAMPLE_FACTOR*i*fs_multiply];
+                forces[i] = haptic_gain * string_force_lowpass_input[fs_index][HAPTIC_DOWNSAMPLE_FACTOR*i*fs_multiply];
             }
 #else
-            //printf("--in--- %g\n", string_haptic_output[fs_index][0] );
+            //printf("--in--- %g\n", string_force_lowpass_input[fs_index][0] );
             const int haptic_samples_body = num_samples/HAPTIC_DOWNSAMPLE_FACTOR;
             const int haptic_samples_string = num_samples * fs_multiply;
             //printf("--- num_samples: %i\n", num_samples);
@@ -474,7 +593,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
                 //printf("%i\n", prep[read_i]);
                 forces[i] = prep[read_i];
 
-                //forces[i] = 1e4*string_haptic_output[fs_index][i*fs_multiply];
+                //forces[i] = 1e4*string_force_lowpass_input[fs_index][i*fs_multiply];
             }
             //exit(1);
             //printf("--out-- %i\n", forces[0]);
@@ -485,6 +604,7 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
             }
         }
     }
+#endif
 }
 
 #ifdef RESEARCH

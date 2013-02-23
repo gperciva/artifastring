@@ -40,7 +40,7 @@ public:
     //void set_kernel(const float complex *kernel);
     void load_kernel_from_time_data(const float *kernel, const int num_samples);
 
-    void process(short *output_buffer, const int num_samples);
+    void process(float *output_buffer, const int num_samples);
 
 #if 0
     void print_kernel(const void* kernel);

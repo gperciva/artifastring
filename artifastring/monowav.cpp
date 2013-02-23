@@ -39,7 +39,7 @@ struct wavhdr {
 
 // from marsyas WavSink.cpp , slightly modified
 FILE* prep_wav_file(const char *filename,
-        int sample_rate=44100, bool is_int=false)
+                    int sample_rate=44100, bool is_int=false)
 {
     wavhdr hdr_;
     FILE* sfp_ = fopen(filename, "wb");

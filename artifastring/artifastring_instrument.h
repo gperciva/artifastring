@@ -156,12 +156,21 @@ public:
 
 private:
     ArtifastringString *artifastringString[NUM_VIOLIN_STRINGS];
-    float violin_string_buffer[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE*NUM_MULTIPLIERS];
+    float string_audio_output[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
+    float string_force_output[NUM_VIOLIN_STRINGS][NORMAL_BUFFER_SIZE];
 
-    ArtifastringConvolution *audio_convolution[NUM_MULTIPLIERS];
-    ArtifastringConvolution *haptic_convolution[NUM_MULTIPLIERS];
-    float *string_audio_output[NUM_MULTIPLIERS];
-    float *string_haptic_output[NUM_MULTIPLIERS];
+    // strings
+    ArtifastringConvolution *string_audio_lowpass_convolution[NUM_VIOLIN_STRINGS];
+    ArtifastringConvolution *string_force_lowpass_convolution[NUM_VIOLIN_STRINGS];
+    float *string_audio_lowpass_input[NUM_VIOLIN_STRINGS];
+    float *string_force_lowpass_input[NUM_VIOLIN_STRINGS];
+
+    // body
+    ArtifastringConvolution *body_audio_convolution;
+    //ArtifastringConvolution *body_force_convolution;
+    float *body_audio_input;
+    //float *body_force_lowpass_input;
+    float body_force_input[NORMAL_BUFFER_SIZE];
 
     InstrumentType m_instrument_type;
 
