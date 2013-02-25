@@ -24,8 +24,11 @@ import_array();
 
 %apply (float* INPLACE_ARRAY1, int DIM1) {(float *buffer, int num_samples)};
 %apply (short* INPLACE_ARRAY1, int DIM1) {(short *buffer, int num_samples)};
+%apply (int* INPLACE_ARRAY1, int DIM1) {(int *buffer, int num_samples)};
 %apply (short* INPLACE_ARRAY1, int DIM1) {
     (short *buffer, int num_samples), (short *forces, int num_samples2)};
+%apply (int* INPLACE_ARRAY1, int DIM1) {(int *buffer, int num_samples),
+  (int *forces, int num_samples2)};
 %include "artifastring_instrument.h"
 
 %inline %{

@@ -54,15 +54,12 @@ artifastring_h = artifastring/artifastring_constants.h \
 	artifastring/constants/strings_viola.h \
 	artifastring/constants/strings_cello.h \
 	artifastring/constants/body_violin_1.h \
-	artifastring/constants/body_violin_2.h \
-	artifastring/constants/body_violin_3.h \
-	artifastring/constants/body_violin_4.h \
 	artifastring/constants/body_viola_1.h \
-	artifastring/constants/body_viola_2.h \
-	artifastring/constants/body_viola_3.h \
-	artifastring/constants/body_viola_4.h \
 	artifastring/constants/body_cello_1.h \
-	artifastring/constants/body_cello_2.h \
+	artifastring/constants/lowpass_1.h \
+	artifastring/constants/lowpass_2.h \
+	artifastring/constants/lowpass_3.h \
+	artifastring/constants/lowpass_4.h \
 	artifastring/constants/haptic_response_1.h \
 	artifastring/constants/haptic_response_2.h \
 	artifastring/constants/haptic_response_3.h \

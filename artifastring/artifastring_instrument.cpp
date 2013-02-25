@@ -53,15 +53,8 @@
 #include "constants/lowpass_2.h"
 #include "constants/lowpass_1.h"
 
-#include "constants/body_violin_4.h"
-#include "constants/body_violin_3.h"
-#include "constants/body_violin_2.h"
 #include "constants/body_violin_1.h"
-#include "constants/body_viola_4.h"
-#include "constants/body_viola_3.h"
-#include "constants/body_viola_2.h"
 #include "constants/body_viola_1.h"
-#include "constants/body_cello_2.h"
 #include "constants/body_cello_1.h"
 
 
@@ -611,19 +604,29 @@ void ArtifastringInstrument::handle_buffer(short output[], short forces[],
 int ArtifastringInstrument::get_num_skips(int which_string) {
     return artifastringString[which_string]->get_num_skips();
 };
-int ArtifastringInstrument::get_string_buffer(int which_string,
-        float *buffer, int num_samples
-                                             ) {
-    const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][bow_string];
-    const int string_samples = NORMAL_BUFFER_SIZE*fs_multiply;
-    for (int i=0; i < string_samples; i++) {
-        buffer[i] = 0;
-    }
-    for (int i=0; i<num_samples; i++) {
-        buffer[i] = violin_string_buffer[which_string][i];
-    }
-    return string_samples;
-}
 #endif
+
+float *ArtifastringInstrument::get_string_buffer(int which_string) {
+    return string_audio_output[which_string];
+}
+
+void ArtifastringInstrument::get_string_buffer_int(int which_string,
+        int *buffer, int num_samples,
+        int *forces, int num_samples2)
+{
+    //printf("reading st %i, num %i\n", which_string, num_samples);
+    (void) num_samples2;
+    //int gain = 0.001 * std::numeric_limits<int>::max();
+    for (int i=0; i<num_samples; i++) {
+        buffer[i] = string_float_to_int * string_audio_output[which_string][i];
+    }
+
+    //std::cout<< "reading from st: "<<which_string<<std::endl;
+    for (int i=0; i<num_samples; i++) {
+        forces[i] = string_float_to_int * string_force_output[which_string][i];
+        //std::cout<< forces[i] <<std::endl;
+        //std::cout<< string_force_output[which_string][i] <<std::endl;
+    }
+}
 
 

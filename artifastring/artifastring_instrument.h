@@ -120,7 +120,8 @@ public:
     int wait_samples_forces(short *buffer, short *forces, int num_samples);
     int wait_samples_forces_python(
         short *buffer, int num_samples,
-        short *forces, int num_samples2);
+        short *forces, int num_samples2
+        );
 
     /** \brief Returns a string's physical constants.
      *
@@ -145,14 +146,17 @@ public:
     bool set_string_logfile(int which_string, const char *filename);
     int get_num_skips(int which_string);
 
+#endif
     /** \brief Get the internal string output pre-instrument body
      *
      * WARNING: you must allocate enough buffer space to hold
-     * the data.  This can be up to 4* the hop size!
-     * it will return the actual size used
+     * the data.
      */
-    int get_string_buffer(int which_string, float *buffer, int num_samples);
-#endif
+    float *get_string_buffer(int which_string);
+
+    void get_string_buffer_int(int which_string, int *buffer,
+        int num_samples,
+        int *forces, int num_samples2);
 
 private:
     ArtifastringString *artifastringString[NUM_VIOLIN_STRINGS];

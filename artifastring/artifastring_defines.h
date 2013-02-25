@@ -46,7 +46,7 @@ const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 22050*4;
 const int HAPTIC_DOWNSAMPLE_FACTOR = 1;
 #else
 const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 44100;
-const int HAPTIC_DOWNSAMPLE_FACTOR = 2;
+const int HAPTIC_DOWNSAMPLE_FACTOR = 1;
 #endif
 
 //const int ARTIFASTRING_INSTRUMENT_SAMPLE_RATE = 66150;
@@ -57,6 +57,10 @@ const int HAPTIC_SAMPLE_RATE = ARTIFASTRING_INSTRUMENT_SAMPLE_RATE / HAPTIC_DOWN
 
 //const int NORMAL_BUFFER_SIZE = 1024;
 const int NORMAL_BUFFER_SIZE = 441;
+
+//const float float_to_int = 0.001 * std::numeric_limits<int>::max();
+const double string_float_to_int = 0.001*((1 << 30)-1);
+const double string_int_to_float = 1.0 / string_float_to_int;
 
 /**
  * \enum InstrumentType

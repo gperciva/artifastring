@@ -52,6 +52,7 @@ vector<string> gulp_file(const char *filename) {
 inline void waitUntil(ArtifastringInstrument *violin, MonoWav *wavfile,
                       MonoWav *forces_file, float until)
 {
+    (void) forces_file;
     int delta = until*ARTIFASTRING_INSTRUMENT_SAMPLE_RATE - total_samples;
     if (delta > 0) {
         // make sure we can easily deal with forces
@@ -63,6 +64,11 @@ inline void waitUntil(ArtifastringInstrument *violin, MonoWav *wavfile,
         //short *forces = forces_file->request_fill(delta/HAPTIC_DOWNSAMPLE_FACTOR);
         //short *forces = forces_file->request_fill(delta);
         int unsafe = violin->wait_samples_forces(array, NULL, delta);
+        //int test_buffer[delta];
+        //int test_forces[delta];
+        //violin->get_string_buffer_int(0, test_buffer, delta,
+         //   test_forces, delta);
+
         if (unsafe > 0) {
             //printf("#Unsafe: friction skip over stable, num samples: %i\n",
             //    unsafe);
@@ -173,6 +179,7 @@ void play_file(vector<string> input, string wav_filename,
     //MonoWav *forces_file = new MonoWav(forces_filename.c_str(),
     //                                   4096, ARTIFASTRING_INSTRUMENT_SAMPLE_RATE / HAPTIC_DOWNSAMPLE_FACTOR);
     MonoWav *forces_file = NULL;
+    (void) forces_filename;
 
 
 #ifdef RESEARCH
