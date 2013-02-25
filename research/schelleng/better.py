@@ -3,7 +3,10 @@
 DISABLE_MULTI = False
 #DISABLE_MULTI = True
 DEBUG = 0
-#DEBUG = 4
+DEBUG = 1
+
+PLOT_PNG_BARE = False
+#PLOT_PNG_BARE = True
 
 PLOT_STD = False
 #PLOT_STD = True
@@ -126,7 +129,7 @@ def generate_schelleng_velocity(dirname, name):
 
     vel_low = 0.1
     vel_high = 0.5
-    vels = numpy.linspace(vel_low, vel_high, STEPS_FORCE)
+    vels = numpy.linspace(vel_low, vel_high, STEPS_POSITIONS)
     #positions = numpy.linspace(XB_MIN, XB_MAX, STEPS_POSITIONS)
     #xlabel = AxisLabel("x_b", XB_MIN, XB_MAX, len(positions))
     forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
@@ -163,7 +166,7 @@ def generate_accel(dirname, name):
     #accels = numpy.linspace(ba_low, ba_high, STEPS_X)
     fb2_low = 0.25
     fb2_high = 1.0
-    fb2s = numpy.linspace(fb2_low, fb2_high, STEPS_FORCE)
+    fb2s = numpy.linspace(fb2_low, fb2_high, STEPS_POSITIONS)
     xlabel = AxisLabel("F_b2", fb2_low, fb2_high, len(fb2s))
     forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
     ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces))
@@ -268,7 +271,7 @@ def display_filename(pickle_filename, name=None):
     #m = 0
     ### for schelleng force
     ri = 7
-    gi = 7
+    gi = 0
     bi = 7
     ### for accel?
     #ri = 0
@@ -278,9 +281,13 @@ def display_filename(pickle_filename, name=None):
     invert = False
     #invert = True
 
-    pylab.figure()
-    pylab.title("%s" % (name))
-    #pylab.xlim(XB_MIN, XB_MAX)
+    if PLOT_PNG_BARE:
+        fig = pylab.figure()
+        fig.set_size_inches(8,6)
+        ax = pylab.Axes(fig, [0., 0., 1., 1.,])
+    else:
+        pylab.figure()
+        pylab.title("%s" % (name))
     numx = xlabel.num
     numy = ylabel.num
     img = numpy.zeros( (numy, numx, 3), dtype=numpy.float32 )
@@ -310,19 +317,31 @@ def display_filename(pickle_filename, name=None):
         img[i][j][0] = r
         img[i][j][1] = g
         img[i][j][2] = b
-    pylab.imshow(img,
-        #interpolation='bilinear',
-        aspect="auto",
-        origin="lower",
+    if PLOT_PNG_BARE:
+        ax.imshow(img,
+            #interpolation='bilinear',
+            aspect="auto",
+            origin="lower",
         )
-    pylab.xlim(0, numx-1)
-    pylab.ylim(0, numy-1)
+        ax.set_xlim(0, numx-1)
+        ax.set_ylim(0, numy-1)
+    else:
+        pylab.imshow(img,
+            #interpolation='bilinear',
+            aspect="auto",
+            origin="lower",
+        )
+        pylab.xlim(0, numx-1)
+        pylab.ylim(0, numy-1)
     for m in range(5, 10):
         modal = 1.0 / m
         relpos = 1.0 - (xlabel.high - modal) / (xlabel.high - xlabel.low)
         abspos = relpos * (numx-1)
         #print m, modal, relpos, abspos
-        #pylab.axvline(abspos, color="white")
+        if PLOT_PNG_BARE:
+            ax.axvline(abspos, color="yellow")
+        else:
+            pylab.axvline(abspos, color="yellow")
 
     #if False:
     if True:
@@ -377,7 +396,16 @@ def display_filename(pickle_filename, name=None):
             pylab.plot(x,y, '.', color=(r,g,b), markersize=10)
     #pylab.axis('off')
     #pylab.yscale('log')
-    pylab.savefig(name+".png", bbox_inches='tight', pad_inches=0)
+    if PLOT_PNG_BARE:
+        ax.set_axis_off()
+        fig.add_axes(ax)
+        #pylab.title('')
+    #pylab.savefig(name+".png", bbox_inches='tight', pad_inches=0)
+        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        filename= name + ".png"
+        pylab.savefig(filename, bbox_inches=extent)
+        print "filename:\tX:", xlabel.title, xlabel.low, xlabel.high
+        print "\t\tY:", ylabel.title, ylabel.low, ylabel.high
     print "... done"
 
 
@@ -403,10 +431,10 @@ def display_filename(pickle_filename, name=None):
 #generate('cello-g-open', generate_schelleng_force)
 #display('cello-g-open')
 
-#generate('cello-c-open', generate_schelleng_force)
+generate('cello-c-open', generate_schelleng_force)
 #generate('cello-c-open', generate_schelleng_velocity)
 #generate('cello-c-open', generate_accel)
-#display('cello-c-open')
+display('cello-c-open')
 
 
 #display_filename('/tmp/art/violin-e-open/coll.pickle')
@@ -416,9 +444,12 @@ def display_filename(pickle_filename, name=None):
 
 #display_filename('violin-e-open.pickle', 'violin-e-open')
 #display_filename('violin-e-open-2.pickle', 'violin-e-open-2')
-display_filename('violin-e-open-fingers.pickle', 'violin-e-open')
 #display_filename('cello-g-open.pickle', 'cello-g-open')
 #display_filename('cello-c-open.pickle', 'cello-c-open')
+
+#display_filename('violin-e-fingers.pickle', 'violin-e-finger')
+#display_filename('violin-e-fingers2.pickle', 'violin-e-fingers2')
+
 
 pylab.show()
 

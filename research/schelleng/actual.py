@@ -71,6 +71,8 @@ def note(inst, actions, basename):
     ### let string settle
     if True:
         if fb2 is not None:
+            init_samples = 0.05
+            samples = init_samples * ARTIFASTRING_SAMPLE_RATE
             #buft = numpy.empty(HOPSIZE, dtype=numpy.int16)
             #forcest = numpy.empty(HOPSIZE/HAPTIC_DOWNSAMPLE_FACTOR,
             #    dtype=numpy.int16)
@@ -90,6 +92,13 @@ def note(inst, actions, basename):
             #inst.bow(st, xb, fb, vb)
             inst.wait_samples_forces_python(buft, forcest)
             inst.bow(st, xb, fb2, vb)
+
+
+            samples = (ADSR_A_SECONDS-init_samples) * ARTIFASTRING_SAMPLE_RATE
+            buft = numpy.empty(samples, dtype=numpy.int16)
+            forcest = numpy.empty(samples/HAPTIC_DOWNSAMPLE_FACTOR,
+                dtype=numpy.int16)
+            inst.wait_samples_forces_python(buft, forcest)
         else:
             buft = numpy.empty(samples, dtype=numpy.int16)
             forcest = numpy.empty(samples/HAPTIC_DOWNSAMPLE_FACTOR,
