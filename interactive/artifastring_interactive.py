@@ -44,7 +44,7 @@ import actions_file
 import midi_pos
 #HOPSIZE = vivi_defines.HOPSIZE
 
-HOPSIZE = 512
+HOPSIZE = artifastring_process.HOPSIZE
 NUM_AUDIO_BUFFERS = 2
 
 TUNING_SETTLE_BUFFERS = 10
@@ -284,17 +284,18 @@ class InteractiveViolin():
         actions_out.finger(0, self.params.violin_string,
             self.params.finger_position)
 
-        complete = numpy.empty(0, dtype=numpy.int16)
-        complete_forces = numpy.empty(0, dtype=numpy.int16)
+        complete = numpy.empty(0, dtype=numpy.int32)
+        complete_forces = numpy.empty(0, dtype=numpy.int32)
 
         seconds = 0.4
         bow_pos_along = 0.1
         num_hops = int(math.ceil(seconds * ARTIFASTRING_SAMPLE_RATE / HOPSIZE))
         for j in xrange(num_hops):
-            arr, forces = self.audio_pipe_master.recv()
-            complete = numpy.append(complete, arr)
-            complete_forces = numpy.append(complete_forces, forces)
-            self.audio_pipe_master.send( (arr, forces) )
+            arr, forces, bowed_arr, bowed_forces = self.audio_pipe_master.recv()
+            complete = numpy.append(complete, bowed_arr)
+            complete_forces = numpy.append(complete_forces, bowed_forces)
+            self.audio_pipe_master.send( (arr, forces, bowed_arr,
+                bowed_forces) )
             seconds = float(j)*HOPSIZE/ARTIFASTRING_SAMPLE_RATE
 
             myparm = self.copy_params()
@@ -325,17 +326,18 @@ class InteractiveViolin():
 
 
         wavfile = monowav.MonoWav(basename+".wav",
-            ARTIFASTRING_SAMPLE_RATE, ARTIFASTRING_SAMPLE_RATE)
+            ARTIFASTRING_SAMPLE_RATE, ARTIFASTRING_SAMPLE_RATE,
+            True)
         ### very awkward abuse of SWIG.  There has to be a better way!
-        buf = wavfile.request_fill(len(complete))
+        buf = wavfile.request_fill_int(len(complete))
         for i in xrange(len(complete)):
-            monowav.buffer_set(buf, i, int(complete[i]))
+            monowav.buffer_set_int(buf, i, int(complete[i]))
 
         wavfile2 = monowav.MonoWav(basename+".forces.wav",
-            HAPTIC_SAMPLE_RATE, HAPTIC_SAMPLE_RATE)
-        buf2 = wavfile2.request_fill(len(complete_forces))
+            HAPTIC_SAMPLE_RATE, HAPTIC_SAMPLE_RATE, True)
+        buf2 = wavfile2.request_fill_int(len(complete_forces))
         for i in xrange(len(complete_forces)):
-            monowav.buffer_set(buf2, i, int(complete_forces[i]))
+            monowav.buffer_set_int(buf2, i, int(complete_forces[i]))
 
         quality_judgements.append_to_mf(self.train_info, self.params,
             basename+".wav", cat_key)
@@ -361,9 +363,17 @@ class InteractiveViolin():
         for i in range(NUM_AUDIO_BUFFERS):
             arr = numpy.zeros(HOPSIZE, dtype=numpy.int16)
             forces = numpy.zeros(
-                HOPSIZE/artifastring_process.HAPTIC_DOWNSAMPLE_FACTOR,
+                HOPSIZE,
+                #HOPSIZE/artifastring_process.HAPTIC_DOWNSAMPLE_FACTOR,
                 dtype=numpy.int16)
-            self.audio_pipe_master.send( (arr, forces) )
+
+            bowed_arr = numpy.zeros(HOPSIZE, dtype=numpy.int32)
+            bowed_forces = numpy.zeros(
+                HOPSIZE,
+                #HOPSIZE/artifastring_process.HAPTIC_DOWNSAMPLE_FACTOR,
+                dtype=numpy.int32)
+            self.audio_pipe_master.send( (arr, forces, bowed_arr,
+                bowed_forces) )
 
         self.commands_pipe_master.send( (COMMANDS.BOW, self.params) )
 
@@ -419,7 +429,7 @@ class InteractiveViolin():
 
 
             if self.audio_pipe_master.poll():
-                arr, forces = self.audio_pipe_master.recv()
+                arr, forces, bowed_arr, bowed_forces = self.audio_pipe_master.recv()
             else:
                 time.sleep(time_unit)
                 continue
@@ -456,7 +466,8 @@ class InteractiveViolin():
                         alter = 1.0 + adjust
                         self.change_tension(alter)
                         self.tuning = TUNING_SETTLE_BUFFERS
-            self.audio_pipe_master.send( (arr, forces) )
+            self.audio_pipe_master.send( (arr, forces, bowed_arr,
+                bowed_forces) )
         self.audio_pipe_master.send(None)
         self.violin_process.join()
  

@@ -20,7 +20,7 @@ ArtifastringInit = collections.namedtuple('ArtifastringInit', """
     instrument_number,
     """)
 
-HOPSIZE = 512
+HOPSIZE = artifastring_instrument.NORMAL_BUFFER_SIZE
 
 
 import os
@@ -68,6 +68,8 @@ def handle_command(violin, commands_pipe, logfile, samples):
             violin.set_physical_constants(params.violin_string, pc)
     elif command[0] == COMMANDS.RESET:
         violin.reset()
+        return None
+    return params.violin_string
 
 
 def violin_process(artifastring_init, commands_pipe, audio_pipe):
@@ -89,20 +91,24 @@ def violin_process(artifastring_init, commands_pipe, audio_pipe):
     #pc = violin.get_physical_constants(params.violin_string)
     #commands_pipe.send( (TENSION, pc.T) )
 
+    st = 0
     while True:
         while commands_pipe.poll():
-            handle_command(violin, commands_pipe, logfile, samples)
-        arr, forces = audio_pipe.recv()
+            st_next = handle_command(violin, commands_pipe, logfile, samples)
+            if st_next is not None:
+                st = st_next
+        arr, forces, bowed_arr, bowed_forces = audio_pipe.recv()
         if arr is None:
             # poison pill
             break
         violin.wait_samples_forces_python(arr, forces)
+        violin.get_string_buffer_int(st, bowed_arr, bowed_forces)
         #unsafe = violin.wait_samples_forces_python(arr, forces)
         #params_log.write("unsafe: %i" % unsafe)
         #commands_pipe.send( (COMMANDS.UNSAFE, unsafe) )
         if audio_stream is not None:
             audio_stream.write( arr.tostring(), HOPSIZE )
-        audio_pipe.send( (arr, forces) )
+        audio_pipe.send( (arr, forces, bowed_arr, bowed_forces) )
         samples += HOPSIZE
     logfile.wait(float(samples)/ARTIFASTRING_SAMPLE_RATE)
     logfile.close()
