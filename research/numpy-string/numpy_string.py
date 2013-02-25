@@ -845,10 +845,7 @@ class Violin():
         Delta = c1**2 - 4.0*c0*c2
         #print "neg Delta:", Delta
         if Delta >= 0:
-            dv = min(
-                (-c1 + numpy.sqrt(Delta)) / (2*c2),
-                (-c1 - numpy.sqrt(Delta)) / (2*c2)
-                )
+            dv = (-c1 + numpy.sqrt(Delta)) / (2*c2)
             #print "neg dv:", dv
             if dv < 0:
                 F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, dv)
@@ -875,10 +872,7 @@ class Violin():
         Delta = c1**2 - 4.0*c0*c2
         #print "pos Delta:", Delta
         if Delta >= 0:
-            dv = max(
-                (-c1 + numpy.sqrt(Delta)) / (2*c2),
-                (-c1 - numpy.sqrt(Delta)) / (2*c2)
-                )
+            dv = (-c1 + numpy.sqrt(Delta)) / (2*c2)
             #print "pos dv:", dv
             if dv > 0:
                 F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, dv)
