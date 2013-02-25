@@ -204,20 +204,20 @@ class Violin():
             self.x2 = 0
             self.K2 = 0
             self.R2 = 0
-        if TEST_BOW:
-            self.x2 = 0 # disable
-            self.K2 = 0
-            self.R2 = 0
+        #if TEST_BOW:
+        #    self.x2 = 0 # disable
+        #    self.K2 = 0
+        #    self.R2 = 0
 
         self.phix0 = phi(self.x0)
         self.phix1 = phi(self.x1)
         self.phix2 = phi(self.x2)
-        #print "finger x0 x1 x2:", self.x0, self.x1, self.x2
+        print "finger x0 x1 x2:", self.x0, self.x1, self.x2
         self.calc_coefficients()
 
-    def bow(self, x0, Fb, vb):
+    def bow(self, xb, Fb, vb):
         #print "bow pos:", x0
-        self.x0 = x0*L
+        self.x0 = xb*L
         self.Fb = Fb
         self.vb = vb
         self.phix0 = phi(self.x0)
@@ -373,6 +373,7 @@ class Violin():
         B02 = sum(Y3n * self.phix0 * self.phix2)
         B12 = sum(Y3n * self.phix1 * self.phix2)
         B22 = sum(Y3n * self.phix2 * self.phix2)
+
 
         #K0 = 1e6
         #K1 = 1e6
@@ -535,6 +536,74 @@ class Violin():
         #A01 = sum(X3n * self.phix0 * self.phix1)
         #A11 = sum(X3n * self.phix1 * self.phix1)
 
+
+        ### bowing with two finger forces
+        R = R_FINGER
+        K = K_FINGER
+        B21 = B12
+        B20 = B02
+        A21 = A12
+        A20 = A02
+        # arising from F2
+        EY22H = -K / (B22*R + A22*K + 1)
+        EV22H = -R / (B22*R + A22*K + 1)
+        E21 = -(B21*R + A21*K)/(B22*R+A22*K+1)
+        E20 = -(B20*R + A20*K)/(B22*R+A22*K+1)
+        print "F2 consists:", EY22H, EV22H, E21, E20
+        # arising from F1
+        E10 = -(((B12*E20+B10)*R + (A12*E20 + A10)*K)
+            /((B12*E21+B11)*R + (A12*E21+A11)*K+1))
+        EY12H = -((B12*EY22H*R + A12*EY22H*K)
+            /((B12*E21+B11)*R + (A12*E21+A11)*K+1))
+        EV12H = -((B12*EV22H*R + A12*EV22H*K)
+            /((B12*E21+B11)*R + (A12*E21+A11)*K+1))
+        EY11H = (-K
+            /((B12*E21+B11)*R + (A12*E21+A11)*K+1))
+        EV11H = (-R
+            /((B12*E21+B11)*R + (A12*E21+A11)*K+1))
+        print "F1 consists:", EY12H, EV12H, EY11H, EV11H, E10
+        # arising from F0
+        if B00 == 0:
+            return
+        EY02H = -((B22*EY22H + (B22*E21 + B01)*EY12H)
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EY01H = (-(B22*E21 + B01)*EY11H
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EV02H = (-(B22*EV22H + (B22*E21 + B01)*EV12H)
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EV01H = (-(B22*E21 + B01)*EV11H
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EV00H = (-1.0
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EVB = (1.0
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        EDV = (1.0
+            /((B22*E10*E21 + B22*E20 + B01*E10 + B00)))
+        #print "F0 consists:", EY02H, EY01H, EV02H, EV01H, EV00H
+        #print EVB, EDV
+        #exit(1)
+
+        self.EVB = EVB
+        self.EDV = EDV
+        self.EY01H = EY01H
+        self.EY02H = EY02H
+        self.EV00H = EV00H
+        self.EV01H = EV01H
+        self.EV02H = EV02H
+
+        self.E10 = E10
+        self.E21 = E21
+        self.E20 = E20
+        self.EY12H = EY12H
+        self.EY11H = EY11H
+        self.EY22H = EY22H
+        self.EV12H = EV12H
+        self.EV11H = EV11H
+        self.EV22H = EV22H
+        print "set up for bowing"
+
+
+
     def tick_release(self, y0h, y1h, v0h, v1h):
         K_FINGER = self.K_finger
         R_FINGER = self.R_finger
@@ -635,11 +704,6 @@ class Violin():
         Delta = c1**2 + 4.0*c0*self.D1
         if Delta >= 0:
             dv = self.D4 * (c1 - numpy.sqrt(Delta))
-            #c2 = -self.D1
-            #dv_old = min(
-            #    (-c1 - numpy.sqrt( c1**2 - 4*c0*c2 )) / (2*c2),
-            #    (-c1 + numpy.sqrt( c1**2 - 4*c0*c2 )) / (2*c2))
-            #print dv - dv_old
             if dv < 0:
                 F0 = self.calc_bow_force(y1h, v1h, v0h, dv)
                 if F0 < 0:
@@ -658,11 +722,6 @@ class Violin():
         Delta = c1**2 - 4.0*c0*self.D1
         if Delta >= 0:
             dv = self.D4 * (-c1 + numpy.sqrt(Delta))
-            #c2 = self.D1
-            #dv_old = max(
-            #    (-c1 - numpy.sqrt( c1**2 - 4*c0*c2 )) / (2*c2),
-            #    (-c1 + numpy.sqrt( c1**2 - 4*c0*c2 )) / (2*c2))
-            #print dv - dv_old
             if dv > 0:
                 F0 = self.calc_bow_force(y1h, v1h, v0h, dv)
                 if F0 > 0:
@@ -761,6 +820,171 @@ class Violin():
             print "really bad"
             exit(1)
 
+    def calc_three_bow_force(self, y1h, y2h, v0h, v1h, v2h, dv):
+        F0 = (y2h*self.EY02H + y1h*self.EY01H + self.vb*self.EVB
+            + v2h*self.EV02H + v1h*self.EV01H + v0h*self.EV00H
+            + dv*self.EDV)
+        #F0 = self.D1*(self.vb + dv - v0h) + self.D2*y1h + self.D3*v1h
+        #print self.debug_tick, dv
+        return F0
+
+    def calc_three_bow_slip_negative(self, y1h, y2h, v0h, v1h, v2h):
+        uN = 1.0 - defs.A_noise*random.random()
+        mu_e = uN * mu_v0
+
+        c2 = -self.EDV
+        c1 = (-y2h*self.EY02H - y1h*self.EY01H - self.vb*self.EVB
+            - v2h*self.EV02H - v1h*self.EV01H - v0h*self.EV00H
+            + mu_e * self.EDV + self.Fb * mu_d
+            )
+        c0 = (mu_e*y2h*self.EY02H + mu_e*y1h*self.EY01H
+            + mu_e*self.vb*self.EVB + mu_e*v2h*self.EV02H
+            + mu_e*v1h*self.EV01H + mu_e*v0h*self.EV00H
+            - self.Fb*mu_e*mu_s
+            )
+        Delta = c1**2 - 4.0*c0*c2
+        #print "neg Delta:", Delta
+        if Delta >= 0:
+            dv = min(
+                (-c1 + numpy.sqrt(Delta)) / (2*c2),
+                (-c1 - numpy.sqrt(Delta)) / (2*c2)
+                )
+            #print "neg dv:", dv
+            if dv < 0:
+                F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, dv)
+                if F0 < 0:
+                    print "panic neg"
+                    return None
+                return F0
+        return None
+
+    def calc_three_bow_slip_positive(self, y1h, y2h, v0h, v1h, v2h):
+        uN = 1.0 - defs.A_noise*random.random()
+        mu_e = uN * mu_v0
+
+        c2 = self.EDV
+        c1 = (y2h*self.EY02H + y1h*self.EY01H + self.vb*self.EVB
+            + v2h*self.EV02H + v1h*self.EV01H + v0h*self.EV00H
+            + mu_e * self.EDV + self.Fb * mu_d
+            )
+        c0 = (mu_e*y2h*self.EY02H + mu_e*y1h*self.EY01H
+            + mu_e*self.vb*self.EVB + mu_e*v2h*self.EV02H
+            + mu_e*v1h*self.EV01H + mu_e*v0h*self.EV00H
+            + self.Fb*mu_e*mu_s
+            )
+        Delta = c1**2 - 4.0*c0*c2
+        #print "pos Delta:", Delta
+        if Delta >= 0:
+            dv = max(
+                (-c1 + numpy.sqrt(Delta)) / (2*c2),
+                (-c1 - numpy.sqrt(Delta)) / (2*c2)
+                )
+            #print "pos dv:", dv
+            if dv > 0:
+                F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, dv)
+                if F0 > 0:
+                    print "panic pos"
+                    return None
+                return F0
+        return None
+
+
+    def calc_three_bow(self, y1h, y2h, v0h, v1h, v2h):
+        #print '-----  bow state', self.bowstate
+        #if self.bowstate > 0:
+            #print "positive bowstate"
+            #return None
+        if self.bowstate == 0:
+            F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, 0)
+            if abs(F0) > mu_s * self.Fb:
+                #print "cannot stable:", F0, mu_s*self.Fb
+                if v0h < self.vb:
+                    # try negative
+                    F0 = self.calc_three_bow_slip_negative(
+                        y1h, y2h, v0h, v1h, v2h)
+                    if F0 is not None:
+                        self.bowstate = -1
+                        return F0
+                elif v0h > self.vb:
+                    if NO_POSITIVE_SLIPPING:
+                        return F0
+                    # try positive
+                    F0 = self.calc_three_bow_slip_positive(
+                        y1h, y2h, v0h, v1h, v2h)
+                    if F0 is not None:
+                        self.bowstate = 1
+                        return F0
+                print "panic stick no longer"
+                return None
+                return 0
+            else:
+                self.dv = 0
+                return F0
+        elif self.bowstate == -1:
+            F0 = self.calc_three_bow_slip_negative(
+                        y1h, y2h, v0h, v1h, v2h)
+            if F0 is None:
+                F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, 0)
+                if NO_POSITIVE_SLIPPING:
+                    self.bowstate = 0
+                    return F0
+                if abs(F0) < mu_s * self.Fb:
+                    self.bowstate = 0
+                else:
+                    if NO_SLIPPING_SKIPS:
+                        print "stay positive"
+                        self.bowstate = 0
+                        return F0
+                    self.debug_slips += 1
+                    print "skip warn -1"
+                    #print v0h, F0
+                    #print "sample:", self.debug_tick
+                    #print "seconds:", self.debug_tick / float(FS)
+                    #return None
+                    F0 = self.calc_three_bow_slip_positive(
+                        y1h, y2h, v0h, v1h, v2h)
+                    #print F0
+                    if F0 is not None:
+                        self.bowstate = 1
+                        return F0
+                    print "panic -1"
+                    return None
+                return F0
+            return F0
+        elif self.bowstate == 1:
+            F0 = self.calc_three_bow_slip_positive(
+                        y1h, y2h, v0h, v1h, v2h)
+            if F0 is None:
+                F0 = self.calc_three_bow_force(y1h, y2h, v0h, v1h, v2h, 0)
+                if abs(F0) < mu_s * self.Fb:
+                    self.bowstate = 0
+                else:
+                    if NO_SLIPPING_SKIPS:
+                        print "stay positive"
+                        self.bowstate = 0
+                        return F0
+                    self.debug_slips += 1
+                    print "skip warn 1"
+                    #print mu_s, self.Fb, mu_s*self.Fb
+                    #print v0h, F0
+                    #print "sample:", self.debug_tick
+                    #print "seconds:", self.debug_tick / float(FS)
+                    #return None
+                    F0 = self.calc_three_bow_slip_negative(
+                        y1h, y2h, v0h, v1h, v2h)
+                    if F0 is not None:
+                        self.bowstate = -1
+                        return F0
+                    return None
+                    print "panic 1"
+                    return 0
+                return F0
+            return F0
+        else:
+            print "really bad"
+            exit(1)
+
+
     def calc_forces(self, y0h, y1h, y2h, y3h, v0h, v1h, v2h, v3h):
         """ returns F0 and F1.
             TODO: add bow capability; right now it just does plucks
@@ -768,6 +992,16 @@ class Violin():
         if self.plucks_left is not False:
             return self.calc_pluck(y0h, y1h, y2h, y3h, v0h, v1h, v2h, v3h)
         elif self.Fb is not False:
+            if True:
+                F0 = self.calc_three_bow(y1h, y2h, v0h, v1h, v2h)
+                if F0 is None:
+                    print "panic something wrong calc_forces"
+                    return None, None, None, None
+                F1 = (self.E10*F0 + y2h*self.EY12H + y1h*self.EY11H
+                    + v2h*self.EV12H + v1h*self.EV11H)
+                F2 = (F1*self.E21 + F0*self.E20
+                    + y2h*self.EY22H + v2h*self.EV22H)
+                return F0, F1, F2, 0
             F0 = self.calc_bow(y1h, v1h, v0h)
             if F0 is None:
                 print "panic something wrong calc_forces"

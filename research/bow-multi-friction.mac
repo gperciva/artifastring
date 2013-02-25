@@ -1,0 +1,209 @@
+load(format);
+
+
+a: y1 = y1h + A10*F0 + A11*F1 + A12*F2$
+b: y2 = y2h + A20*F0 + A21*F1 + A22*F2$
+
+vva: v1 = v1h + B10*F0 + B11*F1 + B12*F2$
+vvb: v2 = v2h + B20*F0 + B21*F1 + B22*F2$
+
+a: ev(a, [A03=0, g3=0, A13=0, B03=0, B13=0])$
+b: ev(b, [A03=0, g3=0, A13=0, B03=0, B13=0])$
+vva: ev(vva, [A03=0, g3=0, A13=0, B03=0, B13=0])$
+vvb: ev(vvb, [A03=0, g3=0, A13=0, B03=0, B13=0])$
+
+
+c: F1 = -K*y1 - R*v1$
+d: F2 = -K*y2 - R*v2$
+
+e: solve(c, y1)$
+f: solve(d, y2)$
+ev(b, [e,f])$
+ev(%, vvb)$
+solve(%, F2)$
+format(%, %poly(F1, F2, F0, y1h, y2h, v1h, v2h))$
+subst(EY22H*y2h, -(y2h*K/(B22*R+A22*K+1)), %)$
+subst(EV22H*v2h, -(v2h*R/(B22*R+A22*K+1)), %)$
+subst(F1*E21, -F1*((B21*R + A21*K)/(B22*R+A22*K+1)), %)$
+subst(F0*E20, -F0*((B20*R + A20*K)/(B22*R+A22*K+1)), %)$
+G2 : %;
+
+ev(a, [e,f])$
+ev(%, vva)$
+ev(%, X1)$
+ev(%, [e,f,G2, vb])$
+ev(%, [e,f,G2, vb])$
+solve(%, F1)$
+format(%, %poly(F1, F2, F0, y0h, y1h, y2h, v0h, v1h, v2h))$
+subst(E10*F0, -(F0*((B12*E20+B10)*R + (A12*E20 + A10)*K)
+  /((B12*E21+B11)*R + (A12*E21+A11)*K+1)), %)$
+subst(EY12H*y2h, -(y2h*(B12*EY22H*R + A12*EY22H*K)
+  /((B12*E21+B11)*R + (A12*E21+A11)*K+1)), %)$
+subst(EV12H*v2h, -(v2h*(B12*EV22H*R + A12*EV22H*K)
+  /((B12*E21+B11)*R + (A12*E21+A11)*K+1)), %)$
+subst(EY11H*y1h, -(y1h*K
+  /((B12*E21+B11)*R + (A12*E21+A11)*K+1)), %)$
+subst(EV11H*v1h, -(v1h*R
+  /((B12*E21+B11)*R + (A12*E21+A11)*K+1)), %)$
+G1: %;
+
+
+
+ee: vb + dv = v0h + B00*F0 + B01*F1 + B22*F2$
+ev(%, G2)$
+ev(%, G1)$
+solve(%, F0)$
+ev(%, [A03=0, g3=0, A13=0, B03=0, B13=0,E23=0]);
+format(%, %poly(F1, F2, F0, dv, vb, y0h, y1h, y2h, v0h, v1h, v2h));
+subst(EY02H*y2h, -(y2h*(B22*EY22H + (B22*E21 + B01)*EY12H)
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EY01H*y1h, -((y1h*(B22*E21 + B01)*EY11H)
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EV02H*v2h, -(v2h*(B22*EV22H + (B22*E21 + B01)*EV12H)
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EV01H*v1h, -(v1h*(B22*E21 + B01)*EV11H
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EV00H*v0h, (-v0h
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EVB*vb, (vb
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+subst(EDV*dv, (dv
+  /((B22*E10*E21 + B22*E20 + B01*E10 + B00))), %)$
+X0: %;
+
+
+g: F0 = fb * (Ud + (Us-Ud)*ue/(ue - dv))$
+rhs(part(X0,1)) - rhs(g);
+ratsimp(%);
+% * denom(%);
+DV: format(%, %poly(F0, dv));
+
+coef: ratcoef(DV, dv, 2);
+coef: ratcoef(DV, dv, 1);
+coef: ratcoef(DV, dv, 0);
+
+
+
+g: F0 = -fb * (Ud + (Us-Ud)*ue/(ue + dv))$
+rhs(part(X0,1)) - rhs(g);
+ratsimp(%);
+% * denom(%);
+DV: format(%, %poly(F0, dv));
+
+coef: ratcoef(DV, dv, 2);
+coef: ratcoef(DV, dv, 1);
+coef: ratcoef(DV, dv, 0);
+/*
+*/
+
+/*
+
+
+ff: vb + dv3 = v3h + B30*F1 + B31*F2 + B32*F0 + B33*g3$
+ev(%, X0)$
+ev(%, X1)$
+ev(%, X2)$
+solve(%, g3)$
+format(%, %poly(F0, g3, dv2, dv3))$
+subst(V32*dv2, -((dv2*((B30*E01 + B31)*E12 + B30*E02 + B32) * V22)
+  / (((B30*E01 + B31)*E12 + B30*E02 + B32) * E23 + (B30*E01 +
+B31)*E13 + B30*E03 + B33))
+  , %)$
+subst(V33*dv3, (dv3
+  / (((B30*E01 + B31)*E12 + B30*E02 + B32) * E23 + (B30*E01 +
+B31)*E13 + B30*E03 + B33))
+  , %)$
+subst(E30, (((B30*E01 + B31)*E12 +B30*E02 + B32)*E20 + (B30*E01 +
+B31)*E10 + B30*E00 - vb + v3h)
+  / (((B30*E01 + B31)*E12 + B30*E02 + B32) * E23 + (B30*E01 +
+B31)*E13 + B30*E03 + B33)
+  , %)$
+X3: %;
+
+
+h: g3 = fb * (Ud + (Us-Ud)*ue/(ue - dv3))$
+
+rhs(part(X3,1)) - rhs(h);
+ratsimp(%);
+% * denom(%);
+DV3: format(%, %poly(F0, g3, dv2, dv3));
+
+
+ev(DV2, X3);
+DV2: format(%, %poly(F0, g3, dv2, dv3));
+
+
+X: format(%, %poly(dv2,dv3));
+coef: ratcoef(%, dv2^2);
+X / coef;
+X: format(%, %poly(dv2,dv3));
+
+subst(dv2*G1, dv2*(ue*E23*V32 + ue*V22 + E23*E30 - E20 + fb*Ud)
+  / (-E23*V32-V22)
+  , %);
+subst(dv3*G2, dv3*ue*E23*V33
+  / (-E23*V32-V22)
+  , %);
+subst(dv2*dv3*G3, -dv2*dv3*E23*V33
+  / (-E23*V32-V22)
+  , %);
+subst(G0, (-ue*E23*E30 + ue*E20 - fb*ue*Us)
+  / (-E23*V32-V22)
+  , %);
+X: %;
+
+
+format(DV3, %poly(dv2,dv3));
+coef: ratcoef(%, dv3^2);
+DV3 / coef;
+format(%, %poly(dv2,dv3));
+
+subst(dv2*H1, -dv2*(ue*V32)
+  / (V33)
+  , %);
+subst(dv3*H2, -dv3*(ue*V33 + E30 + fb*Ud)
+  / (V33)
+  , %);
+subst(dv2*dv3*H3, dv2*dv3*(V32)
+  / (V33)
+  , %);
+Y: subst(H0, -((-fb*ue*Us - ue*E30)
+  / (V33))
+  , %);
+
+X;
+Y;
+solve(Y, dv2);
+ev(X, %);
+
+subst(x, dv3, %);
+ratsimp(%);
+% * denom(%);
+prev: format(%, %poly(x));
+coef: ratcoef(%, x, 4);
+prev / coef;
+format(%, %poly(x));
+
+subst(K3*x^3, x^3*(G2*H3^2 + (-G3*H2-G1)*H3 + 2*H2 - G3*H1)
+  / (1-G3*H3)
+  , %);
+subst(K2*x^2, x^2*(G0*H3^2 + (-G1*H2 + 2*G2*H1 - G3*H0)*H3 + H2^2
+- G3*H1*H2 - G1*H1 + 2*H0)
+  / (1-G3*H3)
+  , %);
+subst(K1*x, x*((2*G0*H1 - G1*H0)*H3 + (2*H0 - G1*H1)*H2 +
+G2*H1^2 - G3*H0*H1)
+  / (1-G3*H3)
+  , %);
+subst(K0, (G0*H1^2 - G1*H0*H1+ H0^2)
+  / (1-G3*H3)
+  , %);
+*/
+
+
+/*
+  end result:
+    x^4 + K3*x^3 + K2*x^2 + K1*x + K0 = 0
+*/
+
+

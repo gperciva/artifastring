@@ -451,7 +451,7 @@ elif THESIS.startswith("bow"):
         #PLOT_TIME_SAMPLE_MAX = int(FS*1.18576)
 
     elif "mundane" in THESIS:
-        SECONDS = 1.0
+        SECONDS = 0.3
 
 elif THESIS.startswith("ns "):
     xf = 1.0 - 0.109
