@@ -121,7 +121,7 @@ public:
     int wait_samples_forces_python(
         short *buffer, int num_samples,
         short *forces, int num_samples2
-        );
+    );
 
     /** \brief Returns a string's physical constants.
      *
@@ -155,8 +155,8 @@ public:
     float *get_string_buffer(int which_string);
 
     void get_string_buffer_int(int which_string, int *buffer,
-        int num_samples,
-        int *forces, int num_samples2);
+                               int num_samples,
+                               int *forces, int num_samples2);
 
 private:
     ArtifastringString *artifastringString[NUM_VIOLIN_STRINGS];

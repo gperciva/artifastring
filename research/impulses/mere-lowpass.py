@@ -62,7 +62,7 @@ def write_impulses(name, mult):
     #for i, filename in enumerate(filenames):
         #if filename != "violin-i.wav":
         #    continue
-        outfile.write("        /* %s */\n" % "lowpass")
+        outfile.write("    /* %s */\n" % "lowpass")
         #wav_samples = read_wave(filename)
         sample_rate = 44100.0 * mult
         wav_samples = numpy.zeros(2048)
@@ -126,7 +126,7 @@ def write_impulses(name, mult):
         print len(wav_samples)
         for sample in wav_samples:
             value = sample * GAIN / len(wav_samples)
-            outfile.write("        %.20gf,\n" % value)
+            outfile.write("    %.20gf,\n" % value)
         #for j in range(len(wav_samples), num_taps):
         #    outfile.write("        %.20gf,\n" % 0.0)
         #if i < len(filenames)-1:

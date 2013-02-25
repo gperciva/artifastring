@@ -67,7 +67,7 @@ inline void waitUntil(ArtifastringInstrument *violin, MonoWav *wavfile,
         //int test_buffer[delta];
         //int test_forces[delta];
         //violin->get_string_buffer_int(0, test_buffer, delta,
-         //   test_forces, delta);
+        //   test_forces, delta);
 
         if (unsafe > 0) {
             //printf("#Unsafe: friction skip over stable, num samples: %i\n",
