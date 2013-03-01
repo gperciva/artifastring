@@ -18,7 +18,7 @@ const String_Physical viola_params[2][4] =
             0.228, // dynamic friction
             0.273, // friction curve steepness
             0.02417, // insignificant string vibrations
-            88, // number of modes N
+            84, // number of modes N
             // decays
             // these were calculated by mode-detect/all-modes.py
             {
@@ -65,7 +65,7 @@ const String_Physical viola_params[2][4] =
             0.231, // dynamic friction
             0.260, // friction curve steepness
             0.01184, // insignificant string vibrations
-            76, // number of modes N
+            72, // number of modes N
             // decays
             // these were calculated by mode-detect/all-modes.py
             {
