@@ -13,7 +13,7 @@ INVESTIGATE = {
       'fp': 0.0,
     },
     'expected_f0': 660.0,
-    'var_forces': (0.01, 4.0),
+    'var_forces': (0.02, 5.0),
   },
 
   'violin-e-open-2': {
@@ -27,7 +27,7 @@ INVESTIGATE = {
       'fp': 0.0,
     },
     'expected_f0': 660.0,
-    'var_forces': (0.01, 4.0),
+    'var_forces': (0.02, 5.0),
   },
 
   'violin-e-fourth': {
@@ -72,6 +72,21 @@ INVESTIGATE = {
     'var_forces': (0.1, 10.0),
   },
 
+  'cello-d-open': {
+    'inst': (2,0),
+    'actions': {
+      'st': 2,
+      'xb': 0.18,
+      'fb': 5.0,
+      'vb': 0.5,
+      'ba': 5.0,
+      'fp': 0.0,
+    },
+    'expected_f0': 146.67,
+    'var_forces': (0.2, 20.0),
+  },
+
+
   'cello-g-open': {
     'inst': (2,0),
     'actions': {
@@ -83,7 +98,7 @@ INVESTIGATE = {
       'fp': 0.0,
     },
     'expected_f0': 97.0,
-    'var_forces': (0.1, 15.0),
+    'var_forces': (0.2, 20.0),
   },
 
   'cello-c-open': {
@@ -97,7 +112,7 @@ INVESTIGATE = {
       'fp': 0.0,
     },
     'expected_f0': 65.0,
-    'var_forces': (0.1, 25.0),
+    'var_forces': (1.0, 30.0),
   },
 
 }

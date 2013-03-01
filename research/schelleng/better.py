@@ -3,7 +3,7 @@
 DISABLE_MULTI = False
 #DISABLE_MULTI = True
 DEBUG = 0
-DEBUG = 1
+#DEBUG = 4
 
 PLOT_PNG_BARE = False
 #PLOT_PNG_BARE = True
@@ -12,6 +12,8 @@ PLOT_STD = False
 #PLOT_STD = True
 PLOT_COMBO = False
 #PLOT_COMBO = True
+LOGS = True
+#LOGS = False
 
 import pickle
 import os
@@ -26,7 +28,7 @@ XB_MIN = 0.10
 XB_MAX = 0.20
 
 if DEBUG == 0:
-    STEPS_FORCE = 25
+    STEPS_FORCE = 100
     STEPS_POSITIONS = 100
     NUM_NOTES = 10
 elif DEBUG == 1:
@@ -59,11 +61,12 @@ def generic_init(actions):
     return st, fp, xb, fb, vb, ba
 
 class AxisLabel():
-    def __init__(self, title, low, high, num):
+    def __init__(self, title, low, high, num, log):
         self.title = title
         self.low = low
         self.high = high
         self.num = num
+        self.log = log
 
 
 def generate_schelleng_force(dirname, name):
@@ -71,10 +74,23 @@ def generate_schelleng_force(dirname, name):
     force_args = defs.INVESTIGATE[name]['var_forces']
     st, fp, xb, fb, vb, ba = generic_init(actions)
 
-    forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
-    positions = numpy.linspace(XB_MIN, XB_MAX, STEPS_POSITIONS)
-    xlabel = AxisLabel("x_b", XB_MIN, XB_MAX, len(positions))
-    ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces))
+    if LOGS:
+        forces = numpy.exp(numpy.linspace(
+            numpy.log(force_args[0]),
+            numpy.log(force_args[1]),
+            STEPS_FORCE))
+        positions = numpy.exp(numpy.linspace(
+            numpy.log(XB_MIN),
+            numpy.log(XB_MAX),
+            STEPS_POSITIONS))
+    else:
+        forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
+        positions = numpy.linspace(XB_MIN, XB_MAX, STEPS_POSITIONS)
+    #print forces
+    #print positions
+    #exit(1)
+    xlabel = AxisLabel("x_b", XB_MIN, XB_MAX, len(positions), LOGS)
+    ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces), LOGS)
 
     argss = []
     for i, fb in enumerate(forces):
@@ -100,8 +116,10 @@ def generate_schelleng_finger_position(dirname, name):
 
     forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
     finger_positions = numpy.linspace(0.0, 0.333, STEPS_POSITIONS)
-    xlabel = AxisLabel("x_f", 0.0, 0.333, len(finger_positions))
-    ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces))
+    xlabel = AxisLabel("x_f", 0.0, 0.333, len(finger_positions),
+        LOGS)
+    ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces),
+        LOGS)
 
     argss = []
     for i, fb in enumerate(forces):
@@ -133,8 +151,9 @@ def generate_schelleng_velocity(dirname, name):
     #positions = numpy.linspace(XB_MIN, XB_MAX, STEPS_POSITIONS)
     #xlabel = AxisLabel("x_b", XB_MIN, XB_MAX, len(positions))
     forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
-    xlabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces))
-    ylabel = AxisLabel("v_b", vel_low, vel_high, len(vels))
+    xlabel = AxisLabel("F_b", force_args[0], force_args[1],
+        len(forces), LOGS)
+    ylabel = AxisLabel("v_b", vel_low, vel_high, len(vels), LOGS)
 
     argss = []
     for i, vb in enumerate(vels):
@@ -167,9 +186,10 @@ def generate_accel(dirname, name):
     fb2_low = 0.25
     fb2_high = 1.0
     fb2s = numpy.linspace(fb2_low, fb2_high, STEPS_POSITIONS)
-    xlabel = AxisLabel("F_b2", fb2_low, fb2_high, len(fb2s))
+    xlabel = AxisLabel("F_b2", fb2_low, fb2_high, len(fb2s), LOGS)
     forces = numpy.linspace(force_args[0], force_args[1], STEPS_FORCE)
-    ylabel = AxisLabel("F_b", force_args[0], force_args[1], len(forces))
+    ylabel = AxisLabel("F_b", force_args[0], force_args[1],
+        len(forces), LOGS)
 
     argss = []
     for i, fb in enumerate(forces):
@@ -277,17 +297,18 @@ def display_filename(pickle_filename, name=None):
     #ri = 0
     #gi = 1
     #bi = 7
-    power = 0.3
+    power = 1.0
     invert = False
     #invert = True
 
     if PLOT_PNG_BARE:
         fig = pylab.figure()
-        fig.set_size_inches(8,6)
+        fig.set_size_inches(4,3)
         ax = pylab.Axes(fig, [0., 0., 1., 1.,])
     else:
-        pylab.figure()
+        fig = pylab.figure()
         pylab.title("%s" % (name))
+    fig.set_size_inches(16,12)
     numx = xlabel.num
     numy = ylabel.num
     img = numpy.zeros( (numy, numx, 3), dtype=numpy.float32 )
@@ -337,26 +358,42 @@ def display_filename(pickle_filename, name=None):
         modal = 1.0 / m
         relpos = 1.0 - (xlabel.high - modal) / (xlabel.high - xlabel.low)
         abspos = relpos * (numx-1)
+        print abspos,
+        if xlabel.log:
+            abspos = numpy.log(abspos)
+        print abspos
         #print m, modal, relpos, abspos
         if PLOT_PNG_BARE:
             ax.axvline(abspos, color="yellow")
         else:
-            pylab.axvline(abspos, color="yellow")
+            #pylab.axvline(abspos, color="yellow")
+            pass
 
-    #if False:
+    xlocs = numpy.linspace(0, numx-1, 11)
+    ylocs = numpy.linspace(0, numy-1, 11)
+    if xlabel.log:
+        xticks = map( lambda d: str("%.3f" % d),
+            numpy.exp(numpy.linspace(
+                numpy.log(xlabel.low),
+                numpy.log(xlabel.high),
+                len(xlocs))))
+    else:
+        xticks = map( lambda d: str("%.3f" % d),
+            numpy.linspace(xlabel.low, xlabel.high, len(xlocs)))
+    if ylabel.log:
+        yticks = map( lambda d: str("%.2f" % d),
+            numpy.exp(numpy.linspace(
+                numpy.log(ylabel.low),
+                numpy.log(ylabel.high),
+                len(ylocs))))
+    else:
+        yticks = map( lambda d: str("%.2f" % d),
+            numpy.linspace(ylabel.low, ylabel.high, len(ylocs)))
     if True:
-        #locs, ticks = pylab.xticks()
-        mylocs = numpy.linspace(0, numx-1, 11)
-        ticks = map( lambda d: str("%.2f" % d),
-            numpy.linspace(xlabel.low, xlabel.high, len(mylocs)))
-        pylab.xticks(mylocs, ticks)
+        pylab.xticks(xlocs, xticks)
         pylab.xlabel(xlabel.title)
     
-        #locs, ticks = pylab.yticks()
-        mylocs = numpy.linspace(0, numy-1, 11)
-        ticks = map( lambda d: str("%.2f" % d),
-            numpy.linspace(ylabel.low, ylabel.high, len(mylocs)))
-        pylab.yticks(mylocs, ticks)
+        pylab.yticks(ylocs, yticks)
         pylab.ylabel(ylabel.title)
      
     if PLOT_STD:
@@ -396,16 +433,18 @@ def display_filename(pickle_filename, name=None):
             pylab.plot(x,y, '.', color=(r,g,b), markersize=10)
     #pylab.axis('off')
     #pylab.yscale('log')
+    filename= name + ".png"
     if PLOT_PNG_BARE:
         ax.set_axis_off()
         fig.add_axes(ax)
         #pylab.title('')
     #pylab.savefig(name+".png", bbox_inches='tight', pad_inches=0)
         extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        filename= name + ".png"
         pylab.savefig(filename, bbox_inches=extent)
         print "filename:\tX:", xlabel.title, xlabel.low, xlabel.high
         print "\t\tY:", ylabel.title, ylabel.low, ylabel.high
+    else:
+        pylab.savefig(filename)
     print "... done"
 
 
@@ -428,13 +467,19 @@ def display_filename(pickle_filename, name=None):
 #generate('cello-a-open', generate_schelleng_force)
 #display('cello-a-open')
 
+#generate('cello-d-open', generate_schelleng_force)
+#display('cello-d-open')
+
+#generate('cello-a-open', generate_schelleng_force)
+#display('cello-a-open')
+
 #generate('cello-g-open', generate_schelleng_force)
 #display('cello-g-open')
 
-generate('cello-c-open', generate_schelleng_force)
+#generate('cello-c-open', generate_schelleng_force)
 #generate('cello-c-open', generate_schelleng_velocity)
 #generate('cello-c-open', generate_accel)
-display('cello-c-open')
+#display('cello-c-open')
 
 
 #display_filename('/tmp/art/violin-e-open/coll.pickle')
@@ -442,11 +487,16 @@ display('cello-c-open')
 
 
 
+#display_filename('violin-e-open-log.pickle', 'violin-e-open-log')
+#display_filename('violin-e-open.pickle', 'violin-e-open')
+
 #display_filename('violin-e-open.pickle', 'violin-e-open')
 #display_filename('violin-e-open-2.pickle', 'violin-e-open-2')
-#display_filename('cello-g-open.pickle', 'cello-g-open')
+#display_filename('cello-d-open.pickle', 'cello-a-open')
 #display_filename('cello-c-open.pickle', 'cello-c-open')
 
+#display_filename('cello-a-open.pickle', 'cello-a-open')
+#display_filename('cello-g-open.pickle', 'cello-g-open')
 #display_filename('violin-e-fingers.pickle', 'violin-e-finger')
 #display_filename('violin-e-fingers2.pickle', 'violin-e-fingers2')
 
