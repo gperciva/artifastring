@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-NUM_PROCESSES = 3
+NUM_PROCESSES = 4
 
 import sys
 sys.path.append('../../build/swig')
@@ -14,12 +14,14 @@ def chunkify(items, num):
     return [items[i::num] for i in range(num)]
 
 
-def wrap_worker_func(result_queue, shared_init_func, shared_init_args, worker_func, chunk):
+def wrap_worker_func(ci, result_queue, shared_init_func, shared_init_args, worker_func, chunk):
+    #print "worker %i, chunk length: %i" % (ci, len(chunk))
     #print chunk, shared_init_func
     shared = shared_init_func(*shared_init_args)
     #shared = None
     for args in chunk:
         result = worker_func(shared, *args)
+        #print ci, result[0][0]
         result_queue.put(result)
 
 def task(worker_func, argslist, shared_init_func, shared_init_args,
@@ -35,13 +37,14 @@ def task(worker_func, argslist, shared_init_func, shared_init_args,
     manager = multiprocessing.Manager()
     result_queue = manager.Queue()
     chunks = chunkify(argslist, NUM_PROCESSES)
-    for chunk in chunks:
+    for ci, chunk in enumerate(chunks):
+        #print "worker %i, chunk length: %i" % (ci, len(chunk))
         if disable_multi:
-            wrap_worker_func(
+            wrap_worker_func(ci,
                 result_queue, shared_init_func, shared_init_args, worker_func, chunk)
         else:
             pool.apply_async(wrap_worker_func,
-                args=(result_queue, shared_init_func,
+                args=(ci, result_queue, shared_init_func,
                 shared_init_args, worker_func, chunk))
     pool.close()
     pool.join()

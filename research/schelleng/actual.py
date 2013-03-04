@@ -6,10 +6,14 @@ import dsp
 
 import scipy.signal
 import scipy.fftpack
+import time
 
 import os.path
 
 import defs
+
+REMOVE_FILES = True
+#REMOVE_FILES = False
 
 #ADSR_A_SECONDS = 0.050
 #ADSR_S_SECONDS = 0.200
@@ -208,7 +212,7 @@ def make_shared(inst_type, inst_num, expected_f0):
 
 def analyze_file(net, notempty, filename):
     if not os.path.exists(filename):
-        return None
+        raise Exception("file doesn't exist!")
     net.updControl("SoundFileSource/src/mrs_string/filename", filename)
     vals = []
     for i in range(NUM_FEATURES):
@@ -221,6 +225,8 @@ def analyze_file(net, notempty, filename):
     for i in range(NUM_FEATURES):
         vals[i] = vals[i][1:-1]
 
+    if REMOVE_FILES:
+        os.remove(filename)
     #sample_rate, data = scipy.io.wavfile.read(filename)
     #freqs, fft_db = get_freqs_db(data, sample_rate)
     #one = dsp.spectral_flatness_limited(data, 20, 5000, sample_rate)
@@ -238,6 +244,7 @@ def analyze_files(shared, filenames):
         vals.append([])
         means.append(0)
         stds.append(0)
+
     for filename in filenames:
         #val, sfm = analyze_file(net, notempty, filename)
         val = analyze_file(net, notempty, filename)
@@ -256,6 +263,7 @@ def analyze_files(shared, filenames):
 def process(shared, actions, basename, num_notes):
     filenames, actions = notes(shared, actions, basename, num_notes)
     #means, stds, sfmm, sfmstd = analyze_files(shared, filenames)
+    time.sleep(0.01)
     means, stds = analyze_files(shared, filenames)
     #return (filenames, actions, means, stds, sfmm, sfmstd)
     return (filenames, actions, means, stds)

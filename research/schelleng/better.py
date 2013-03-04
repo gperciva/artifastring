@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 DISABLE_MULTI = False
-#DISABLE_MULTI = True
+DISABLE_MULTI = True
 DEBUG = 0
 #DEBUG = 4
 
 PLOT_PNG_BARE = False
-#PLOT_PNG_BARE = True
+PLOT_PNG_BARE = True
 
 PLOT_STD = False
 #PLOT_STD = True
@@ -19,6 +19,7 @@ import pickle
 import os
 import numpy
 import pylab
+pylab.ioff()
 
 import multi_artifastring
 import actual
@@ -28,9 +29,9 @@ XB_MIN = 0.10
 XB_MAX = 0.20
 
 if DEBUG == 0:
-    STEPS_FORCE = 100
-    STEPS_POSITIONS = 100
-    NUM_NOTES = 10
+    STEPS_FORCE = 200
+    STEPS_POSITIONS = 200
+    NUM_NOTES = 25
 elif DEBUG == 1:
     STEPS_FORCE = 3
     STEPS_POSITIONS = 3
@@ -297,7 +298,7 @@ def display_filename(pickle_filename, name=None):
     #ri = 0
     #gi = 1
     #bi = 7
-    power = 1.0
+    power = 0.5
     invert = False
     #invert = True
 
@@ -312,16 +313,27 @@ def display_filename(pickle_filename, name=None):
     numx = xlabel.num
     numy = ylabel.num
     img = numpy.zeros( (numy, numx, 3), dtype=numpy.float32 )
+
+    min_ms_ri = min(ms[ri])
+    min_ms_gi = min(ms[gi])
+    min_ms_bi = min(ms[bi])
+    max_ms_ri = max(ms[ri])
+    max_ms_gi = max(ms[gi])
+    max_ms_bi = max(ms[bi])
+
+    min_ss_ri = min(ms[ri])
+    max_ss_ri = max(ms[ri])
+    print "got min/max"
     for value in coll:
         (bp, force, i, j, means, stds) = value
         #(bp, force, i, j, sfmm, sfmstd) = value
         x = bp
         y = force
-        r = normalize(means[ri], min(ms[ri]), max(ms[ri]))
-        g = normalize(means[gi], min(ms[gi]), max(ms[gi]))
-        b = normalize(means[bi], min(ms[bi]), max(ms[bi]))
+        #r = normalize(means[ri], min(ms[ri]), max(ms[ri]))
+        g = normalize(means[gi], min_ms_gi, max_ms_gi)
+        b = normalize(means[bi], min_ms_bi, max_ms_bi)
 
-        r = normalize(stds[ri], min(ss[ri]), max(ss[ri]))
+        r = normalize(stds[ri], min_ss_ri, max_ss_ri)
         if invert:
             r = 1. - r**power
             g = 1. - g**power
@@ -338,6 +350,7 @@ def display_filename(pickle_filename, name=None):
         img[i][j][0] = r
         img[i][j][1] = g
         img[i][j][2] = b
+    print "start imshow"
     if PLOT_PNG_BARE:
         ax.imshow(img,
             #interpolation='bilinear',
@@ -354,6 +367,7 @@ def display_filename(pickle_filename, name=None):
         )
         pylab.xlim(0, numx-1)
         pylab.ylim(0, numy-1)
+    print "end imshow"
     for m in range(5, 10):
         modal = 1.0 / m
         relpos = 1.0 - (xlabel.high - modal) / (xlabel.high - xlabel.low)
@@ -364,7 +378,8 @@ def display_filename(pickle_filename, name=None):
         print abspos
         #print m, modal, relpos, abspos
         if PLOT_PNG_BARE:
-            ax.axvline(abspos, color="yellow")
+            pass
+            #ax.axvline(abspos, color="yellow")
         else:
             #pylab.axvline(abspos, color="yellow")
             pass
@@ -481,6 +496,8 @@ def display_filename(pickle_filename, name=None):
 #generate('cello-c-open', generate_accel)
 #display('cello-c-open')
 
+#generate('cello-c-open-2', generate_schelleng_force)
+#display('cello-c-open-2')
 
 #display_filename('/tmp/art/violin-e-open/coll.pickle')
 #display_filename('/tmp/art/violin-e-open-96/coll.pickle')
@@ -488,12 +505,8 @@ def display_filename(pickle_filename, name=None):
 
 
 #display_filename('violin-e-open-log.pickle', 'violin-e-open-log')
+#display_filename('violin-e-log-2.pickle', 'violin-e-log-2')
 #display_filename('violin-e-open.pickle', 'violin-e-open')
-
-#display_filename('violin-e-open.pickle', 'violin-e-open')
-#display_filename('violin-e-open-2.pickle', 'violin-e-open-2')
-#display_filename('cello-d-open.pickle', 'cello-a-open')
-#display_filename('cello-c-open.pickle', 'cello-c-open')
 
 #display_filename('cello-a-open.pickle', 'cello-a-open')
 #display_filename('cello-g-open.pickle', 'cello-g-open')
@@ -501,6 +514,18 @@ def display_filename(pickle_filename, name=None):
 #display_filename('violin-e-fingers2.pickle', 'violin-e-fingers2')
 
 
-pylab.show()
+#display_filename('violin-e-log-1.pickle', 'violin-e-log-1')
+#display_filename('violin-e-log-2.pickle', 'violin-e-log-2')
+#display_filename('cello-d-log-1.pickle', 'cello-d-log-1')
+#display_filename('cello-c-log-1.pickle', 'cello-c-log-1')
+
+
+### final set
+display_filename('violin-e-massive-1.pickle', 'violin-e-massive-1')
+display_filename('violin-e-massive-2.pickle', 'violin-e-massive-2')
+display_filename('cello-a-massive.pickle', 'cello-a-massive')
+display_filename('cello-c-massive.pickle', 'cello-c-massive')
+
+#pylab.show()
 
 
