@@ -25,6 +25,7 @@ PLUCK_MAX_DISPLACEMENT = 0.005 # meters
 PLUCK_MAX_VELOCITY = 0.1 # how quickly can the pluck finger move?
 PLUCK_SAMPLES = 0 # defined lower, after getting FS
 
+
 def thesis_save(text, values):
     filename = os.path.join(
         DATA_DIR,
@@ -353,26 +354,26 @@ class Violin():
         #print "  K0, K1, K2", self.K0, self.K1, self.K2
         #print "  R0, R1, R2", self.R0, self.R1, self.R2
 
-        A00 = sum(X3n * self.phix0 * self.phix0)
-        A01 = sum(X3n * self.phix0 * self.phix1)
-        A02 = sum(X3n * self.phix0 * self.phix2)
-        A10 = sum(X3n * self.phix1 * self.phix0)
-        A11 = sum(X3n * self.phix1 * self.phix1)
-        A12 = sum(X3n * self.phix1 * self.phix2)
-        A22 = sum(X3n * self.phix2 * self.phix2)
+        A00 = numpy.sum(X3n * self.phix0 * self.phix0)
+        A01 = numpy.sum(X3n * self.phix0 * self.phix1)
+        A02 = numpy.sum(X3n * self.phix0 * self.phix2)
+        A10 = numpy.sum(X3n * self.phix1 * self.phix0)
+        A11 = numpy.sum(X3n * self.phix1 * self.phix1)
+        A12 = numpy.sum(X3n * self.phix1 * self.phix2)
+        A22 = numpy.sum(X3n * self.phix2 * self.phix2)
         self.A00 = A00
         self.A01 = A01
         self.A10 = A10
         self.A11 = A11
         #print "A11:", A11
 
-        B00 = sum(Y3n * self.phix0 * self.phix0)
-        B01 = sum(Y3n * self.phix0 * self.phix1)
-        B10 = sum(Y3n * self.phix1 * self.phix0)
-        B11 = sum(Y3n * self.phix1 * self.phix1)
-        B02 = sum(Y3n * self.phix0 * self.phix2)
-        B12 = sum(Y3n * self.phix1 * self.phix2)
-        B22 = sum(Y3n * self.phix2 * self.phix2)
+        B00 = numpy.sum(Y3n * self.phix0 * self.phix0)
+        B01 = numpy.sum(Y3n * self.phix0 * self.phix1)
+        B10 = numpy.sum(Y3n * self.phix1 * self.phix0)
+        B11 = numpy.sum(Y3n * self.phix1 * self.phix1)
+        B02 = numpy.sum(Y3n * self.phix0 * self.phix2)
+        B12 = numpy.sum(Y3n * self.phix1 * self.phix2)
+        B22 = numpy.sum(Y3n * self.phix2 * self.phix2)
 
 
         #K0 = 1e6
@@ -385,14 +386,14 @@ class Violin():
         R2 = self.R2
 
         if FOUR_PLUCK_FORCES:
-            A03 = sum(X3n * self.phix0 * self.phix3)
-            A13 = sum(X3n * self.phix1 * self.phix3)
-            A23 = sum(X3n * self.phix2 * self.phix3)
-            A33 = sum(X3n * self.phix3 * self.phix3)
-            B03 = sum(Y3n * self.phix0 * self.phix3)
-            B13 = sum(Y3n * self.phix1 * self.phix3)
-            B23 = sum(Y3n * self.phix2 * self.phix3)
-            B33 = sum(Y3n * self.phix3 * self.phix3)
+            A03 = numpy.sum(X3n * self.phix0 * self.phix3)
+            A13 = numpy.sum(X3n * self.phix1 * self.phix3)
+            A23 = numpy.sum(X3n * self.phix2 * self.phix3)
+            A33 = numpy.sum(X3n * self.phix3 * self.phix3)
+            B03 = numpy.sum(Y3n * self.phix0 * self.phix3)
+            B13 = numpy.sum(Y3n * self.phix1 * self.phix3)
+            B23 = numpy.sum(Y3n * self.phix2 * self.phix3)
+            B33 = numpy.sum(Y3n * self.phix3 * self.phix3)
             K3 = self.K3
             R3 = self.R3
             lu_A = numpy.array([[
@@ -441,9 +442,9 @@ class Violin():
         self.debug_A10 = A10
         self.debug_B00 = B00
         self.debug_B01 = B01
-        self.debug_A11_fake = sum(self.phix1 * self.phix1)
-        self.debug_B00_fake = sum(self.phix0 * self.phix0)
-        self.debug_A01_fake = sum(self.phix0 * self.phix1)
+        self.debug_A11_fake = numpy.sum(self.phix1 * self.phix1)
+        self.debug_B00_fake = numpy.sum(self.phix0 * self.phix0)
+        self.debug_A01_fake = numpy.sum(self.phix0 * self.phix1)
 
         try:
             L1 = 1.0 / (
@@ -525,16 +526,16 @@ class Violin():
         #print self.P7, self.P8, self.P9
         # for fingered plucks
         #self.A = numpy.empty( (2,2) )
-        #self.A[0][0] = 1.0 + self.K0 * sum(X3n * self.phix0 * self.phix0)
-        #self.A[0][1] =       self.K0 * sum(X3n * self.phix0 * self.phix1)
-        #self.A[1][0] =       self.K1 * sum(X3n * self.phix1 * self.phix0)
-        #self.A[1][1] = 1.0 + self.K1 * sum(X3n * self.phix1 * self.phix1)
+        #self.A[0][0] = 1.0 + self.K0 * numpy.sum(X3n * self.phix0 * self.phix0)
+        #self.A[0][1] =       self.K0 * numpy.sum(X3n * self.phix0 * self.phix1)
+        #self.A[1][0] =       self.K1 * numpy.sum(X3n * self.phix1 * self.phix0)
+        #self.A[1][1] = 1.0 + self.K1 * numpy.sum(X3n * self.phix1 * self.phix1)
         ## for open-string plucks
         #self.A00only = -self.K0 / (
-        #    1.0 + self.K0 * sum(X3n * self.phix0 * self.phix0))
+        #    1.0 + self.K0 * numpy.sum(X3n * self.phix0 * self.phix0))
         # for bowing
-        #A01 = sum(X3n * self.phix0 * self.phix1)
-        #A11 = sum(X3n * self.phix1 * self.phix1)
+        #A01 = numpy.sum(X3n * self.phix0 * self.phix1)
+        #A11 = numpy.sum(X3n * self.phix1 * self.phix1)
 
 
         ### bowing with two finger forces
@@ -1058,19 +1059,19 @@ class Violin():
 
     def log_for_plot(self, F_bridge, F0, F1, F2, ahn, ahdn):
         ### log data for plotting
-        v0h = sum(self.phix0*ahdn)
-        y0 = sum(self.phix0*self.an)
-        v0 = sum(self.phix0*self.adn)
-        v1 = sum(self.phix1*self.adn)
+        v0h = numpy.sum(self.phix0*ahdn)
+        y0 = numpy.sum(self.phix0*self.an)
+        v0 = numpy.sum(self.phix0*self.adn)
+        v1 = numpy.sum(self.phix1*self.adn)
         def get_disps():
             disps = numpy.empty( DISPLACEMENTS_ALONG_STRING )
             disps_h = numpy.empty( DISPLACEMENTS_ALONG_STRING )
             xs = numpy.linspace(0, L, DISPLACEMENTS_ALONG_STRING)
             for i, x in enumerate(xs):
                 phix = phi(x)
-                y = sum(phix * self.an)
+                y = numpy.sum(phix * self.an)
                 disps[i] = y
-                yh = sum(phix * ahn)
+                yh = numpy.sum(phix * ahn)
                 disps_h[i] = yh
             return disps, disps_h
         def extra_write(filename, values, seconds):
@@ -1122,29 +1123,31 @@ class Violin():
             bowstate = self.bowstate
             )
 
+    def hist_vectors(self):
+        # "hands-free" values: how would the string behave if
+        # there were no external forces
+        self.ahn  = X1n*self.an + X2n*self.adn
+        self.adhn = Y1n*self.an + Y2n*self.adn
+
+    def hist_points(self):
+        # what would be the displacements at positions x0 and x1
+        # if there were no external forces?
+        y0h = numpy.sum(self.phix0 * self.ahn) if self.x0 > 0 else 0
+        y1h = numpy.sum(self.phix1 * self.ahn) if self.x1 > 0 else 0
+        y2h = numpy.sum(self.phix2 * self.ahn) if self.x2 > 0 else 0
+        y3h = numpy.sum(self.phix3 * self.ahn) if self.x3 > 0 else 0
+        v0h = numpy.sum(self.phix0 * self.adhn) if self.x0 > 0 else 0
+        v1h = numpy.sum(self.phix1 * self.adhn) if self.x1 > 0 else 0
+        v2h = numpy.sum(self.phix2 * self.adhn) if self.x2 > 0 else 0
+        v3h = numpy.sum(self.phix3 * self.adhn) if self.x3 > 0 else 0
+        return y0h, y1h, y2h, y3h, v0h, v1h, v2h, v3h
+
 
     def tick(self):
         """ advance time with previously-given actions """
-        # "hands-free" values: how would the string behave if
-        # there were no external forces
-        ahn  = X1n*self.an + X2n*self.adn
-        adhn = Y1n*self.an + Y2n*self.adn
-    
+        self.hist_vectors()
 
-        #print "D1:\t%g\tD2:\t%g" % (self.D1, self.D2)
-        #print '-----'
-        #exit(1)
-
-        # what would be the displacements at positions x0 and x1
-        # if there were no external forces?
-        y0h = sum(self.phix0 * ahn)
-        y1h = sum(self.phix1 * ahn)
-        y2h = sum(self.phix2 * ahn)
-        y3h = sum(self.phix3 * ahn)
-        v0h = sum(self.phix0 * adhn)
-        v1h = sum(self.phix1 * adhn)
-        v2h = sum(self.phix2 * adhn)
-        v3h = sum(self.phix3 * adhn)
+        y0h, y1h, y2h, y3h, v0h, v1h, v2h, v3h = self.hist_points()
 
         #print "v0h:\t", v0h, "y1h:\t", y1h
         # external forces at positions x0 and x1
@@ -1155,26 +1158,27 @@ class Violin():
 
         # modal effects of external forces F0 and F1
         #exit(1)
-        try:
-            fn = self.phix0*F0 + self.phix1*F1 + self.phix2*F2 + self.phix3*F3
-        except Exception as e:
-            print F0, F1
-            print self.phix0
-            print self.phix1
-            print "bail"
-            raise (e)
-            return None
-            exit(1)
+        fn = self.phix0*F0 + self.phix1*F1 + self.phix2*F2 + self.phix3*F3
+        #try:
+        #    fn = self.phix0*F0 + self.phix1*F1 + self.phix2*F2 + self.phix3*F3
+        #except Exception as e:
+        #    print F0, F1
+        #    print self.phix0
+        #    print self.phix1
+        #    print "bail"
+        #    raise (e)
+        #    return None
+        #    exit(1)
     
         # update string behaviour based on external forces
-        self.an  = ahn  + X3n*fn
-        self.adn = adhn + Y3n*fn
+        self.an  = self.ahn  + X3n*fn
+        self.adn = self.adhn + Y3n*fn
 
         #print "an:", self.an
         #print "adn:", self.adn
     
         # output of model for wav file
-        F_bridge = sum(self.an * pc_bridge)
+        F_bridge = numpy.sum(self.an * pc_bridge)
 
 
         if PLOTS:

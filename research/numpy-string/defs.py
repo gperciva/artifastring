@@ -810,7 +810,8 @@ else:
     SECONDS = 1.0
     #N = 16
     #FS = 441100
-    FS = 88200
+    #FS = 88200
+    FS = 44100
     #FS = 96000
     #FS = 22050
     #PLOTS = True

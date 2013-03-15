@@ -26,9 +26,9 @@ THESIS_TYPES = [
 #    "pluck finger-force-one violin-g",
 #    "pluck finger-force-two violin-g", # no plural
 #    "pluck beating unit",
-    "pluck release-force two violin-g",
-    "pluck release-force three violin-g",
-    "pluck release-force four violin-g",
+    #"pluck release-force two violin-g",
+    #"pluck release-force three violin-g",
+    #"pluck release-force four violin-g",
 
 ### section 2.2.2
     #"bow slip-single freq-low violin-e",
@@ -95,6 +95,7 @@ THESIS_TYPES = [
 ##    "multi pluck three violin-g",
 #
 #
+    "NULL violin-g"
 ]
 
 for i, thesis in enumerate(THESIS_TYPES):
