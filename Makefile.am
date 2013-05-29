@@ -141,7 +141,8 @@ python_PYTHON = interactive/artifastring_interactive.py \
 nodist_python_PYTHON = swig/monowav.py swig/artifastring_instrument.py \
 	swig/actions_file.py swig/midi_pos.py
 bin_SCRIPTS += interactive/artifastring_play_osc.py \
-	interactive/artifastring_play_interactive.py
+	interactive/artifastring_play_interactive.py \
+	interactive/play-file.py
 
 nodist__monowav_la_SOURCES = swig/monowav_wrap.cxx \
 	artifastring/monowav.cpp
