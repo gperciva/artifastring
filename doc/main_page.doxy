@@ -30,7 +30,7 @@ make
 
 If you do not want to use the autotools build system, you can
 still compile with the \c .c and \c .h files directly.  This is
-demonstrated in \ref use_in_code.
+demonstrated in \ref use_in_code "use in code".
 
 
 \subsection generate_audio 1.3 Generate audio
@@ -40,17 +40,27 @@ demonstrated in \ref use_in_code.
 \endcode
 
 The format of the \c ".actions" file is described in
-\ref file_format.
+\ref file_format "file format".
 
 You may also use it in C++ code directly; this is described in
-\ref use_in_code.  Python bindings are available; see \ref swig.
+\ref use_in_code "use in code".  Python bindings are available;
+see \ref swig "swig".
 
 
 \subsection generate_video 1.4 Generate video
 
-Video can be produced with \c blender.  At the moment, this is not
-integerated into the \c scons build system; instead, go to
-\c blender/ and follow the instructions in the README there.
+Video can be produced with \c blender.  Use \c --enable-blender
+during the \c ../configure stage.  Individual pictures are
+produced with <c>actions2images.py</c>; these pictures can be
+combined with audio with <c>artifastring_movie.py</c>.
+
+There are 3 preset levels of image quality.  Most machines can
+process multiple threads at once; the speed of rendering images
+can be increased by manually splitting the range of frames and
+calling \c actions2imges.py multiple times (i.e.
+<c>artifastring2images.py -q 1 -s 1 -e 100</c> and
+<c>artifastring2images.py -q 1 -s 101 -e 200</c>).  For more
+information, check the \c --help of both scripts.
 
 
 \subsection generate_audio 1.5 Benchmarks
@@ -72,10 +82,17 @@ tweaked, so the violin control will be fairly poor.
 
 \subsection references 2.1 References
 
-Artifastring is an implementation of modal bowed string physical
-modelling as described by:
+Artifastring is discussed extensively in my PhD dissertation:
 
-- Matthias Demoucron's 2008 PhD thesis:
+- G. Percival, "Physical modelling meets machine learning:
+  performing music with a virtual string ensemble", PhD
+  dissertation, University of Glasgow, 2013,
+  http://theses.gla.ac.uk/4253/1/2013percivalphd.pdf
+
+The fundamental model was described by Demoucron, subjected to a
+few changes to avoid undesirable behaviour (described in my PhD).
+
+- M. Demoucron's 2008 PhD thesis:
   http://recherche.ircam.fr/equipes/instruments/demoucron
 
 - M. Demoucron and N. Rasamimanana, "Score based real-time
@@ -83,6 +100,7 @@ modelling as described by:
   International Conference on Digital Audio Effects (DAFx-09),
   Como, Italy, September 1-4, 2009.
   http://articles.ircam.fr/textes/Demoucron09a/index.pdf
+
 
 \subsection known_limits 2.2 Known limitations
 
@@ -152,7 +170,7 @@ command.
 - accelerate bow: 5 extra parameters: string number, bow position, bow force,
   target bow velocity, and bow acceleration
   \code
-  b       3.0       3       0.12       0.6       0.4    10.0
+  a       3.0       3       0.12       0.6       0.4    10.0
   \endcode
 
 See files in the \c actions/ directory for examples.
@@ -168,16 +186,7 @@ Input code:
 To compile (after installing):
 
 \code
-g++ simple.cpp -lartifastring -lfftwf
-\endcode
-
-Manual compile (with no installation):
-
-\code
-g++ artifastring_defines.h artifastring_constants \
-    fft_convolution monowav.cpp \
-    artifastring_instrument.cpp artifastring_string.cpp \
-    simple.cpp -o simple
+g++ simple.cpp -lartifastring -lmonowav -lfftwf
 \endcode
 
 
@@ -197,7 +206,7 @@ Short answer: GNU GPL 3.0+
 Long answer:
 
 \verbatim
-Copyright 2010--2011 Graham Percival
+Copyright 2010--2013 Graham Percival
 
 Artifastring is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as
@@ -219,7 +228,8 @@ License along with Artifastring.  If not, see
 
 It would be nice to extend the physical modelling algorithm to use
 (at least) two bow positions (to accommodate bow width), and two
-finger forces during bowing.
+finger forces during bowing.  I hope to have the latter working in
+the next few weeks.
 
 More instruments would be fantastic, especially double bass.  If I
 feel inspired then I might try renting a double bass for a week so

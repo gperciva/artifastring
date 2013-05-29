@@ -1,0 +1,9 @@
+
+- allow use of KISSFFT instead of FFTW (already built-into Eigen,
+  so switch to Eigen's FFTs unstead of manually using fftw)
+- clean up internal code (remove old code, update variable names)
+- switch to 2-finger force bowing
+- plugins:
+  . pd
+  . vamp? (maybe)
+

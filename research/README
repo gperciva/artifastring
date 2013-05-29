@@ -1,0 +1,19 @@
+
+Material in this directory is not up to the standard of the rest
+of Artifastring.  I'm trying to make the rest of this project easy
+to use, but I'm not even going to try to clean up stuff in this
+research/ directory.
+
+You're welcome to look at this stuff and use it (it's all under
+the GPLv3+), but it's in pretty rough shape and you might need to
+send me a few emails for hints as to how things work.  Also,
+probably about 2/3 of this code is not used at all (they were
+earlier drafts that I rewrote, or I decided to pursue a different
+method of solving the problem, etc).  So you might spend an hour
+trying to decypher how something works, email me, then I might
+spend 10 or 20 minutes doing similar decyphering only to remember
+that the file(s) aren't used after all.
+
+Good luck!
+- Graham
+
