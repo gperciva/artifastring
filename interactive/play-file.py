@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ##
-# Copyright 2010--2011 Graham Percival
+# Copyright 2010--2013 Graham Percival
 # This file is part of Artifastring.
 #
 # Artifastring is free software: you can redistribute it and/or
@@ -51,7 +51,7 @@ def parseFile(lines, wavfile):
 
         # advance time
         action_time = float( splitline[1] )
-        delta_samples = 22050.0*action_time - total_samples
+        delta_samples = artifastring_instrument.ARTIFASTRING_INSTRUMENT_SAMPLE_RATE*action_time - total_samples
         delta_samples = int(delta_samples)
         if delta_samples > 0:
 #            print "advancing", delta_samples, "samples"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010--2011 Graham Percival
+ * Copyright 2010--2013 Graham Percival
  * This file is part of Artifastring.
  *
  * Artifastring is free software: you can redistribute it and/or
@@ -64,6 +64,7 @@ const double string_int_to_float = 1.0 / string_float_to_int;
 
 /**
  * \enum InstrumentType
+ * \brief foogle
  *
  * Enumeration type to select instrument family.  After selecting
  * the instrument family, the specific instrument within that
@@ -83,8 +84,7 @@ enum InstrumentType {
 /** \struct String_Physical
  *  \brief Structure storing physical parameters of each string
  *
- *  B1 and B2 modal damping factors come from Demoucron's thesis, p. 78.
- *  and some ad-hoc experimentation.
+ *  For more information, see my PhD dissertation.
  */
 typedef struct {
     float T;  /**< \brief Tension          (N) */
@@ -92,12 +92,12 @@ typedef struct {
     float d;  /**< \brief Diameter         (m) */
     float pl; /**< \brief Linear Density   (kg/m) */
     float E;  /**< \brief Young's elastic modulus */
-    float mu_s;
-    float mu_d;
-    float v0;
-    float cutoff;
-    unsigned int N;
-    float rn[MAX_MODAL_DECAY_MODES];
+    float mu_s; /**< \brief Coefficient of static friction */
+    float mu_d; /**< \brief Coefficient of dynamic friction */
+    float v0; /**< \brief Slope of hyperbolic friction curve */
+    float cutoff; /**< \brief Minimum sum-of-squares amplitude to maintain processing */
+    unsigned int N; /**< \brief Number of modes for this string (should be a multiple of 4 for SSE, or 8 for AVX) */
+    float rn[MAX_MODAL_DECAY_MODES]; /**< Array of modal decays */
 } String_Physical;
 
 

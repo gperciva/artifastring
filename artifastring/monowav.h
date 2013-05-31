@@ -1,5 +1,5 @@
 /*
- * Copyright 2010--2011 Graham Percival
+ * Copyright 2010--2013 Graham Percival
  * This file is part of Artifastring.
  *
  * Artifastring is free software: you can redistribute it and/or
@@ -36,7 +36,7 @@ public:
      * memory it attempted to allocate; if this occurs, it will
      * probably result in an unchecked exception crash.
      */
-    MonoWav(const char *filename, int buffer_size=44100, int sample_rate=44100,
+    MonoWav(const char *filename, int buffer_size=2048, int sample_rate=44100,
             bool set_is_int=false);
 
     /// @brief writes data to disk before quitting

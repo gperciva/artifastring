@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ##
-# Copyright 2010--2011 Graham Percival
+# Copyright 2010--2013 Graham Percival
 # This file is part of Artifastring.
 #
 # Artifastring is free software: you can redistribute it and/or

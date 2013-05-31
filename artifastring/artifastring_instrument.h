@@ -1,5 +1,5 @@
 /*
- * Copyright 2010--2011 Graham Percival
+ * Copyright 2010--2013 Graham Percival
  * This file is part of Artifastring.
  *
  * Artifastring is free software: you can redistribute it and/or
@@ -30,7 +30,7 @@ const int NUM_VIOLIN_STRINGS = 4;
 const int NUM_MULTIPLIERS = 4;
 
 
-/// \brief Main class for violin synthesis  (if in doubt, use this one)
+/// \brief Main class for violin synthesis (if in doubt, use only this class).
 class ArtifastringInstrument {
 public:
     /**
@@ -51,7 +51,7 @@ public:
      *
      * Finger remains in place until moved.
      * @param[in] which_string Instrument string (0,1,2,3); higher
-     * string numbers are higher in pitch.  0 is the G string).
+     * string numbers are higher in pitch.
      * @param[in] ratio_from_nut Measured as a fraction of string
      * length.
      * @param[in] Kf This sets how firmly the finger is
@@ -128,7 +128,7 @@ public:
      * This method is not recommended for normal use; it is merely
      * a curiosity for people wanting to experiment.
      * @param[in] which_string Instrument string (0,1,2,3); higher
-     * string numbers are higher in pitch.  0 is the G string).
+     * string numbers are higher in pitch.
      */
     String_Physical get_physical_constants(int which_string);
 
@@ -137,7 +137,7 @@ public:
      * This method is not recommended for normal use; it is merely
      * a curiosity for people wanting to experiment.
      * @param[in] which_string Instrument string (0,1,2,3); higher
-     * string numbers are higher in pitch.  0 is the G string).
+     * string numbers are higher in pitch.
      * @param[in] pc_new String physical constants.
      */
     void set_physical_constants(int which_string, String_Physical pc_new);
@@ -145,15 +145,27 @@ public:
 #ifdef RESEARCH
     bool set_string_logfile(int which_string, const char *filename);
     int get_num_skips(int which_string);
-
 #endif
-    /** \brief Get the internal string output pre-instrument body
+
+    /** \brief Get a pointer to the audio output of a string (pre-instrument body)
      *
-     * WARNING: you must allocate enough buffer space to hold
-     * the data.
+     * @param[in] which_string Instrument string (0,1,2,3); higher
+     * string numbers are higher in pitch.
      */
     float *get_string_buffer(int which_string);
 
+    /** \brief Get the internal string output pre-instrument body
+     * as int32.
+     *
+     * \warning You must allocate sufficient memory for the audio
+     * and haptic output
+     * @param[in] which_string Instrument string (0,1,2,3); higher
+     * string numbers are higher in pitch.
+     * @param[in] buffer Array for audio output
+     * @param[in] num_samples Number of samples in audio output
+     * @param[in] forces Array for haptic output
+     * @param[in] num_samples2 Number of samples in haptic output
+     */
     void get_string_buffer_int(int which_string, int *buffer,
                                int num_samples,
                                int *forces, int num_samples2);
