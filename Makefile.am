@@ -66,7 +66,6 @@ artifastring_h = artifastring/artifastring_constants.h \
 	artifastring/constants/haptic_response_4.h \
 	artifastring/actions_file.h \
 	artifastring/midi_pos.h \
-	artifastring/decimate.h \
 	artifastring/fft_convolution.h \
 	artifastring/artifastring_string.h \
 	artifastring/artifastring_instrument.h
@@ -76,7 +75,6 @@ lib_LIBRARIES = libartifastring.a libmonowav.a
 libartifastring_a_SOURCES = $(artifastring_h) \
 	artifastring/actions_file.cpp \
 	artifastring/midi_pos.cpp \
-	artifastring/decimate.cpp \
 	artifastring/fft_convolution.cpp \
 	artifastring/artifastring_string.cpp \
 	artifastring/artifastring_instrument.cpp
