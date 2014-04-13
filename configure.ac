@@ -21,7 +21,7 @@ AC_HEADER_STDC
 
 #AC_LANG([C++])
 
-AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstc++))
+AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstdc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
 AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))
 
