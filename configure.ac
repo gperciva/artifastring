@@ -10,7 +10,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_PREREQ([2.59])
-AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 subdir-objects no-define foreign -Wall -Werror])
 AM_PROG_AR
 
 
