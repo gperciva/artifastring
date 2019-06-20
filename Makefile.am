@@ -1,13 +1,14 @@
 ### general setup
 ACLOCAL_AMFLAGS = -I m4
+EIGEN3_CFLAGS = @eigen3_cflags@
 if HAS_DEBUG
-AM_CXXFLAGS = -I$(srcdir)/otherlibs/ -fPIC -g -fbounds-check
+AM_CXXFLAGS = -fPIC -g -fbounds-check
 MORE_WARNINGS_CXXFLAGS = -Wall -Werror -Wextra
 else
 if IS_DARWIN
-AM_CXXFLAGS = -I$(srcdir)/otherlibs/ -fPIC -O3 -mtune=native -DNDEBUG
+AM_CXXFLAGS = -fPIC -O3 -mtune=native -DNDEBUG
 else
-AM_CXXFLAGS = -I$(srcdir)/otherlibs/ -fPIC -O3 -march=native -DNDEBUG
+AM_CXXFLAGS = -fPIC -O3 -march=native -DNDEBUG
 endif
 MORE_WARNINGS_CXXFLAGS =
 endif
