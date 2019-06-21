@@ -82,6 +82,7 @@ libartifastring_a_SOURCES = $(artifastring_h) \
 libartifastring_a_CXXFLAGS = $(AM_CXXFLAGS) \
 	$(MORE_WARNINGS_CXXFLAGS) \
 	$(EIGEN3_CFLAGS)
+# $(SAMPLERATE_CFLAGS)
 artifastring_includedir=$(includedir)/artifastring/
 libmonowav_a_SOURCES = $(monowav_h) \
 	artifastring/monowav.cpp 

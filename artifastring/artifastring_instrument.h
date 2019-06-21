@@ -41,7 +41,9 @@ public:
      * See \ref InstrumentType
      */
     ArtifastringInstrument(InstrumentType instrument_type=Violin,
-                           int instrument_number=0);
+                           int instrument_number=0,
+                           const int instrument_sample_rate=ARTIFASTRING_INSTRUMENT_SAMPLE_RATE
+                          );
     /// \brief Destructor; nothing special
     ~ArtifastringInstrument();
     /// \brief Stops all movement

@@ -212,10 +212,7 @@ public:
 
     void string_release();
 
-protected:
-    // Samle rate of this string
-    const int instrument_sr;
-    
+protected:    
     // physical constants
     String_Physical pc;
 

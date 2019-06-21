@@ -24,6 +24,7 @@ AC_LANG([C++])
 AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstdc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
 AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))
+AC_CHECK_LIB(samplerate, src_simple,, AC_MSG_ERROR(requires libsamplerate))
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING(--enable-debug,[Compile with debug support])],
@@ -34,8 +35,8 @@ AM_CONDITIONAL([HAS_DEBUG], [test "x$enable_debug" != xno])
 AC_ARG_WITH([eigen],
   [AS_HELP_STRING(--with-eigen=<path>,
     [Specify path to eigen headers. Default is /usr/include/eigen3])],
-  [echo eigen arg $with_eigen],
-  [echo with-eigen not used. ; with_eigen=default])
+  [],
+  [with_eigen=default])
   
 EIGEN3_CFLAGS=/usr/include/eigen3
 AS_IF([test "x${with_eigen}" = xno], [AC_MSG_WARN(m4_normalize(
@@ -49,8 +50,6 @@ AS_IF([test "x${with_eigen}" = xno], [AC_MSG_WARN(m4_normalize(
       [test "x${with_eigen}" = xdefault], [],
       [EIGEN3_CFLAGS=${with_eigen}])
 
-      echo $with_eigen $EIGEN3_CFLAGS
-      
 AC_CHECK_HEADER(${EIGEN3_CFLAGS}/Eigen/Core,
   [AC_SUBST([eigen3_cflags], ["-I${EIGEN3_CFLAGS}"])],
   [AC_MSG_ERROR([I looked for Eigen/Core in ${EIGEN3_CFLAGS} and failed to find it])],
@@ -70,6 +69,8 @@ AS_IF([test "x$with_swig" != xno],
   AX_SWIG_ENABLE_CXX
   AX_SWIG_PYTHON
   ], [])
+
+#PKG_CHECK_MODULES(SAMPLERATE, samplerate >= 0.1)
 
 
 ### play nice with other fftw users
