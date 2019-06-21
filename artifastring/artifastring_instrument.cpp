@@ -78,7 +78,7 @@ ArtifastringInstrument::ArtifastringInstrument(
         const int fs_multiply = FS_MULTIPLICATION_FACTOR[m_instrument_type][st];
 #endif
         artifastringString[st] = new ArtifastringString(m_instrument_type,
-                instrument_number, st, fs_multiply);
+                instrument_number, st, fs_multiply, instrument_sample_rate);
     }
     /*
     m_bridge_force_amplify = BRIDGE_FORCE_AMPLIFY[(int)m_instrument_type]
