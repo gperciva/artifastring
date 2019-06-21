@@ -23,6 +23,8 @@
 #include <limits.h>
 #include <cstddef>
 #include <algorithm>
+#include <map>
+#include <memory>
 #include <samplerate.h>
 
 #include <iostream>
@@ -126,42 +128,20 @@ ArtifastringInstrument::ArtifastringInstrument(
                 lowpass_time_data = LOWPASS_4,
                 lowpass_num_taps = NUM_TAPS_LOWPASS_4;
             }
+            
             // If the requested sample rate is the default sample rate, we're done.
             // If not, the supplied convolution has to be scaled for the new sample
             // rate.
-            float* resampled_time_data{ nullptr };
-            if (instrument_sample_rate != ARTIFASTRING_INSTRUMENT_SAMPLE_RATE) {
-                double sr_ratio(
-                    static_cast<double>(instrument_sample_rate) /
-                    static_cast<double>(ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
-                );
-                long num_resampled_taps(sr_ratio*lowpass_num_taps);
-                resampled_time_data = new float[num_resampled_taps];
-                SRC_DATA resample_spec {
-                    lowpass_time_data,      // data in
-                    resampled_time_data,    // data output
-                    lowpass_num_taps,       // number of input frmes
-                    num_resampled_taps,     // number of output frames
-                    0L,                     // place holdere (input frames used)
-                    0L,                     // place holder (number of frames generated)
-                    0,                      // place holder (end of input)
-                    sr_ratio                // output sample rate / input sample rate
-                };
-                
-                if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
-                    throw new std::string(src_strerror(err));
-                
-                lowpass_time_data = resampled_time_data;
-                lowpass_num_taps = num_resampled_taps;
-            }
+            if (instrument_sample_rate != ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
+                get_resampled_time_data(lowpass_time_data,
+                                        lowpass_num_taps,
+                                        instrument_sample_rate);
 
             string_audio_lowpass_convolution[st] = new ArtifastringConvolution(
                 fs_multiply, lowpass_time_data, lowpass_num_taps);
             string_force_lowpass_convolution[st] = new ArtifastringConvolution(
                 fs_multiply, lowpass_time_data, lowpass_num_taps);
-            
-            if (resampled_time_data) delete[] resampled_time_data;
-            
+                        
             string_audio_lowpass_input[st] = string_audio_lowpass_convolution[st]->get_input_buffer();
             string_force_lowpass_input[st] = string_force_lowpass_convolution[st]->get_input_buffer();
 
@@ -662,4 +642,36 @@ void ArtifastringInstrument::get_string_buffer_int(int which_string,
     }
 }
 
+void ArtifastringInstrument::get_resampled_time_data(const float*& time_data,
+                                                     int& num_taps,
+                                                     const int sample_rate)
+{
+    double sr_ratio(
+        static_cast<double>(sample_rate) /
+        static_cast<double>(ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
+    );
+    long num_resampled_taps(sr_ratio*num_taps);
+    resampledTDCacheKey k {time_data, sample_rate};
+    std::cout << "resample request at " << sample_rate << "Hz\n";
+    
+    if (time_data_cache.find(k) == time_data_cache.end()) { // Time data not in cache
+        std::cout << "NOT CACHED\n";
+        time_data_cache[k].reset(new float[num_resampled_taps]);
+        SRC_DATA resample_spec {
+            time_data,                  // data in
+            time_data_cache[k].get(),   // data output
+            num_taps,                   // number of input frmes
+            num_resampled_taps,         // number of output frames
+            0L,                         // place holder (input frames used)
+            0L,                         // place holder (number of frames generated)
+            0,                          // place holder (end of input)
+            sr_ratio                    // output sample rate / input sample rate
+        };
+        
+        if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
+            throw new std::string(src_strerror(err));
+    }
 
+    time_data = time_data_cache[k].get();
+    num_taps = num_resampled_taps;
+}

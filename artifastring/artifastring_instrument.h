@@ -20,6 +20,9 @@
 #ifndef ARTIFASTRING_INSTRUMENT_H
 #define ARTIFASTRING_INSTRUMENT_H
 
+#include <map>
+#include <memory>
+
 #include "artifastring/artifastring_defines.h"
 #include "artifastring/artifastring_constants.h"
 #include "artifastring/fft_convolution.h"
@@ -220,8 +223,17 @@ private:
 
     float m_bridge_force_amplify;
     float m_bow_force_amplify;
+    
+    // map empircally determined response and its transformed sample rate
+    // to the cached version at the new sample rate.
+    typedef std::pair<const float*, int> resampledTDCacheKey;
+    std::map <resampledTDCacheKey, std::unique_ptr<float[]>> time_data_cache;
+    
+    void get_resampled_time_data(const float*& time_data,
+                                 int& num_taps,
+                                 const int sample_rate);
+
 
 };
 
 #endif
-
