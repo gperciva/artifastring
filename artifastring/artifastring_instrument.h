@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 
 #include "artifastring/artifastring_defines.h"
 #include "artifastring/artifastring_constants.h"
@@ -227,11 +228,12 @@ private:
     // map empircally determined response and its transformed sample rate
     // to the cached version at the new sample rate.
     typedef std::pair<const float*, int> resampledTDCacheKey;
-    std::map <resampledTDCacheKey, std::unique_ptr<float[]>> time_data_cache;
+    static std::map <resampledTDCacheKey, std::unique_ptr<float[]>> time_data_cache;
+    static std::mutex cache_mtx;
     
-    void get_resampled_time_data(const float*& time_data,
-                                 int& num_taps,
-                                 const int sample_rate);
+    void resample_time_data(const float*& time_data,
+                            int& num_taps,
+                            const int sample_rate);
 
 
 };

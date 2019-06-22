@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <samplerate.h>
 
 #include <iostream>
@@ -132,10 +133,11 @@ ArtifastringInstrument::ArtifastringInstrument(
             // If the requested sample rate is the default sample rate, we're done.
             // If not, the supplied convolution has to be scaled for the new sample
             // rate.
-            if (instrument_sample_rate != ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
-                get_resampled_time_data(lowpass_time_data,
-                                        lowpass_num_taps,
-                                        instrument_sample_rate);
+            //
+            // resample_time_data takes care of that, with memoization
+            resample_time_data(lowpass_time_data,
+                               lowpass_num_taps,
+                               instrument_sample_rate);
 
             string_audio_lowpass_convolution[st] = new ArtifastringConvolution(
                 fs_multiply, lowpass_time_data, lowpass_num_taps);
@@ -271,6 +273,11 @@ ArtifastringInstrument::ArtifastringInstrument(
             break;
         }
         }
+        
+        resample_time_data(body_time_data,
+                           body_num_taps,
+                           instrument_sample_rate);
+        
         body_audio_convolution = new ArtifastringConvolution(
             1, body_time_data, body_num_taps);
         body_audio_input = body_audio_convolution->get_input_buffer();
@@ -642,36 +649,60 @@ void ArtifastringInstrument::get_string_buffer_int(int which_string,
     }
 }
 
-void ArtifastringInstrument::get_resampled_time_data(const float*& time_data,
-                                                     int& num_taps,
-                                                     const int sample_rate)
-{
-    double sr_ratio(
-        static_cast<double>(sample_rate) /
-        static_cast<double>(ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
-    );
-    long num_resampled_taps(sr_ratio*num_taps);
-    resampledTDCacheKey k {time_data, sample_rate};
-    std::cout << "resample request at " << sample_rate << "Hz\n";
-    
-    if (time_data_cache.find(k) == time_data_cache.end()) { // Time data not in cache
-        std::cout << "NOT CACHED\n";
-        time_data_cache[k].reset(new float[num_resampled_taps]);
-        SRC_DATA resample_spec {
-            time_data,                  // data in
-            time_data_cache[k].get(),   // data output
-            num_taps,                   // number of input frmes
-            num_resampled_taps,         // number of output frames
-            0L,                         // place holder (input frames used)
-            0L,                         // place holder (number of frames generated)
-            0,                          // place holder (end of input)
-            sr_ratio                    // output sample rate / input sample rate
-        };
-        
-        if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
-            throw new std::string(src_strerror(err));
-    }
+std::mutex ArtifastringInstrument::cache_mtx;
+std::map <ArtifastringInstrument::resampledTDCacheKey,
+          std::unique_ptr<float[]>> ArtifastringInstrument::time_data_cache;
 
-    time_data = time_data_cache[k].get();
-    num_taps = num_resampled_taps;
+void ArtifastringInstrument::resample_time_data(const float*& time_data,
+                                                int& num_taps,
+                                                const int sample_rate)
+{
+    if (sample_rate != ARTIFASTRING_INSTRUMENT_SAMPLE_RATE) {
+        // In case ArtifastringInstruments are instanced concurrently
+        std::lock_guard<std::mutex> lock(cache_mtx);
+        
+        double sr_ratio(
+            static_cast<double>(sample_rate) /
+            static_cast<double>(ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
+        );
+        long num_resampled_taps(sr_ratio*num_taps);
+        resampledTDCacheKey k {time_data, sample_rate};
+        std::cout << "resample request at " << sample_rate << "Hz for " << time_data << std::endl;
+        
+        if (time_data_cache.find(k) == time_data_cache.end()) { // Time data not in cache
+            std::cout << "NOT CACHED\n";
+            time_data_cache[k].reset(new float[num_resampled_taps]);
+            SRC_DATA resample_spec {
+                time_data,                  // data in
+                time_data_cache[k].get(),   // data output
+                num_taps,                   // number of input frames
+                num_resampled_taps,         // number of output frames
+                0L,                         // place holder (input frames used)
+                0L,                         // place holder (number of frames generated)
+                0,                          // place holder (end of input)
+                sr_ratio                    // output sample rate / input sample rate
+            };
+            
+            if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
+                throw new std::string(src_strerror(err));
+
+            //float sum_in {0};
+            //float sum_resamp {0};
+            
+            //for(int i{0}; i < num_taps; i++) sum_in += time_data[i];
+            //for(int i{0}; i < num_resampled_taps; i++) sum_resamp += time_data_cache[k].get()[i];
+            
+            //std::cout << "Sum over input: " << sum_in << " Sum over output: " << sum_resamp << std::endl;
+            
+            // Renormalise filter gain when the kernel length changes
+            for (int i{0}; i < num_resampled_taps; i++) {
+                std::cout << i << ", " << time_data[i] << ", " << time_data_cache[k][i] << std::endl;
+                time_data_cache[k][i] /= sr_ratio;
+            }
+            
+        }
+
+        time_data = time_data_cache[k].get();
+        num_taps = num_resampled_taps;
+    }
 }
