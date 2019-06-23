@@ -658,19 +658,20 @@ void ArtifastringInstrument::resample_time_data(const float*& time_data,
                                                 const int sample_rate)
 {
     if (sample_rate != ARTIFASTRING_INSTRUMENT_SAMPLE_RATE) {
-        // In case ArtifastringInstruments are instanced concurrently
-        std::lock_guard<std::mutex> lock(cache_mtx);
-        
-        double sr_ratio(
+
+        const float sr_ratio(
             static_cast<double>(sample_rate) /
             static_cast<double>(ARTIFASTRING_INSTRUMENT_SAMPLE_RATE)
         );
-        long num_resampled_taps(sr_ratio*num_taps);
+        const long num_resampled_taps(sr_ratio*num_taps);
         resampledTDCacheKey k {time_data, sample_rate};
-        std::cout << "resample request at " << sample_rate << "Hz for " << time_data << std::endl;
+        //std::cout << "resample request at " << sample_rate << "Hz for " << time_data << std::endl;
+        
+        // In case ArtifastringInstruments are instanced concurrently
+        std::lock_guard<std::mutex> lock(cache_mtx);
         
         if (time_data_cache.find(k) == time_data_cache.end()) { // Time data not in cache
-            std::cout << "NOT CACHED\n";
+            //std::cout << "NOT CACHED\n";
             time_data_cache[k].reset(new float[num_resampled_taps]);
             SRC_DATA resample_spec {
                 time_data,                  // data in
@@ -685,21 +686,15 @@ void ArtifastringInstrument::resample_time_data(const float*& time_data,
             
             if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
                 throw new std::string(src_strerror(err));
-
-            //float sum_in {0};
-            //float sum_resamp {0};
             
-            //for(int i{0}; i < num_taps; i++) sum_in += time_data[i];
-            //for(int i{0}; i < num_resampled_taps; i++) sum_resamp += time_data_cache[k].get()[i];
-            
-            //std::cout << "Sum over input: " << sum_in << " Sum over output: " << sum_resamp << std::endl;
-            
-            // Renormalise filter gain when the kernel length changes
-            for (int i{0}; i < num_resampled_taps; i++) {
-                std::cout << i << ", " << time_data[i] << ", " << time_data_cache[k][i] << std::endl;
-                time_data_cache[k][i] /= sr_ratio;
-            }
-            
+            // FIXME: Renormalise filter gain when the kernel length changes
+            // fft_convolution doesn't normalise, so the factor needed here
+            // ends up as sr_ratio^2 approximately. As the normalization takes
+            // place in the Python interface by setting a gain factor, this
+            // approximation is applied here rather than make change the
+            // Python interface. This should probably be fixed.
+            for (int i{0}; i < num_resampled_taps; i++)
+                time_data_cache[k][i] /= sr_ratio*sr_ratio;
         }
 
         time_data = time_data_cache[k].get();
