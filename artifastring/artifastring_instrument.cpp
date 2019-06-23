@@ -691,8 +691,8 @@ void ArtifastringInstrument::resample_time_data(const float*& time_data,
             // fft_convolution doesn't normalise, so the factor needed here
             // ends up as sr_ratio^2 approximately. As the normalization takes
             // place in the Python interface by setting a gain factor, this
-            // approximation is applied here rather than make change the
-            // Python interface. This should probably be fixed.
+            // approximation is applied here rather than change the way the
+            // Python code works. This should probably be fixed.
             for (int i{0}; i < num_resampled_taps; i++)
                 time_data_cache[k][i] /= sr_ratio*sr_ratio;
         }
