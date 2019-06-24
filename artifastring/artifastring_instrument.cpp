@@ -26,6 +26,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <samplerate.h>
 
 #include <iostream>
@@ -685,7 +686,7 @@ void ArtifastringInstrument::resample_time_data(const float*& time_data,
             };
             
             if (int err = src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */))
-                throw new std::string(src_strerror(err));
+                throw new std::runtime_error(src_strerror(err));
             
             // FIXME: Renormalise filter gain when the kernel length changes
             // fft_convolution doesn't normalise, so the factor needed here
