@@ -695,7 +695,7 @@ void ArtifastringInstrument::resample_time_data(const float*& time_data,
             // approximation is applied here rather than change the way the
             // Python code works. This should probably be fixed.
             for (int i{0}; i < num_resampled_taps; i++)
-                time_data_cache[k][i] /= sr_ratio*sr_ratio;
+                time_data_cache[k][i] /= std::max(2.0f, sr_ratio*sr_ratio);
         }
 
         time_data = time_data_cache[k].get();
