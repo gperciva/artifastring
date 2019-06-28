@@ -25,6 +25,34 @@ AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstdc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
 AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))
 AC_CHECK_LIB(samplerate, src_simple,, AC_MSG_ERROR(requires libsamplerate))
+# Versions of samplerate earlier than about 0.1.9 didn't allow
+# passing of const float* as the data input. So explicitly check for that.
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([[
+#include <samplerate.h>
+
+int main()
+{
+  const float* src {nullptr};
+  float* dest {nullptr};
+            
+  SRC_DATA resample_spec {
+    src,     // data in
+    dest,    // data output
+    0L,      // number of input frames
+    0L,      // number of output frames
+    0L,      // place holder (input frames used)
+    0L,      // place holder (number of frames generated)
+    0,       // place holder (end of input)
+    1.0      // output sample rate / input sample rate
+  };
+
+  int err (src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */));
+
+  return err;
+}
+]])],, AC_MSG_ERROR([Requires libresample to accept const input data (0.1.9 does)]))
+
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING(--enable-debug,[Compile with debug support])],
