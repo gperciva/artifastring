@@ -52,7 +52,9 @@ using namespace std;
 
 ArtifastringString::ArtifastringString(InstrumentType which_instrument,
                                        int instrument_number, int string_number,
-                                       int fs_multiplication_factor)
+                                       int fs_multiplication_factor,
+                                       int instrument_sample_rate
+                                      )
 {
     //
     //_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
@@ -63,7 +65,7 @@ ArtifastringString::ArtifastringString(InstrumentType which_instrument,
     _mm_setcsr( _mm_getcsr() | 0x8040 );
 #endif
     fs_multiplier = fs_multiplication_factor;
-    fs = fs_multiplier * ARTIFASTRING_INSTRUMENT_SAMPLE_RATE;
+    fs = fs_multiplier * instrument_sample_rate;
     dt = 1.0f / fs;
     //printf("fs: %i\tmult: %i\n", fs, fs_multiplier);
 

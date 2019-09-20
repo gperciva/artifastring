@@ -20,6 +20,10 @@
 #ifndef ARTIFASTRING_INSTRUMENT_H
 #define ARTIFASTRING_INSTRUMENT_H
 
+#include <map>
+#include <memory>
+#include <mutex>
+
 #include "artifastring/artifastring_defines.h"
 #include "artifastring/artifastring_constants.h"
 #include "artifastring/fft_convolution.h"
@@ -41,7 +45,9 @@ public:
      * See \ref InstrumentType
      */
     ArtifastringInstrument(InstrumentType instrument_type=Violin,
-                           int instrument_number=0);
+                           int instrument_number=0,
+                           const int instrument_sample_rate=ARTIFASTRING_INSTRUMENT_SAMPLE_RATE
+                          );
     /// \brief Destructor; nothing special
     ~ArtifastringInstrument();
     /// \brief Stops all movement
@@ -218,8 +224,18 @@ private:
 
     float m_bridge_force_amplify;
     float m_bow_force_amplify;
+    
+    // map empircally determined response and its transformed sample rate
+    // to the cached version at the new sample rate.
+    typedef std::pair<const float*, int> resampledTDCacheKey;
+    static std::map <resampledTDCacheKey, std::unique_ptr<float[]>> time_data_cache;
+    static std::mutex cache_mtx;
+    
+    void resample_time_data(const float*& time_data,
+                            int& num_taps,
+                            const int sample_rate);
+
 
 };
 
 #endif
-

@@ -122,10 +122,13 @@ public:
      * @param[in] fs_multiplication_factor This sets the sampling
      * rate of the string by multiplying the base instrument
      * sampling rate.
+     * @param[in] instruemnt_sample_rate The sample rate used for this
+     * string, defaulting to the vaule defined in artifastring_defines.h
      */
     ArtifastringString(InstrumentType which_instrument,
                        int instrument_number, int string_number,
-                       int fs_multiplication_factor);
+                       int fs_multiplication_factor,
+                       const int instrument_sample_rate = ARTIFASTRING_INSTRUMENT_SAMPLE_RATE);
     /// \brief Destructor; nothing special
     ~ArtifastringString();
     /// \brief Stops all movement
@@ -209,7 +212,7 @@ public:
 
     void string_release();
 
-protected:
+protected:    
     // physical constants
     String_Physical pc;
 

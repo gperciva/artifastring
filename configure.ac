@@ -10,7 +10,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile artifastring.pc monowav.pc doc/doxyfile])
 
 AC_PREREQ([2.59])
-AM_INIT_AUTOMAKE([1.10 no-define foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 subdir-objects no-define foreign -Wall -Werror])
 AM_PROG_AR
 
 
@@ -19,11 +19,40 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_HEADER_STDC
 
-#AC_LANG([C++])
+AC_LANG([C++])
 
 AC_CHECK_LIB(stdc++, main,, AC_MSG_ERROR(requires libstdc++))
 AC_CHECK_LIB(m, main,, AC_MSG_ERROR(requires libm (math)))
 AC_CHECK_LIB(fftw3f, main,, AC_MSG_ERROR(requires libfftw3))
+AC_CHECK_LIB(samplerate, src_simple,, AC_MSG_ERROR(requires libsamplerate))
+# Versions of samplerate earlier than about 0.1.9 didn't allow
+# passing of const float* as the data input. So explicitly check for that.
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([[
+#include <samplerate.h>
+
+int main()
+{
+  const float* src {nullptr};
+  float* dest {nullptr};
+            
+  SRC_DATA resample_spec {
+    src,     // data in
+    dest,    // data output
+    0L,      // number of input frames
+    0L,      // number of output frames
+    0L,      // place holder (input frames used)
+    0L,      // place holder (number of frames generated)
+    0,       // place holder (end of input)
+    1.0      // output sample rate / input sample rate
+  };
+
+  int err (src_simple(&resample_spec, SRC_SINC_BEST_QUALITY, 1 /* channel */));
+
+  return err;
+}
+]])],, AC_MSG_ERROR([Requires libresample to accept const input data (0.1.9 does)]))
+
 
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING(--enable-debug,[Compile with debug support])],
@@ -31,6 +60,28 @@ AC_ARG_ENABLE([debug],
   [enable_debug="no"])
 AM_CONDITIONAL([HAS_DEBUG], [test "x$enable_debug" != xno])
 
+AC_ARG_WITH([eigen],
+  [AS_HELP_STRING(--with-eigen=<path>,
+    [Specify path to eigen headers. Default is /usr/include/eigen3])],
+  [],
+  [with_eigen=default])
+  
+EIGEN3_CFLAGS=/usr/include/eigen3
+AS_IF([test "x${with_eigen}" = xno], [AC_MSG_WARN(m4_normalize(
+        [Artifastring requires Eigen. The --with-eigen flag allows you to
+         specify the path to the Eigen headers, not to despense with them.
+         Configuration will continue, checking the default location for
+         the Eigen headers, namely ${EIGEN3_CFLAGS}]))],
+      [test "x${with_eigen}" = xyes], [AC_MSG_WARN(m4_normalize(
+        [Using --with-eigen without an argument is just the default behaviour.
+         This option only makes sense when you specify the Eigen include path]))],
+      [test "x${with_eigen}" = xdefault], [],
+      [EIGEN3_CFLAGS=${with_eigen}])
+
+AC_CHECK_HEADER(${EIGEN3_CFLAGS}/Eigen/Core,
+  [AC_SUBST([eigen3_cflags], ["-I${EIGEN3_CFLAGS}"])],
+  [AC_MSG_ERROR([I looked for Eigen/Core in ${EIGEN3_CFLAGS} and failed to find it])],
+  [AC_INCLUDES_DEFAULT])
 
 ### swig stuff
 AC_ARG_WITH(swig,
@@ -46,6 +97,8 @@ AS_IF([test "x$with_swig" != xno],
   AX_SWIG_ENABLE_CXX
   AX_SWIG_PYTHON
   ], [])
+
+#PKG_CHECK_MODULES(SAMPLERATE, samplerate >= 0.1)
 
 
 ### play nice with other fftw users

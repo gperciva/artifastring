@@ -7,6 +7,6 @@ Name: Artifastring
 Description: Artifastring ("artificial fast string") is a highly optimized physical simulation of a violin for sound synthesis.
 Requires:
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lartifastring -lm -lfftw3f
+Libs: -L${libdir} -lartifastring -lm -lfftw3f -lsamplerate
 Cflags: -I${includedir}
 
